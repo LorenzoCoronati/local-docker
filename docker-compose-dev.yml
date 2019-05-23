@@ -1,0 +1,120 @@
+# Use images from Docker Hub to use community/or-alike maintained images.
+# @see https://hub.docker.com/explore/
+#
+# # Fix images to minor release tags to make all container updates deliberate,
+# # while still allowing patch releases.
+
+version: '3.2'
+
+services:
+
+  nginx:
+    build: ./docker/build/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # See bottom of this file, and ./docker-sync.yml
+      - localbase-sync-core:/var/www:nocopy
+    depends_on: # This key affects the order of which containers get started.
+      - php
+    working_dir: /var/www/web
+
+  php:
+    # Available builds: https://hub.docker.com/r/xoxoxo/php-container/tags
+    # Custom build contains sendmail_path -fix for Mailhog and OPTION to add
+    # overrides (per project) to other PHP config.
+    build: ./docker/build/php/7.2
+    ports:
+      - "9010:9000" # xdebug
+    volumes:
+      # :nocopy must be used with docker-sync
+      # See bottom of this file, and ./docker-sync.yml
+      - localbase-sync-src-themes:/var/www/web/themes/custom:nocopy
+      - localbase-sync-src-modules:/var/www/web/modules/custom:nocopy
+      - localbase-sync-src-patches:/var/www/web/modules/local_patches:nocopy
+      - localbase-sync-core:/var/www:nocopy
+    working_dir: /var/www
+   # env_file:
+   #   - .env
+
+  composer:
+    # Run `composer install` during startup.
+    build: ./docker/build/php/7.2
+    volumes:
+      - localbase-sync-src-patches:/var/www/web/modules/local_patches:nocopy
+      - localbase-sync-core:/var/www:nocopy
+    working_dir: /var/www
+    command: /usr/local/bin/composer install
+
+  db:
+    # mysql:8.0.11 keeps restarting.
+    image: mysql:5.7.26
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db_dumps:/var/db_dumps:cached
+    working_dir: /var
+    restart: always
+    # Set max_allowed_packet to 256M (or any other value)
+    command: --max_allowed_packet=268435456
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      # These is used to create a database.
+      MYSQL_DATABASE: drupal
+      MYSQL_USER: drupal
+      MYSQL_PASSWORD: drupal
+
+  # Maybe use this instead of the one set blow here: https://hub.docker.com/r/eeacms/varnish/
+  # varnish:
+  #   image: jonbaldie/varnish:8056b94
+  #   ports:
+  #     - "8017:80"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+  # This we do not need, becase all things can be done with the composer
+  # installed in host machine.
+  # composer:
+  #   image: composer:1.6.4
+  #   working_dir: /var/www
+  #   volumes:
+  #     - .:/var/www
+  #   depends_on:
+  #     - php
+
+  # PHP container needs some Mailhog -configuration.
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
+    restart: always
+    ports:
+      - 8025:8025
+      - 1025:1025
+
+#  nodejs:
+#    image: wodby/drupal-node:1.0-1.0.0
+#    working_dir: /var/www/web/themes/custom/mytheme
+#    environment:
+#      NODE_SERVICE_KEY: node-service-key
+#    labels:
+#      - 'traefik.backend=nodejs'
+#      - 'traefik.port=8080'
+#      - 'traefik.frontend.rule=Host:nodejs.core.localhost'
+#    volumes:
+#      - ./web/themes/mytheme:/var/www/web/themes/mytheme:delegated
+#    command: sh -c 'npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
+
+volumes:
+  localbase-sync-core:
+    external: true
+  localbase-sync-src-modules:
+    external: true
+  localbase-sync-src-themes:
+    external: true
+  localbase-sync-src-patches:
+    external: true
+

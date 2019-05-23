@@ -1,0 +1,101 @@
+version: "2"
+
+# docker-sync.yml
+options:
+  # optional, default: pwd, root directory to be used when transforming sync src into absolute path, accepted values: pwd (current working directory), config_path (the directory where docker-sync.yml is found)
+  project_root: 'pwd'
+  # optional, maximum number of attempts for unison waiting for the success exit status. The default is 5 attempts (1-second sleep for each attempt). Only used in unison.
+  max_attempt: 10
+  verbose: true
+syncs:
+  localbase-sync-core:
+#    sync_strategy: 'native_osx'
+    #    sync_strategy: 'unison'  # NOTE: requires `brew install unison` AND `brew install eugenmayer/dockersync/unox`
+    # NOTE: requires `brew install fswatch`
+    sync_strategy: 'rsync' # NOTE: requires `brew install fswatch`
+    sync_args: '-v --links --hard-links'
+    # do not use this for unison - not needed there
+    sync_host_port: 10871
+    # which folder to watch / sync from - you can use tilde, it will get expanded.
+    # the contents of this directory will be synchronized to the Docker volume with the name of this sync entry ('default-sync' here)
+    # NOTE: run `docker-sync[-stack] clean` after any change in src
+    src: './drupal/'
+
+    host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
+    # other unison options can also be specified here, which will be used when run under osx,
+    # and ignored when run under linux
+#    sync_args: '-v'
+    sync_excludes: ['.DS_Store', '.sass-cache', 'sass-cache', 'node_modules', '.gitignore', '.git']
+#    sync_args:
+#      - "-ignore='Path localdev.sh'"    # no need to send our own OSX -side helper tools
+#      - "-ignore='Path localdev'"       # no need to send our own OSX -side helper tools
+#      - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
+#      - "-ignore='Path .idea'"          # no need to send PHPStorm config to container
+#      - "-ignore='Path .git'"           # ignore the main .git repo
+#      - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
+    #  - "-ignore='Path node_modules/*'" # remove this if you need code completion
+    # - "-ignore='Path vendor/*'"     # we could ignore the composer vendor folder, but then you won't have code completion in your IDE
+
+#    sync_excludes: ['.DS_Store', 'Gemfile.lock', 'Gemfile', 'config.rb', '.sass-cache', 'sass', 'sass-cache', 'composer.json' , 'bower.json', 'package.json', 'Gruntfile*', 'bower_components', 'node_modules', '.gitignore', '.git', '*.coffee', '*.scss', '*.sass']
+
+    # enable terminal_notifier. On every sync sends a Terminal Notification regarding files being synced. ( Mac Only ).
+    # good thing in case you are developing and want to know exactly when your changes took effect.
+    # be aware in case of unison this only gives you a notification on the initial sync, not the syncs after changes.
+    notify_terminal: true
+
+  localbase-sync-src-themes:
+    sync_strategy: 'rsync' # NOTE: requires `brew install fswatch`
+    sync_args: '-v --links --hard-links'
+    sync_host_port: 10872 #rsync only, uniq port per sync
+    #    sync_args: '-v --copy-links --hard-links'
+    sync_excludes: ['.DS_Store', '.sass-cache', 'sass-cache', 'node_modules', '.gitignore', '.git']
+#    sync_args:
+#      - "-ignore='Path localdev.sh'"    # no need to send our own OSX -side helper tools
+#      - "-ignore='Path localdev'"       # no need to send our own OSX -side helper tools
+#      - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
+#      - "-ignore='Path .idea'"          # no need to send PHPStorm config to container
+#      - "-ignore='Path .git'"           # ignore the main .git repo
+#      - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
+    src: './src/themes/'
+    # sync_host_port: 10871
+    host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
+#    sync_excludes: ['.DS_Store', 'Gemfile.lock', 'Gemfile', 'config.rb', '.sass-cache', 'sass', 'sass-cache', 'composer.json' , 'bower.json', 'package.json', 'Gruntfile*', 'bower_components', 'node_modules', '.gitignore', '.git', '*.coffee', '*.scss', '*.sass']
+    notify_terminal: true
+
+  localbase-sync-src-modules:
+    sync_strategy: 'rsync' # NOTE: requires `brew install fswatch`
+    sync_args: '-v --links --hard-links'
+    sync_host_port: 10873 #rsync only, uniq port per sync
+#    sync_args: '-v --copy-links --hard-links'
+    sync_excludes: ['.DS_Store', '.sass-cache', 'sass-cache', 'node_modules', '.gitignore', '.git']
+#    sync_args:
+#      - "-ignore='Path localdev.sh'"    # no need to send our own OSX -side helper tools
+#      - "-ignore='Path localdev'"       # no need to send our own OSX -side helper tools
+#      - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
+#      - "-ignore='Path .idea'"          # no need to send PHPStorm config to container
+#      - "-ignore='Path .git'"           # ignore the main .git repo
+#      - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
+    src: './src/modules/'
+    # sync_host_port: 10871
+    host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
+#    sync_excludes: ['.DS_Store', 'Gemfile.lock', 'Gemfile', 'config.rb', '.sass-cache', 'sass', 'sass-cache', 'composer.json' , 'bower.json', 'package.json', 'Gruntfile*', 'bower_components', 'node_modules', '.gitignore', '.git', '*.coffee', '*.scss', '*.sass']
+    notify_terminal: true
+
+  localbase-sync-src-patches:
+    sync_strategy: 'rsync' # NOTE: requires `brew install fswatch`
+    sync_args: '-v --links --hard-links'
+    sync_host_port: 10873 #rsync only, uniq port per sync
+    #    sync_args: '-v --copy-links --hard-links'
+    sync_excludes: ['.DS_Store', '.sass-cache', 'sass-cache', 'node_modules', '.gitignore', '.git']
+    #    sync_args:
+    #      - "-ignore='Path localdev.sh'"    # no need to send our own OSX -side helper tools
+    #      - "-ignore='Path localdev'"       # no need to send our own OSX -side helper tools
+    #      - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
+    #      - "-ignore='Path .idea'"          # no need to send PHPStorm config to container
+    #      - "-ignore='Path .git'"           # ignore the main .git repo
+    #      - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
+    src: './src/local_patches/'
+    # sync_host_port: 10871
+    host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
+    #    sync_excludes: ['.DS_Store', 'Gemfile.lock', 'Gemfile', 'config.rb', '.sass-cache', 'sass', 'sass-cache', 'composer.json' , 'bower.json', 'package.json', 'Gruntfile*', 'bower_components', 'node_modules', '.gitignore', '.git', '*.coffee', '*.scss', '*.sass']
+    notify_terminal: true

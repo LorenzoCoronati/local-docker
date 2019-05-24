@@ -184,11 +184,70 @@ case "$ACTION" in
   ;;
 
 "rebuild")
-   $SCRIPT_NAME down 2&>/dev/null
-   # Return value is not important here.
-   docker-compose -f $DOCKER_COMPOSER_FILE build
-   $SCRIPT_NAME up
-   $SCRIPT_NAME restore
+    $SCRIPT_NAME down 2&>/dev/null
+    # Return value is not important here.
+    docker-compose -f $DOCKER_COMPOSER_FILE build
+    $SCRIPT_NAME up
+    $SCRIPT_NAME restore
+    ;;
+
+"nuke-volumes")
+    echo " "
+    echo " *************************"
+    echo " ******   WARNING ********"
+    echo " *************************"
+    echo " "
+    echo " ALL volumes localbase* will be destroyed permanently in 5 secs."
+    WAIT=5
+    while [ $WAIT -gt 0 ]; do
+        echo -n "$WAIT ... "
+        ((WAIT--))
+        sleep 1
+    done
+    echo
+    docker-compose -f $DOCKER_COMPOSER_FILE down
+    docker-sync clean
+    for VOL in $(docker volume ls --filter="name=localbase*" -q); do
+        echo "Handling volume: $VOL"
+        for CONT in $(docker ps --filter volume=$VOL -q); do
+            echo "Kill container : $CONT "
+            docker -v kill $CONT
+        done
+        echo "Removing volume: $VOL"
+        docker -v volume rm -f $VOL
+    done
+    ;;
+
+"init")
+   if [ -e "drupal/comopser.json" ]; then
+      echo 'Looks like project is already created? File drupal/composer.json exists.'
+      exit 1
+   fi
+    echo 'Installing Drupal project, please wait...'
+    docker-sync start
+    # Use verbose output on this composer command.
+    TMP_FOLDER=/tmp/composer_temp_$(date +%s)
+    COMPOSER_INIT="composer -vv create-project drupal-composer/drupal-project:8.x-dev $TMP_FOLDER --no-interaction --stability=dev"
+    COMPOSER_MOVE="cp -vrf $TMP_FOLDER/* /var/www"
+    docker-compose -f $DOCKER_COMPOSER_FILE up -d composer php
+    echo "============="
+    echo "Composer and php containers built"
+    echo "============="
+    echo "Next: $COMPOSER_INIT"
+    echo "Next: $COMPOSER_MOVE"
+    docker-compose -f $DOCKER_COMPOSER_FILE run composer bash -c "$COMPOSER_INIT; $COMPOSER_MOVE"
+    echo "============="
+    echo "Project created and copied to /var/www"
+    echo "============="
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'ls -lha /var/www'
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'mkdir -vp ./web/modules/custom && mkdir -vp ./web/themes/custom'
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/modules/custom/.gitkeep'
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/themes/custom/.gitkeep'
+    echo "============="
+    echo ".gitkeep's created /var/www"
+    echo "============="
+    docker-sync sync
+    docker-sync logs
    ;;
 
 "restart")
@@ -209,6 +268,8 @@ case "$ACTION" in
   echo 'Usage:'
   echo "$SCRIPT_NAME up|down|dump|stop|restart|restore|rebuild"
   echo
+  echo " - init: build project to ./drupal -folder, using composer and drupal-project"
+  echo " - nuke-volumes: remove permanently synced volumes (NO BACKUPS!)"
   echo " - up: brings containers up (starts docker-sync)"
   echo " - down: backups databases and removes containers & networks (stops docker-sync)"
   echo " - dump: backup databases to db_dump -folder"

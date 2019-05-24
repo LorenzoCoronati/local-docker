@@ -3,7 +3,7 @@
 # 1st param
 ACTION=${1-'help'}
 # Local development file. 2nd param. Defaults to docker-compose-dev.yml because docker-sync defaults to that.
-DOCKER_COMPOSER_FILE=${2-'docker-compose-dev.yml'};
+DOCKER_COMPOSER_FILE=${2-'docker-compose.yml'};
 
 # DB container name, ie. the container key that holds mysql/mariadb.
 CONTAINER_DB='db';

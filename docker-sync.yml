@@ -7,6 +7,8 @@ options:
   # optional, maximum number of attempts for unison waiting for the success exit status. The default is 5 attempts (1-second sleep for each attempt). Only used in unison.
   max_attempt: 10
   verbose: true
+  compose-dev-file-path: 'docker-compose.yml'
+  compose-file-path: 'docker-compose.dev-vm.yml'
 syncs:
   localbase-sync-core:
 #    sync_strategy: 'native_osx'

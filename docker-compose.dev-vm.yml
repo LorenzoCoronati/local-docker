@@ -35,15 +35,17 @@ services:
       - localbase-sync-src-patches:/var/www/web/modules/local_patches:nocopy
       - localbase-sync-core:/var/www:nocopy
     working_dir: /var/www
-   # env_file:
-   #   - .env
+    # env_file:
+    #   - .env
 
+  # Re-use php-container, but here only to execute`composer install` during
+  # startup, and then exit.
   composer:
-    # Run `composer install` during startup.
+    restart: 'no' # state explicitly
     build: ./docker/build/php/7.2
     volumes:
       - localbase-sync-src-patches:/var/www/web/modules/local_patches:nocopy
-      - localbase-sync-core:/var/www:nocopy
+      - localbase-sync-core-delegated:/var/www:nocopy
     working_dir: /var/www
     command: /usr/local/bin/composer install
 
@@ -77,7 +79,7 @@ services:
     ports:
       - "8080:8080"
 
-  # This we do not need, becase all things can be done with the composer
+  # This we do not need, because all things can be done with the composer
   # installed in host machine.
   # composer:
   #   image: composer:1.6.4
@@ -110,6 +112,8 @@ services:
 
 volumes:
   localbase-sync-core:
+    external: true
+  localbase-sync-core-delegated:
     external: true
   localbase-sync-src-modules:
     external: true

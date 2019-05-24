@@ -206,7 +206,9 @@ case "$ACTION" in
     done
     echo
     docker-compose -f $DOCKER_COMPOSER_FILE down
-    docker-sync clean
+    if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+        docker-sync clean
+    fi
     for VOL in $(docker volume ls --filter="name=localbase*" -q); do
         echo "Handling volume: $VOL"
         for CONT in $(docker ps --filter volume=$VOL -q); do
@@ -224,7 +226,9 @@ case "$ACTION" in
       exit 1
    fi
     echo 'Installing Drupal project, please wait...'
-    docker-sync start
+    if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+        docker-sync start
+    fi
     # Use verbose output on this composer command.
     TMP_FOLDER=/tmp/composer_temp_$(date +%s)
     COMPOSER_INIT="composer -vv create-project drupal-composer/drupal-project:8.x-dev $TMP_FOLDER --no-interaction --stability=dev"
@@ -246,8 +250,10 @@ case "$ACTION" in
     echo "============="
     echo ".gitkeep's created /var/www"
     echo "============="
-    docker-sync sync
-    docker-sync logs
+    if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+        docker-sync sync
+        docker-sync logs
+    fi
    ;;
 
 "restart")

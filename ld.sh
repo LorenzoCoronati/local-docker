@@ -232,14 +232,15 @@ case "$ACTION" in
     # Use verbose output on this composer command.
     TMP_FOLDER=/tmp/composer_temp_$(date +%s)
     COMPOSER_INIT="composer -vv create-project drupal-composer/drupal-project:8.x-dev $TMP_FOLDER --no-interaction --stability=dev"
-    COMPOSER_MOVE="cp -vrf $TMP_FOLDER/* /var/www"
-    docker-compose -f $DOCKER_COMPOSER_FILE up -d composer php
+    COMPOSER_MOVE="cp -rf $TMP_FOLDER/* /var/www"
+    COMPOSER_CLEAN="rm -rf $TMP_FOLDER"
+    docker-compose -f $DOCKER_COMPOSER_FILE up -d php
     echo "============="
     echo "Composer and php containers built"
     echo "============="
     echo "Next: $COMPOSER_INIT"
     echo "Next: $COMPOSER_MOVE"
-    docker-compose -f $DOCKER_COMPOSER_FILE run composer bash -c "$COMPOSER_INIT; $COMPOSER_MOVE"
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c "$COMPOSER_INIT; $COMPOSER_MOVE; $COMPOSER_CLEAN"
     echo "============="
     echo "Project created and copied to /var/www"
     echo "============="

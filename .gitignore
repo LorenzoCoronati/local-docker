@@ -1,3 +1,7 @@
 .DS_Store
 .idea
 .docker-sync
+
+# Ignore locations filled by composer create-project.
+drupal/*
+!drupal/.gitkeep

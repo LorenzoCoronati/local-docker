@@ -145,8 +145,13 @@ Another way is run one-off commands in `php` -container:
 
 #### Compile CSS
 
-Look at the `nodejs` -container, correct file paths and enable it.
-Launch the project again to get the container booted up.
+Look at the `nodejs` -container in `docker-compose*.yml`, correct file
+paths and enable it. Launch the project again to get the container
+booted up.
+
+You can expose nodejs container logs with:
+
+      $ docker-compose logs -f nodejs
 
 #### Xdbug
 
@@ -178,27 +183,53 @@ you should not do that, but rather execute composer install:
 
 Docker volumes are using volume names from `docker-composer.yml` (see
 root-level key `volumes`). If you collapse with other projects: 
-1. clean up your volumes `./ld nuke-volumes` if needed
-2. stop filesync and local `./ld down` if needed
-3. rename all `webroot-sync-*` -named volumes in `docker-compose.yml`
-   and `docker-sync.yml` -files, and start over.
 
-## Local is stuck??
+1. stop file sync and local (`./ld down`) if needed
+2. clean up your volumes `./ld nuke-volumes` if needed
+3. rename all `webroot-sync-*` -named volumes in `docker-compose.yml` and
+  `docker-sync.yml` -files
+4. start your local again `./ld up` and optionally restore database
+   `./ld restore`
 
-Clean up all volumes (throughout your laptop)
+## ISSUES 
+
+#### Local files not getting synced
+
+If you feel file sync is not working properly, start by checking logs
+and editing some files that should be synced:
+
+    $ docker-sync logs -f # -f flag keeps log tracker opened
+
+If none of your edits in host or in container are being synced, clean up
+and restart:
+
+1. stop file sync and local (`./ld down`) if needed
+2. clean up your volumes `./ld nuke-volumes` if needed
+3. start your local again `./ld up` and optionally restore database
+   `./ld restore`
+
+**If this did not solve the sync** you can wipe out all volumes in your
+system.
+
+**BE WARNED** This will delete ALL volumes in ALL Docker projects across
+your laptop.
  
         docker system prune --volumes
         
-If even that does not help, clean up everything docker -related
+If even that does not help, clean up EVERYTHING Docker -related
 (downloaded images, created volumes and containers).
+
+**BE WARNED** This will delete ALL volumes, downloaded images and
+containers in ALL Docker projects across your whole laptop. Sorts of
+resets everything else but Docker configuration.
 
         docker system prune
 
 
 ## Why my favourite feature is not there?
 
-This is the initial version of the localdev. Redis, Solr and others are
-coming once the need arises.
+This is the initial version of the local-docker. Redis, Solr and others
+are coming once the need arises.
 
 **Asking help from your colleagues is very recommended, and pull
 requests even more so!**

@@ -65,9 +65,9 @@ syncs:
       - "-ignore='Path node_modules/*'" # remove this if you need code completion
     notify_terminal: true
 
-  webroot-sync-src-themes:
+  webroot-sync-src-patches:
     sync_strategy: 'native_osx'
-    src: './src/themes/'
+    src: './src/local_patches/'
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
     sync_args:
       - "-ignore='Path ld.sh'"    # no need to send our own OSX -side helper tools
@@ -80,9 +80,9 @@ syncs:
       - "-ignore='Path node_modules/*'" # remove this if you need code completion
     notify_terminal: true
 
-  webroot-sync-src-patches:
+  webroot-sync-src-themes:
     sync_strategy: 'native_osx'
-    src: './src/local_patches/'
+    src: './src/themes/'
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
     sync_args:
       - "-ignore='Path ld.sh'"    # no need to send our own OSX -side helper tools

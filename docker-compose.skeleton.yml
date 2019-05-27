@@ -30,9 +30,9 @@ services:
     volumes:
       # :nocopy must be used with docker-sync
       # See bottom of this file, and ./docker-sync.yml
-      - webroot-sync-src-themes:/var/www/web/themes/custom:nocopy
       - webroot-sync-src-modules:/var/www/web/modules/custom:nocopy
       - webroot-sync-src-patches:/var/www/web/modules/local_patches:nocopy
+      - webroot-sync-src-themes:/var/www/web/themes/custom:nocopy
       - webroot-sync-core:/var/www:nocopy
     working_dir: /var/www
     # env_file:
@@ -115,8 +115,8 @@ volumes:
     external: true
   webroot-sync-src-modules:
     external: true
-  webroot-sync-src-themes:
-    external: true
   webroot-sync-src-patches:
+    external: true
+  webroot-sync-src-themes:
     external: true
 

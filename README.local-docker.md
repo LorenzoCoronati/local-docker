@@ -97,12 +97,12 @@ If containers are not pulles/built yet, this will do it for you.
 
 #### Stop local
 
-Just pu to sleep:
+Put local to sleep:
 
     ./ld stop # or 
     docker-compose stop [; docker-sync clean]
 
-or remove containers (with whatever they have inside them)
+Stop (ie. remove volumes with content, containers):
 
     ./ld down # or 
     docker-compose down; docker-sync clean

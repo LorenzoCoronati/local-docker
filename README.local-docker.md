@@ -4,7 +4,22 @@
 
 This is a template for local development, mainly targeted for Drupal.
 
-You should have docker, docker-composer and docker-sync installed:
+In short: Drupal's all PHP lives in `./drupal` -folder, and index.php -
+the docroot - is in `./drupal/web/index.php` -folder. Composer, Drush
+and Drupal console can be used within `php` -containers shell:
+
+        # on host
+        $ docker-compose exec php bash
+        # inside php container get status of site in `web/sites/default`
+        /var/www # drush status 
+
+## Requirements
+
+Your laptop should have
+[Docker and Docker compose](https://docs.docker.com/compose/) as well
+as [Docker-sync](https://docker-sync.readthedocs.io). If you have
+[Homebrew](https://brew.sh/) installed do these steps on you host (in
+any directory):
 
          $ brew install cask 
          $ brew cask install docker-edge
@@ -14,31 +29,31 @@ You should have docker, docker-composer and docker-sync installed:
 ## What's in the package?
 
 Behind scenes `local-docker` uses Docker. Recipe of what is launched is
-in `docker-compose.yml` (or in the DEVELOPMENT server version
-`docker-comopose.dev-vm.yml`). 
+in `docker-compose.yml` (or for the DEVELOPMENT server
+`docker-comopose.dev-vm.yml`).
 
-To overcome technical limitations (ie. nerve wrecking local drupal site
-slowness) `docker-sync` is being used. It sets up intermediate
-containers and hides the OSX filesystem incompatibility there. Cost is
-you need to wait for the file sync when you start the service.
+To overcome the known technical limitations (ie. nerve wrecking local
+drupal site slowness) `docker-sync` is being used. It sets up
+[intermediate containers and hides the OSX filesystem incompatibility](https://docker-sync.readthedocs.io/en/latest/advanced/how-it-works.html)
+there. 
 
 ### Pros and cons
 
 **Con** is that the initial sync after launching the local takes a bit
-of time. Once that is done local is ... ready. Files syncing between
-host and docker containers may take a few seconds, but running
-`docker-sync logs -f` on a terminal will expose what and when is being
-synced.
+of time (up to a few minutes). Once that is done local is ... ready.
+Files syncing between host and docker containers may take a few seconds,
+but running `docker-sync logs -f` on a terminal will expose what and
+when is being synced.
 
-**Pros** -side promises non-rotten local development environment for the
-handful of years a head. The trick is local environment is not built,
-but just loaded from the Docker hub as-is (apart for some minor config
-adjustments).
+**Pros** No rotten local development environments ever again! At least
+for the handful of years a head of you. The trick is local environment
+is not **built** locally, but loaded from the Docker hub as-is (apart
+for some minor *config* adjustments).
 
 ## Usage
 
-Main usage is done using a `ld.sh `script: `./ld`. Calling it without
-arguments gives you command list.
+Main usage is done using a `ld.sh `script: `./ld`. Executing the scrip
+without no arguments gives you command list.
 
 ### Start using local-docker
 
@@ -52,12 +67,17 @@ Copy all of this repository on top of your current project.
         ld.sh 
         ld  # symlink to ld.sh
 
-If your project is not Skeleton based, delete `*.skeleton.yml` -files.
-
 Open your favourite terminal, type `/ld` and hit \[ENTER]. If you get
 an error, ensure `ld.sh` has execute permission:
 
         chmod 0744 ld.sh
+
+#### Skeleton
+
+If your project is not Skeleton based, delete `*.skeleton.yml` -files.
+If you are applying Local docker on a Skeleton based project, replace
+docker-sync.yml with dockers-sync.skeleton.yml and docker-compose.yml
+with docker-compose.skeleton.yml.
 
 ### Daily usage
 
@@ -153,16 +173,6 @@ take a few minutes). If you already have a `drupal/composer.json` file
 you should not do that, but rather execute composer install:
 
        $ docker-compose exec php bash -c "composer install"
-
-## Use on Skeleton based project
-
-Skeleton needs more complex path mappings to function as expected. There
-are `*.skeleton.yml` -files, that contain the needed docker volume
-setup.
-
-Replace `docker-compose.yml` with `docker-compose.skeleton.yml` and
-`docker-sync.yml` with `docker-sync.skeleton.yml`, and launch your
-local.
 
 ## Projects in paralled?
 

@@ -275,15 +275,15 @@ case "$ACTION" in
   echo 'Usage:'
   echo "$SCRIPT_NAME up|down|dump|stop|restart|restore|rebuild"
   echo
-  echo " - init: build project to ./drupal -folder, using composer and drupal-project"
-  echo " - nuke-volumes: remove permanently synced volumes (NO BACKUPS!)"
-  echo " - up: brings containers up (starts docker-sync)"
   echo " - down: backups databases and removes containers & networks (stops docker-sync)"
   echo " - dump: backup databases to db_dump -folder"
-  echo " - stop: stops containers leaving them hanging around (stops docker-sync)"
+  echo " - init: build project to ./drupal -folder, using composer and drupal-project"
+  echo " - nuke-volumes: remove permanently synced volumes (NO BACKUPS!)"
+  echo " - rebuild: runs DB backup, builds containers and starts with the restored DB backup (restarts docker-sync too)"
   echo " - restart: down, up and restore (restarts docker-sync too)"
   echo " - restore: import latest db. Database container must be running."
-  echo " - rebuild: runs DB backup, builds containers and starts with the restored DB backup (restarts docker-sync too)"
+  echo " - stop: stops containers leaving them hanging around (stops docker-sync)"
+  echo " - up: brings containers up (starts docker-sync)"
   exit 0
   ;;
 

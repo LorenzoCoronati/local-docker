@@ -67,7 +67,7 @@ Copy all of this repository on top of your current project.
         ld.sh 
         ld  # symlink to ld.sh
 
-Open your favourite terminal, type `/ld` and hit \[ENTER]. If you get
+Open your favourite terminal, type `./ld` and hit \[ENTER]. If you get
 an error, ensure `ld.sh` has execute permission:
 
         chmod 0744 ld.sh

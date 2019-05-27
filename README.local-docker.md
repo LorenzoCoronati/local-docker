@@ -170,7 +170,7 @@ Docker volumes are using volume names from `docker-composer.yml` (see
 root-level key `volumes`). If you collapse with other projects: 
 1. clean up your volumes `./ld nuke-volumes` if needed
 2. stop filesync and local `./ld down` if needed
-3. rename all `localbase-sync-*` -named volumes in `docker-compose.yml`
+3. rename all `webroot-sync-*` -named volumes in `docker-compose.yml`
    and `docker-sync.yml` -files, and start over.
 
 ## Local is stuck??

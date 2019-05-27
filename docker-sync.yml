@@ -10,7 +10,7 @@ options:
   compose-dev-file-path: 'docker-compose.yml'
   compose-file-path: 'docker-compose.dev-vm.yml'
 syncs:
-  localbase-sync-core:
+  webroot-sync-core:
     sync_strategy: 'native_osx'
     # which folder to watch / sync from - you can use tilde, it will get expanded.
     # the contents of this directory will be synchronized to the Docker volume with the name of this sync entry ('default-sync' here)
@@ -34,7 +34,7 @@ syncs:
     # be aware in case of unison this only gives you a notification on the initial sync, not the syncs after changes.
     notify_terminal: true
 
-  localbase-sync-core-delegated:
+  webroot-sync-core-delegated:
     sync_strategy: 'native_osx'
     src: './drupal/'
 

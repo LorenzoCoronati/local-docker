@@ -15,7 +15,7 @@ services:
       - "443:443"
     volumes:
       # See bottom of this file, and ./docker-sync.yml
-      - localbase-sync-core:/var/www:nocopy
+      - webroot-sync-core:/var/www:nocopy
     depends_on: # This key affects the order of which containers get started.
       - php
     working_dir: /var/www/web
@@ -30,10 +30,10 @@ services:
     volumes:
       # :nocopy must be used with docker-sync
       # See bottom of this file, and ./docker-sync.yml
-      - localbase-sync-src-themes:/var/www/web/themes/custom:nocopy
-      - localbase-sync-src-modules:/var/www/web/modules/custom:nocopy
-      - localbase-sync-src-patches:/var/www/web/modules/local_patches:nocopy
-      - localbase-sync-core:/var/www:nocopy
+      - webroot-sync-src-themes:/var/www/web/themes/custom:nocopy
+      - webroot-sync-src-modules:/var/www/web/modules/custom:nocopy
+      - webroot-sync-src-patches:/var/www/web/modules/local_patches:nocopy
+      - webroot-sync-core:/var/www:nocopy
     working_dir: /var/www
     # env_file:
     #   - .env
@@ -44,8 +44,8 @@ services:
     restart: 'no' # state explicitly
     build: ./docker/build/php/7.2
     volumes:
-      - localbase-sync-src-patches:/var/www/web/modules/local_patches:nocopy
-      - localbase-sync-core-delegated:/var/www:nocopy
+      - webroot-sync-src-patches:/var/www/web/modules/local_patches:nocopy
+      - webroot-sync-core-delegated:/var/www:nocopy
     working_dir: /var/www
     command: /usr/local/bin/composer install
 
@@ -111,14 +111,14 @@ services:
 #    command: sh -c 'npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
 
 volumes:
-  localbase-sync-core:
+  webroot-sync-core:
     external: true
-  localbase-sync-core-delegated:
+  webroot-sync-core-delegated:
     external: true
-  localbase-sync-src-modules:
+  webroot-sync-src-modules:
     external: true
-  localbase-sync-src-themes:
+  webroot-sync-src-themes:
     external: true
-  localbase-sync-src-patches:
+  webroot-sync-src-patches:
     external: true
 

@@ -3,10 +3,11 @@
 # 1st param
 ACTION=${1-'help'}
 # Local development file. 2nd param. Defaults to docker-compose-dev.yml because docker-sync defaults to that.
-DOCKER_COMPOSER_FILE=${2-'docker-compose.yml'};
+DOCKER_COMPOSER_FILE='docker-compose.yml';
 
 # DB container name, ie. the container key that holds mysql/mariadb.
 CONTAINER_DB='db';
+CONTAINER_PHP='php';
 MYSQL_ROOT_PASSWORD=root_password
 DATE=$(date +%Y-%m-%d--%H-%I-%S)
 RESTORE_INFO="mysql --host db -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
@@ -34,6 +35,11 @@ fi
 
 find_db_container() {
     TMP_NAME=$DOCKER_PROJECT"_"$CONTAINER_DB
+    echo $(docker ps  | grep "$TMP_NAME" | sed -e's/  */ /g' |awk -F\  '{print $12}')
+}
+
+find_php_container() {
+    TMP_NAME=$DOCKER_PROJECT"_"$CONTAINER_PHP
     echo $(docker ps  | grep "$TMP_NAME" | sed -e's/  */ /g' |awk -F\  '{print $12}')
 }
 
@@ -83,11 +89,11 @@ db_connect() {
 
 case "$ACTION" in
 "dump")
-  db_connect
-  CONN=$?
-  if [ "$CONN" -ne "0" ]; then
-    exit 1
-  fi
+    db_connect
+    CONN=$?
+    if [ "$CONN" -ne "0" ]; then
+        exit 1
+    fi
 
   echo "Using datestamp: $DATE"
   DUMPER="mysqldump --host db -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --dump-date --tz-utc --verbose"
@@ -121,24 +127,24 @@ case "$ACTION" in
   ;;
 
 "restore")
-  if [ ! -e "db_dumps/db-container-dump-LATEST.sql.gz" ]; then
-    echo
-    echo "********************************************************************************************"
-    echo "** Dump file missing! Create a symlin to your DB backup file:                             **"
-    echo "** ln -s PATH/TO/GZIPPED/MYSQLDUMP/FILE.sql.gz ./db_dumps/db-container-dump-LATEST.sql.gz **"
-    echo "********************************************************************************************"
-    exit 1
-  fi
+    if [ ! -e "db_dumps/db-container-dump-LATEST.sql.gz" ]; then
+        echo
+        echo "********************************************************************************************"
+        echo "** Dump file missing! Create a symlin to your DB backup file:                             **"
+        echo "** ln -s PATH/TO/GZIPPED/MYSQLDUMP/FILE.sql.gz ./db_dumps/db-container-dump-LATEST.sql.gz **"
+        echo "********************************************************************************************"
+        exit 1
+    fi
 
-  db_connect
-  CONN=$?
+    db_connect
+    CONN=$?
 
-  if [ "$CONN" -ne 0 ]; then
-    echo "Oww... DB container is not up, even after a few retries. Exiting..."
-    exit 2
-  fi
+    if [ "$CONN" -ne 0 ]; then
+        echo "Oww... DB container is not up, even after a few retries. Exiting..."
+        exit 2
+    fi
 
-  echo "Restoring state with DB dump."
+    echo "Restoring state with DB dump."
 
   echo
   echo 'Databases *before* the restore:'
@@ -163,13 +169,13 @@ case "$ACTION" in
   fi
   docker-compose -f $DOCKER_COMPOSER_FILE up -d
 
-  db_connect
-  CONN=$?
+    db_connect
+    CONN=$?
 
-  if [ "$CONN" -ne 0 ]; then
-    echo "Oww... DB container is not up, even after a few retries."
-    exit 1
-  fi
+    if [ "$CONN" -ne 0 ]; then
+        echo "Oww... DB container is not up, even after a few retries."
+        exit 1
+    fi
 
   echo
   echo 'Current databases:'
@@ -221,10 +227,10 @@ case "$ACTION" in
     ;;
 
 "init")
-   if [ -e "drupal/comopser.json" ]; then
+    if [ -e "drupal/comopser.json" ]; then
       echo 'Looks like project is already created? File drupal/composer.json exists.'
       exit 1
-   fi
+    fi
     echo 'Installing Drupal project, please wait...'
     if [ "$IS_DOCKERSYNC" -eq "1" ]; then
         docker-sync start
@@ -258,34 +264,47 @@ case "$ACTION" in
    ;;
 
 "restart")
-   $SCRIPT_NAME down
-   OK=$?
-   if [ "$OK" -ne "0" ]; then
-      echo 'Putting local down failed. Database backup may have failed, so stopping process here.'
-      exit 1
-   fi
-   $SCRIPT_NAME up
-   $SCRIPT_NAME restore
-   ;;
+    $SCRIPT_NAME down
+    OK=$?
+    if [ "$OK" -ne "0" ]; then
+        echo 'Putting local down failed. Database backup may have failed, so stopping process here.'
+        exit 1
+    fi
+    $SCRIPT_NAME up
+    $SCRIPT_NAME restore
+    ;;
+
+"composer")
+    CONTAINER_PHP_ID=$(find_php_container)
+    if [ ! -z "$CONTAINER_PHP_ID" ]; then
+        COMM="docker-compose exec ${CONTAINER_PHP_ID} /usr/local/bin/composer -vv '${@:2}'"
+        echo "=========================================================="
+        echo "COMMAND: $COMM"
+        $COMM
+    else
+        echo "PHP container is not up"
+    fi
+    ;;
 
 *)
-  echo "This is a simple script, aimed to help in developer's daily use of local environment."
-  echo "If you have docker-sync installed and configuration present (docker-sync.yml) it controls that too."
-  echo
-  echo 'Usage:'
-  echo "$SCRIPT_NAME up|down|dump|stop|restart|restore|rebuild"
-  echo
-  echo " - down: backups databases and removes containers & networks (stops docker-sync)"
-  echo " - dump: backup databases to db_dump -folder"
-  echo " - init: build project to ./drupal -folder, using composer and drupal-project"
-  echo " - nuke-volumes: remove permanently synced volumes (NO BACKUPS!)"
-  echo " - rebuild: runs DB backup, builds containers and starts with the restored DB backup (restarts docker-sync too)"
-  echo " - restart: down, up and restore (restarts docker-sync too)"
-  echo " - restore: import latest db. Database container must be running."
-  echo " - stop: stops containers leaving them hanging around (stops docker-sync)"
-  echo " - up: brings containers up (starts docker-sync)"
-  exit 0
-  ;;
+    echo "This is a simple script, aimed to help in developer's daily use of local environment."
+    echo "If you have docker-sync installed and configuration present (docker-sync.yml) it controls that too."
+    echo
+    echo 'Usage:'
+    echo "$SCRIPT_NAME [composer|down|dump|init|nuke-volumes|rebuild|restart|restore|stop|up]"
+    echo
+    echo " - composer: run composer command in PHP container (if up and running)"
+    echo " - down: backups databases and removes containers & networks (stops docker-sync)"
+    echo " - dump: backup databases to db_dump -folder"
+    echo " - init: build project to ./drupal -folder, using composer and drupal-project"
+    echo " - nuke-volumes: remove permanently synced volumes (NO BACKUPS!)"
+    echo " - rebuild: runs DB backup, builds containers and starts with the restored DB backup (restarts docker-sync too)"
+    echo " - restart: down, up and restore (restarts docker-sync too)"
+    echo " - restore: import latest db. Database container must be running."
+    echo " - stop: stops containers leaving them hanging around (stops docker-sync)"
+    echo " - up: brings containers up (starts docker-sync)"
+    exit 0
+    ;;
 
 esac
 

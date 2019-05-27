@@ -22,7 +22,7 @@ as [Docker-sync](https://docker-sync.readthedocs.io). If you have
 any directory):
 
          $ brew install cask 
-         $ brew cask install docker-edge
+         $ brew cask install docker
          $ gem install docker-sync
          
 

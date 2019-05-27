@@ -23,8 +23,9 @@ any directory):
 
          $ brew install cask 
          $ brew cask install docker
-         $ gem install docker-sync
-         
+         $ [sudo] gem install docker-sync
+
+You may have the Docker already installed, in which case brew will tell you so.         
 
 ## What's in the package?
 

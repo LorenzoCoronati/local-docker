@@ -156,7 +156,7 @@ case "$ACTION" in
 
   echo
   echo 'Databases *before* the restore:'
-  docker-compose -f $DOCKER_COMPOSER_FILE exec CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
+  docker-compose -f $DOCKER_COMPOSER_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
   echo
   echo 'Restoring db...'
   echo -n "DB backup used: db_dumps/db-container-dump-LATEST.sql.gz => "

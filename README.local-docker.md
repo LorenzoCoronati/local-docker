@@ -73,6 +73,53 @@ an error, ensure `ld.sh` has execute permission:
 
         chmod 0744 ld.sh
 
+### Local IP address and domains
+
+This is not needed unless you wish to use a local domain (ie. type
+something other than IP address 0.0.0.0 in your browser) or use Xdebug.
+
+Use custom IP alias per project to keep your own `/etc/hosts` -file
+sane. Safe IP address ranges are `192.168.10.[10...250]` and
+`10.10.*.*`.
+
+1.  **A) Create alias to your loopback -address** with a specific IP
+    address (you will need to repeat this step after each reboot unless
+    you do also step 2.):
+
+          $ sudo ifconfig lo0 alias 192.168.10.10
+
+    More info in "Local IP addresses and ports" -section
+
+    **OR B) Make loopback -alias to be loaded automatically (MacOS only)**
+
+    1.  Copy [this plist -file](docker/docker-for-mac-ip-alias.plist) to your `/Library/LauchDaemons` (will be loaded automatically after each reboot)
+
+              $ sudo cp PROJECT_ROOT/docker/docker-for-mac-ip-alias.plist /Library/LaunchDaemons/com.exove.net.docker_192-168-10-10_alias.plist
+
+    2.  Run this or reboot your MacOS:
+
+              $ launchctl load /Library/LaunchDaemons/com.exove.net.docker_192-168-10-10_alias.plist
+
+    You should have similar configuration now in in your [loopback interface](https://en.wikipedia.org/wiki/Loopback#LOOPBACK-INTERFACE)
+
+          $ ifconfig lo0
+          lo0: flags=8049<UP,LOOPBACK,RUNNING,MULTICAST> mtu 16384
+          options=1203<RXCSUM,TXCSUM,TXSTATUS,SW_TIMESTAMP>
+          inet 127.0.0.1 netmask 0xff000000
+          inet6 ::1 prefixlen 128
+          inet6 fe80::1%lo0 prefixlen 64 scopeid 0x1
+          inet 192.168.10.10 netmask 0xffffff00   # **** ALIAS! *****
+          nd6 options=201<PERFORMNUD,DAD>
+
+    (Important line is **`inet 192.168.10.10...`**).
+
+2.  Add your desired hostanames to `/etc/hosts` with IP addresses.
+
+        #######################################################
+        ##############  PROJECT NAME    #######################
+        192.168.10.10 mylocal.example.com mylocal.example.fi
+        192.168.10.10 mailhog.local
+
 #### Skeleton
 
 If your project is not Skeleton based, delete `*.skeleton.yml` -files.
@@ -154,23 +201,28 @@ You can expose nodejs container logs with:
 
       $ docker-compose logs -f nodejs
 
-#### Xdbug
+#### Xdebug
 
-**Better instructions coming soon!**
+`php` -container has Xdebug up and running. You should be able to
+connect from you IDE to Xdebug using this configuration:
 
-Xdebug is installed and enabled by default. You should be able to
-connect your IDE to container's IP address, port 9000.
+    xdebug.remote_enable = 1
+    ; php-container's *INTERNAL* port
+    xdebug.remote_port = 9000
+    ; Loopback alias IP:
+    xdebug.remote_host = 192.168.10.10
 
-To turn xdebug off add
+This Xdebug configuration is set in
+[`./docker/docker-for-mac-ip-alias.plist`](./docker/docker-for-mac-ip-alias.plist)
+-file, and all Xdebug's config can be checked either from Drupal
+(`admin/reports/status/php`) or with command
 
-     xdebug.remote_enable=0
+    $ docker-compose exec php sh -c 'exec /usr/local/bin/php -i |grep xdebug'
 
-to the bottom of file
-`docker/build/php/7.2/conf.d/95-drupal-development.ini` (check your PHP
-version from `docker-compose.yml`, default is `7.2`). After the change
-you need to rebuild the `php` -container:
+In depth information can be found in
 
-     ./ld rebuild
+-   <https://gist.github.com/ralphschindler/535dc5916ccbd06f53c1b0ee5a868c93> and
+-   <https://www.ashsmith.io/docker/get-xdebug-working-with-docker-for-mac/>
 
 ### Launch a new project
 
@@ -192,7 +244,51 @@ root-level key `volumes`). If you collapse with other projects:
 4. start your local again `./ld up` and optionally restore database
    `./ld restore`
 
+### Local IP addresses and ports
+
+Docker exposes different services via IP address `0.0.0.0` to allow access to them via all host machine IPs (_right now_ is the time to turn on your firewall if it is not yet enabled). Currently exposed services include:
+
+-   **Nginx** ports 80, 443
+-   PHP/**Xdebug** port 9010/9000 \*)
+-   **Adminer** port 8080 - manage databases via UI, host: `db`, user `root`, password `root_password`
+-   **MySQL** port 3306 - manage databases, execute
+    `$ docker-compose exec db sh -c 'mysql -h db -uroot -proot_password'`
+    to connect via shell
+-   **Mailhog** port 8025 - catches all emails sent by PHP
+
+If you want to use a specific IP address or set domain names in your 
+`/etc/hosts` -file, you must add an alias to host's loopback address. On
+macOS this is done with the command
+
+    $ sudo ifconfig lo0 alias 192.168.10.10
+
+On Ubuntu 16.04 and probably other Linux variants
+
+    $ sudo ifconfig docker0:0 192.168.10.10
+
+**NOTE**: This must currently be done after each reboot.
+
+Note that all containers can access other containers services  using
+Docker's internal networking. Containers connect between each other by
+IP addresses, which are automatically resolved using container aliases
+(see service names in
+[`docker-compose.yml -file`](./docker-compose.yml)).
+
+\*) See "Xdebug" -section for more info.
+
 ## ISSUES 
+
+#### Local-docker does not start
+
+1. `Bind for 0.0.0.0:80: unexpected error (Failure EADDRINUSE)`
+  
+   Turn of yor local (on Mac) web server (Apache, Nginx, whatever):
+   
+        $ sudo apachectl stop && sudo service nginx stop
+
+    Turn off your local MySQL (on Mac):  
+    > System preferences -> MySQL ->stop
+ 
 
 #### Local files not getting synced
 

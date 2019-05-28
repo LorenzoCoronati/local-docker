@@ -73,6 +73,9 @@ an error, ensure `ld.sh` has execute permission:
 
         chmod 0744 ld.sh
 
+If your project is not Skeleton based, delete `*.skeleton.yml` -files.
+If you are, see "Skeleton" -section.
+
 ### Local IP address and domains
 
 This is not needed unless you wish to use a local domain (ie. type
@@ -122,10 +125,9 @@ sane. Safe IP address ranges are `192.168.10.[10...250]` and
 
 #### Skeleton
 
-If your project is not Skeleton based, delete `*.skeleton.yml` -files.
-If you are applying Local docker on a Skeleton based project, replace
-docker-sync.yml with dockers-sync.skeleton.yml and docker-compose.yml
-with docker-compose.skeleton.yml.
+If you are applying Local-docker on a Skeleton based project, replace
+`docker-sync.yml` with `dockers-sync.skeleton.yml` and
+`docker-compose.yml` with `docker-compose.skeleton.yml`.
 
 ### Daily usage
 

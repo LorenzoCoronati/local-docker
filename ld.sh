@@ -35,12 +35,20 @@ fi
 
 find_db_container() {
     TMP_NAME=$DOCKER_PROJECT"_"$CONTAINER_DB
-    echo $(docker ps  | grep "$TMP_NAME" | sed -e's/  */ /g' |awk -F\  '{print $12}')
+    FOUND_NAME=$(docker ps  | grep "$TMP_NAME" | sed 's/.*\ //' )
+    if [ -z "$FOUND_NAME" ]; then
+        echo ''
+    fi
+    echo $FOUND_NAME;
 }
 
 find_php_container() {
     TMP_NAME=$DOCKER_PROJECT"_"$CONTAINER_PHP
-    echo $(docker ps  | grep "$TMP_NAME" | sed -e's/  */ /g' |awk -F\  '{print $12}')
+    FOUND_NAME=$(docker ps  | grep "$TMP_NAME" | sed 's/.*\ //')
+    if [ -z "$FOUND_NAME" ]; then
+        echo ''
+    fi
+    echo $FOUND_NAME;
 }
 
 
@@ -61,7 +69,7 @@ db_connect() {
   ROUNDS_MAX=30
   RET='-'
   if [ -z "$CONTAINER_DB_ID" ]; then
-    echo "DB container ($CONTAINER_DB_ID), not running (or not yet created)."
+    echo "DB container not running (or not yet created)."
     exit 1
   else
     echo "Connecting to DB container ($CONTAINER_DB_ID), please wait..."

@@ -74,8 +74,14 @@ an error, ensure `ld.sh` has execute permission:
 
         chmod 0744 ld.sh
 
-If your project is not Skeleton based, delete `*.skeleton.yml` -files.
-If you are, see "Skeleton" -section.
+If your project is not Skeleton based, run one of these before stepping
+eny futher:
+
+        $ ./ld skeleton-cleanup # ONLY if you don't use this with Skeleton -based project.
+        $ ./ld init # asks if you what config to use (Skeleton or not).
+        
+If you are applying `local-docker` on a Skeleton -based project, see
+"Skeleton" -section .
 
 ### Local IP address and domains
 
@@ -157,9 +163,11 @@ database, you can
  
 #### Skeleton
 
-If you are applying Local-docker on a Skeleton based project, replace
-`docker-sync.yml` with `dockers-sync.skeleton.yml` and
-`docker-compose.yml` with `docker-compose.skeleton.yml`.
+If you are applying Local-docker on a Skeleton based project do either
+of these two:
+
+        $ ./ld skeleton-switch # ONLY if you do use this with Skeleton -based project.
+        $ ./ld init # asks if you what config to use (Skeleton or not).
 
 Drupal should also connect to correct database host. This is usually
 done via your site's `settings.php` -file. Skeleton uses `localhost` as
@@ -187,6 +195,14 @@ Behind the scenes script starts and stops files syncing and containers.
 More importantly using it helps you to not delete database by mistake,
 but executes (and restores) database backups in `db_dumps/` -folder,
 keeping most recent as the restoreable dump. 
+
+#### Initial start
+
+It is recommended to start the project first time with:
+
+        ./ld init
+
+and answer some question to set up things properly.
 
 #### Start local
 
@@ -239,6 +255,11 @@ your thing:
        /var/www # drush status
        /var/www # composer require drupal/pathauto:^1
 
+Composer commands can be launched from your host (but executed inside
+container):
+
+       $ ./ld composer require drupal/pathauto:^1
+
 Another way is run one-off commands in `php` -container:
 
        $ docker-compose exec php bash -c "drush status"
@@ -286,7 +307,7 @@ you should not do that, but rather execute composer install:
        # OR
        $ ./ld composer install
 
-## Projects in paralled?
+## Projects in parallel?
 
 Docker volumes are using volume names from `docker-composer.yml` (see
 root-level key `volumes`). If you collapse with other projects: 
@@ -297,6 +318,13 @@ root-level key `volumes`). If you collapse with other projects:
   `docker-sync.yml` -files
 4. start your local again `./ld up` and optionally restore database
    `./ld restore`
+   
+Another thing that may be needed is changing exposed ports. As an
+example `nginx` exposes port 80 and only one project can use the port at
+a time. You can change exposed ports in `docker-compose.yml` file, see
+containers configuration for `ports`, format is HOST:CONTAINER. In other
+words, 80:80 exposes `nginx` port `80` to host as-is, and `8080:80`
+allows access to `nginx` from host via port `8080`.
 
 ### Local IP addresses and ports
 
@@ -354,6 +382,9 @@ File should contain key=value -pairs, such as
 
     Turn off your local MySQL (on Mac):  
     > System preferences -> MySQL ->stop
+    
+    Check also "Projects in parallel" -section. Other projects may have
+    acclaimed ports your project is trying to use.
  
 
 #### Local files not getting synced

@@ -94,6 +94,12 @@ db_connect() {
   return $RET
 }
 
+# Cross-OS way to do in-place find-and-replace with sed.
+# Use: replace_in_file PATTERN FILENAME
+replace_in_file () {
+    sed --version >/dev/null 2>&1 && sed -i -- "$@" || sed -i "" "$@"
+}
+
 
 case "$ACTION" in
 "dump")
@@ -294,6 +300,35 @@ case "$ACTION" in
     fi
     ;;
 
+"rename-volumes")
+    if [ $IS_DOCKERSYNC -eq "1" ]; then
+        echo 'Turning off docker-sync, please wait...'
+        docker-sync clean
+    fi
+    DEFAULT=$(basename $CWD)
+    VALID=0
+    while [ "$VALID" -eq "0" ]; do
+        read -p "Please give me yoru project name ([ENTER]: \"$DEFAULT\")? " PROJECTNAME
+        if [ -z "$PROJECTNAME" ]; then
+            PROJECTNAME=$DEFAULT
+            VALID=1
+        elif [[ $PROJECTNAME =~ ^[0-9a-z\-\_]$ ]]; then
+            VALID=1
+        else
+            echo 'ERROR: Project name can contain only alphabetic characters (a-z), numbers (0-9), underscore (_) and hyphen (-).'
+            sleep 2
+            echo
+        fi
+    done;
+
+     echo "Renaming volumes to '$PROJECTNAME' for docker-sync, please wait..."
+     replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKERSYNC_FILE
+     replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKER_COMPOSER_FILE
+     echo 'Done. You can now (re)start your project:'
+     echo "$SCRIPT_NAME init - installs Drupal 8 codebase if not present"
+     echo "$SCRIPT_NAME up - boots up this project"
+    ;;
+
 *)
     echo "This is a simple script, aimed to help in developer's daily use of local environment."
     echo "If you have docker-sync installed and configuration present (docker-sync.yml) it controls that too."
@@ -309,6 +344,7 @@ case "$ACTION" in
     echo " - rebuild: runs DB backup, builds containers and starts with the restored DB backup (restarts docker-sync too)"
     echo " - restart: down, up and restore (restarts docker-sync too)"
     echo " - restore: import latest db. Database container must be running."
+    echo " - rename-volumes: Rename your local-docker volumes (helps to avoid collisions with other projects)"
     echo " - stop: stops containers leaving them hanging around (stops docker-sync)"
     echo " - up: brings containers up (starts docker-sync)"
     exit 0

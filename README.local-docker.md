@@ -120,14 +120,60 @@ sane. Safe IP address ranges are `192.168.10.[10...250]` and
 
         #######################################################
         ##############  PROJECT NAME    #######################
-        192.168.10.10 mylocal.example.com mylocal.example.fi
+        192.168.10.10 mylocal.example.com mylocal.example.fi other.multilanguage.domain mylocal.de.example.com
         192.168.10.10 mailhog.local
 
+#### Install Drupal
+
+After setting IP addresses and domains as your project needs them point
+your browser to the correct domain. If all is well adn Drupal is not yet
+installed you'll be redirected to
+`mylocal.example.com/core/install.php`.
+
+Install Drupal as usual. Be default database -container (`db`) has one
+database (`drupal`) and credentials for accessing (`drupal`/`drupal`).
+**Database hostname should be `db`** (database container name). Docker
+connects containers internally using container names.
+
+If you need more databases or need to manage anything inside Drupal's
+database, you can
+1) connect to `db` container either via shell
+
+        $ docker-compose exec db sh
+        
+
+2. or use Adminer with your browser (port is configured in
+   `docker-composer.yml`, see `adminer.ports`):
+   [http://mylocal.example.com:8080](http://mylocal.example.com:8080)
+
+3. or use your favourite SQL GUI app (SequelPro or similar), and connect
+   using IP (host) `0.0.0.0`, default port `3306`, username `root` and
+   password from `docker-composer.yml`,
+   `db.environment.MYSQL_ROOT_PASSWORD`.
+ 
 #### Skeleton
 
 If you are applying Local-docker on a Skeleton based project, replace
 `docker-sync.yml` with `dockers-sync.skeleton.yml` and
 `docker-compose.yml` with `docker-compose.skeleton.yml`.
+
+Drupal should also connect to correct database host. This is usually
+done via your site's `settings.php` -file. Skeleton uses `localhost` as
+the database host. `local-docker` uses `db` container, and by default
+credentials `drupal`/`drupal` with database named `drupal` (simple!).
+Example for Drupal 8:
+
+        <?php 
+          $databases['default']['default'] = [
+            'database' => 'drupal',
+            'username' => 'drupal',
+            'password' => 'drupal',
+            'prefix' => '',
+            'host' => 'db',   // <== IMPORTANT!
+            'port' => '3306',
+            'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
+            'driver' => 'mysql',
+          ];
 
 ### Daily usage
 

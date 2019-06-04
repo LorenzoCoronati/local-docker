@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 
-# 1st param
+# 1st param, The Command.
 ACTION=${1-'help'}
-# Local development file. 2nd param. Defaults to docker-compose-dev.yml because docker-sync defaults to that.
+
+# Use fixed name, since docker-sync is supposed to be locally only.
+DOCKERSYNC_FILE="./docker-sync.yml"
 DOCKER_COMPOSER_FILE='docker-compose.yml';
+
+CWD=$(pwd)
+DOCKER_PROJECT=$(basename $CWD)
 
 # DB container name, ie. the container key that holds mysql/mariadb.
 CONTAINER_DB='db';
 CONTAINER_PHP='php';
+
+# This is one of the reasons to NEVER use the local-docker publicly:
 MYSQL_ROOT_PASSWORD=root_password
+
 DATE=$(date +%Y-%m-%d--%H-%I-%S)
 RESTORE_INFO="mysql --host db -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
 USERS="mysql --host db -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e \"SELECT User, Host from mysql.user WHERE User NOT LIKE 'mysql%';\""

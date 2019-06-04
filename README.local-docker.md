@@ -17,15 +17,16 @@ and Drupal console can be used within `php` -containers shell:
 
 Your laptop should have
 [Docker and Docker compose](https://docs.docker.com/compose/) as well
-as [Docker-sync](https://docker-sync.readthedocs.io). If you have
-[Homebrew](https://brew.sh/) installed do these steps on you host (in
-any directory):
+as [Docker-sync](https://docker-sync.readthedocs.io). Install
+[Homebrew](https://brew.sh/) if you have not done it already, and run
+this on you host (in any directory):
 
          $ brew install cask 
          $ brew cask install docker
-         $ [sudo] gem install docker-sync
+         $ sudo gem install docker-sync
 
-You may have the Docker already installed, in which case brew will tell you so.         
+You may have the Docker already installed, in which case
+[Homebrew](https://brew.sh/) will tell you.
 
 ## What's in the package?
 

@@ -42,16 +42,6 @@ find_db_container() {
     echo $FOUND_NAME;
 }
 
-find_php_container() {
-    TMP_NAME=$DOCKER_PROJECT"_"$CONTAINER_PHP
-    FOUND_NAME=$(docker ps  | grep "$TMP_NAME" | sed 's/.*\ //')
-    if [ -z "$FOUND_NAME" ]; then
-        echo ''
-    fi
-    echo $FOUND_NAME;
-}
-
-
 is_dockersync() {
     if [ -z "$(which docker-sync)" ] || [ ! -f "$DOCKERSYNC_FILE" ]; then
         echo 0
@@ -282,9 +272,9 @@ case "$ACTION" in
     ;;
 
 "composer")
-    CONTAINER_PHP_ID=$(find_php_container)
+    CONTAINER_PHP_ID=$CONTAINER_PHP
     if [ ! -z "$CONTAINER_PHP_ID" ]; then
-        COMM="docker-compose exec ${CONTAINER_PHP_ID} /usr/local/bin/composer -vv '${@:2}'"
+        COMM="docker-compose exec ${CONTAINER_PHP} /usr/local/bin/composer -vv ${@:2}"
         echo "=========================================================="
         echo "COMMAND: $COMM"
         $COMM

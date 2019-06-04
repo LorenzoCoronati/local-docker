@@ -283,6 +283,8 @@ take a few minutes). If you already have a `drupal/composer.json` file
 you should not do that, but rather execute composer install:
 
        $ docker-compose exec php bash -c "composer install"
+       # OR
+       $ ./ld composer install
 
 ## Projects in paralled?
 

@@ -230,8 +230,22 @@ case "$ACTION" in
     ;;
 
 "init")
+    read -p "Is this a Skeleton -project? (y/n)" CHOISE
+    case "$CHOISE" in
+        y|Y ) $SCRIPT_NAME skeleton-switch;;
+        n|N ) $SCRIPT_NAME skeleton-cleanup;;
+        * ) echo "ERROR: Unclear answer, exiting" && exit;;
+    esac
+
+    read -p "Use project-name based docker-sync -volumes (recommended)? (y/n)" CHOISE
+    case "$CHOISE" in
+        y|Y ) $SCRIPT_NAME rename-volumes;;
+    esac
+
     if [ -e "drupal/comopser.json" ]; then
       echo 'Looks like project is already created? File drupal/composer.json exists.'
+      echo 'Maybe you should install composer codebase instead:'
+      echo $SCRIPT_NAME composer install
       exit 1
     fi
     echo 'Installing Drupal project, please wait...'
@@ -312,6 +326,49 @@ case "$ACTION" in
      echo "$SCRIPT_NAME up - boots up this project"
     ;;
 
+"skeleton-switch")
+    echo "Replacing docker-sync.yml and docker-composer.yml with Skeleton -versions. This will overwrite any changes in your docker-sync.yml and docker-compose.yml."
+    read -p "Continue (y/n)?" CHOISE
+    case "$CHOISE" in
+        y|Y ) echo "Continuing...please wait.";;
+        n|N ) exit;;
+        * ) exit;;
+    esac
+    if [ ! -f "docker-sync.skeleton.yml" ]; then
+      echo "ERROR: Check that docker-sync.skeleton.yml file exists."
+      exit;
+    fi
+    if [ ! -f "docker-compose.skeleton.yml" ]; then
+      echo "ERROR: Check that docker-compose.skeleton.yml file exists."
+      exit;
+    fi
+    rm -f docker-sync.yml 2>/dev/null
+    rm -f docker-compose.yml 2>/dev/null
+    mv docker-sync.skeleton.yml docker-sync.yml
+    mv docker-compose.skeleton.yml docker-compose.yml
+    echo "Done. Consider renaming your docker-sync volumes next:"
+    echo "$SCRIPT_NAME rename-volumes"
+    echo "Don't forget to ensure your database connection is configure properly (host should be 'db', database 'drupal', credentials 'drupal'/'drupal')"
+    ;;
+
+"skeleton-cleanup")
+    echo "Removing docker-sync.skeleton.yml and docker-composer.skeleton.yml."
+    read -p "Continue (y/n)?" CHOISE
+    case "$CHOISE" in
+        y|Y ) echo "Continuing...please wait.";;
+        n|N ) exit;;
+        * ) exit;;
+    esac
+    if [ -f "docker-sync.skeleton.yml" ]; then
+      rm docker-sync.skeleton.yml
+    fi
+    if [ -f "docker-compose.skeleton.yml" ]; then
+      rm docker-compose.skeleton.yml
+    fi
+    echo "Done. Consider renaming your docker-sync volumes next:"
+    echo "$SCRIPT_NAME rename-volumes"
+    ;;
+
 *)
     echo "This is a simple script, aimed to help in developer's daily use of local environment."
     echo "If you have docker-sync installed and configuration present (docker-sync.yml) it controls that too."
@@ -328,6 +385,8 @@ case "$ACTION" in
     echo " - restart: down, up and restore (restarts docker-sync too)"
     echo " - restore: import latest db. Database container must be running."
     echo " - rename-volumes: Rename your local-docker volumes (helps to avoid collisions with other projects)"
+    echo " - skeleton-cleanup: remove config for Skeleton projects"
+    echo " - skeleton-switch: switch config to Skeleton -based structure"
     echo " - stop: stops containers leaving them hanging around (stops docker-sync)"
     echo " - up: brings containers up (starts docker-sync)"
     exit 0

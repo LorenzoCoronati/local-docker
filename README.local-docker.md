@@ -370,6 +370,24 @@ resets everything else but Docker configuration.
 
         docker system prune
 
+#### Docker-stack does not start
+
+`mkmf.rb can't find header files for ruby at /System/Library/Frameworks/Ruby.framework/Versions/2.3/usr/lib/ruby/include/ruby.h`
+
+You have probably updated Xcode but have not yet approved a new license?
+
+**Solution**: Start Xdoce (UI application) and approve the license, and
+try again. Ootionally you can achieve the same via command line with
+less downloads for you Xcode:
+
+        $ xcode-select --install
+        
+If you get an error like this: `xcode-select: error: tool
+'xcodebuild'requires Xcode, but active developer directory
+'/Library/Developer/CommandLineTools' is a command line tools instance`
+you should also reset the command line tools path with
+ 
+        $ sudo xcode-select -r
 
 ## Why my favourite feature is not there?
 

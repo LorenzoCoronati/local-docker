@@ -53,7 +53,6 @@ find_php_container() {
 
 
 is_dockersync() {
-    INSTALLED=
     if [ -z "$(which docker-sync)" ] || [ ! -f "$DOCKERSYNC_FILE" ]; then
         echo 0
     fi
@@ -255,26 +254,20 @@ case "$ACTION" in
     COMPOSER_MOVE="cp -rf $TMP_FOLDER/* /var/www"
     COMPOSER_CLEAN="rm -rf $TMP_FOLDER"
     docker-compose -f $DOCKER_COMPOSER_FILE up -d php
-    echo "============="
-    echo "Composer and php containers built"
-    echo "============="
     echo "Next: $COMPOSER_INIT"
-    echo "Next: $COMPOSER_MOVE"
+    echo "Then: $COMPOSER_MOVE"
+    echo "Finally: $COMPOSER_CLEAN"
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c "$COMPOSER_INIT; $COMPOSER_MOVE; $COMPOSER_CLEAN"
     echo "============="
     echo "Project created and copied to /var/www"
     echo "============="
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'ls -lha /var/www'
+    echo "Creating some folder to project created and copied to /var/www"
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'mkdir -vp ./web/modules/custom && mkdir -vp ./web/themes/custom'
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/modules/custom/.gitkeep'
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/themes/custom/.gitkeep'
-    echo "============="
-    echo ".gitkeep's created /var/www"
-    echo "============="
-    if [ "$IS_DOCKERSYNC" -eq "1" ]; then
-        docker-sync sync
-        docker-sync logs
-    fi
+    echo 'Drupal 8 codebase built. Drupal is in ./drupal -folder, and public webroot in ./drupal/web/index.php.'
+    sleep 1
+    echo 'Happy coding!'
    ;;
 
 "restart")

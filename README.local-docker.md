@@ -330,6 +330,18 @@ IP addresses, which are automatically resolved using container aliases
 
 \*) See "Xdebug" -section for more info.
 
+## Customize ld -script variables
+
+Main script supports .env -file overrides. You can override any configs
+found in the upper part of `ld.sh` -file by placing a file named `.env`
+in the root of the project and changing some variable values.
+
+File should contain key=value -pairs, such as
+
+        # Comment starts with hash.
+        MYSQL_ROOT_PASSWORD=some_password
+        ANOTHER_KEY=the-value
+
 ## ISSUES 
 
 #### Local-docker does not start

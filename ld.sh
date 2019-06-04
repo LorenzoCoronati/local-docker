@@ -21,11 +21,10 @@ DATE=$(date +%Y-%m-%d--%H-%I-%S)
 RESTORE_INFO="mysql --host db -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
 USERS="mysql --host db -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e \"SELECT User, Host from mysql.user WHERE User NOT LIKE 'mysql%';\""
 
-# Use fixed name, since docker-sync is supposed to be locally only.
-DOCKERSYNC_FILE="./docker-sync.yml"
-
-CWD=$(pwd)
-DOCKER_PROJECT=$(basename $CWD)
+# Add support to .env files, allowing overrides to any of our config values.
+if [ -f '.env' ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
 
 # Get current script name, and use a symlink if it exists.
 if [ ! -L "$( basename "$0" .sh)" ]; then

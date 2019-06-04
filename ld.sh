@@ -179,14 +179,20 @@ case "$ACTION" in
     docker-sync start
   fi
   docker-compose -f $DOCKER_COMPOSER_FILE up -d
+  OK=$?
+  if [ "$OK" -ne "0" ]; then
+    echo 'Something went wrong when bringing the project back."
+    echo "Check that required ports are not allocated (by other containers or programs) and re-configure them if needed.'
+    exit 1
+  fi
 
-    db_connect
-    CONN=$?
+  db_connect
+  CONN=$?
 
-    if [ "$CONN" -ne 0 ]; then
-        echo "Oww... DB container is not up, even after a few retries."
-        exit 1
-    fi
+  if [ "$CONN" -ne 0 ]; then
+    echo "Oww... DB container is not up, even after a few retries."
+    exit 1
+  fi
 
   echo
   echo 'Current databases:'
@@ -238,17 +244,19 @@ case "$ACTION" in
     ;;
 
 "init")
-    read -p "Is this a Skeleton -project? (y/n)" CHOISE
-    case "$CHOISE" in
-        y|Y ) $SCRIPT_NAME skeleton-switch;;
-        n|N ) $SCRIPT_NAME skeleton-cleanup;;
-        * ) echo "ERROR: Unclear answer, exiting" && exit;;
-    esac
-
-    read -p "Use project-name based docker-sync -volumes (recommended)? (y/n)" CHOISE
-    case "$CHOISE" in
-        y|Y ) $SCRIPT_NAME rename-volumes;;
-    esac
+    # Suggest Skeleton cleanup only when it is relevant.
+    if [ -e "docker-sync.skeleton.yml" ] || [ -e "docker-compose.skeleton.yml" ]; then
+        read -p "Is this a Skeleton -project? (y/n)" CHOISE
+        case "$CHOISE" in
+            y|Y ) $SCRIPT_NAME skeleton-switch;;
+            n|N ) $SCRIPT_NAME skeleton-cleanup;;
+            * ) echo "ERROR: Unclear answer, exiting" && exit;;
+        esac
+        read -p "Use project-name based docker-sync -volumes (recommended)? (y/n)" CHOISE
+        case "$CHOISE" in
+            y|Y ) $SCRIPT_NAME rename-volumes;;
+        esac
+    fi
 
     if [ -e "drupal/comopser.json" ]; then
       echo 'Looks like project is already created? File drupal/composer.json exists.'
@@ -256,7 +264,10 @@ case "$ACTION" in
       echo $SCRIPT_NAME composer install
       exit 1
     fi
+    echo
+    sleep 3
     echo 'Installing Drupal project, please wait...'
+    sleep 1
     if [ "$IS_DOCKERSYNC" -eq "1" ]; then
         docker-sync start
     fi
@@ -266,6 +277,13 @@ case "$ACTION" in
     COMPOSER_MOVE="cp -rf $TMP_FOLDER/* /var/www"
     COMPOSER_CLEAN="rm -rf $TMP_FOLDER"
     docker-compose -f $DOCKER_COMPOSER_FILE up -d php
+    OK=$?
+    if [ "$OK" -ne "0" ]; then
+        echo 'Something went wrong when bringing the project back."
+        echo "Check that required ports are not allocated (by other containers or programs) and re-configure them if needed.'
+        exit 1
+    fi
+
     echo "Next: $COMPOSER_INIT"
     echo "Then: $COMPOSER_MOVE"
     echo "Finally: $COMPOSER_CLEAN"

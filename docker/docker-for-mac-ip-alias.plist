@@ -16,24 +16,24 @@ your Docker has always one fixed public address.
 
   $ launchctl load /Library/LaunchDaemons/com.exove.net.docker_192-168-10-10_alias.plist
 
-3. Now you can connect to Docker stack using IP 192.168.10.10
+3. Now you can connect to Docker stack using IP 10.10.10.10
   - for Xdebug configuration use
 ```
 xdebug.remote_enable = 1
 xdebug.remote_port = 9000
-xdebug.remote_host= 192.168.10.10
+xdebug.remote_host= 10.10.10.10
 ```
 -->
 <plist version="1.0">
   <dict>
     <key>Label</key>
-    <string>com.exove.net.docker_192-168-10-10_alias</string>
+    <string>com.exove.net.docker_10-10-10-10_alias</string>
     <key>ProgramArguments</key>
     <array>
       <string>ifconfig</string>
       <string>lo0</string>
       <string>alias</string>
-      <string>192.168.10.10</string>
+      <string>10.10.10.10</string>
     </array>
     <key>RunAtLoad</key>
     <true/>

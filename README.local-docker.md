@@ -82,14 +82,13 @@ This is not needed unless you wish to use a local domain (ie. type
 something other than IP address 0.0.0.0 in your browser) or use Xdebug.
 
 Use custom IP alias per project to keep your own `/etc/hosts` -file
-sane. Safe IP address ranges are `192.168.10.[10...250]` and
-`10.10.*.*`.
+sane. Safe IP address ranges are `10.` and `192.168.*`.
 
 1.  **A) Create alias to your loopback -address** with a specific IP
     address (you will need to repeat this step after each reboot unless
     you do also step 2.):
 
-          $ sudo ifconfig lo0 alias 192.168.10.10
+          $ sudo ifconfig lo0 alias 10.10.10.10
 
     More info in "Local IP addresses and ports" -section
 
@@ -97,11 +96,11 @@ sane. Safe IP address ranges are `192.168.10.[10...250]` and
 
     1.  Copy [this plist -file](docker/docker-for-mac-ip-alias.plist) to your `/Library/LauchDaemons` (will be loaded automatically after each reboot)
 
-              $ sudo cp PROJECT_ROOT/docker/docker-for-mac-ip-alias.plist /Library/LaunchDaemons/com.exove.net.docker_192-168-10-10_alias.plist
+              $ sudo cp PROJECT_ROOT/docker/docker-for-mac-ip-alias.plist /Library/LaunchDaemons/com.exove.net.docker_10-10-10-10_alias.plist
 
     2.  Run this or reboot your MacOS:
 
-              $ launchctl load /Library/LaunchDaemons/com.exove.net.docker_192-168-10-10_alias.plist
+              $ launchctl load /Library/LaunchDaemons/com.exove.net.docker_10-10-10-10_alias.plist
 
     You should have similar configuration now in in your [loopback interface](https://en.wikipedia.org/wiki/Loopback#LOOPBACK-INTERFACE)
 
@@ -111,17 +110,21 @@ sane. Safe IP address ranges are `192.168.10.[10...250]` and
           inet 127.0.0.1 netmask 0xff000000
           inet6 ::1 prefixlen 128
           inet6 fe80::1%lo0 prefixlen 64 scopeid 0x1
-          inet 192.168.10.10 netmask 0xffffff00   # **** ALIAS! *****
+          inet 10.10.10.10 netmask 0xffffff00   # **** ALIAS! *****
           nd6 options=201<PERFORMNUD,DAD>
 
-    (Important line is **`inet 192.168.10.10...`**).
+    (Important line is **`inet 10.10.10.10...`**).
 
 2.  Add your desired hostanames to `/etc/hosts` with IP addresses.
 
         #######################################################
         ##############  PROJECT NAME    #######################
-        192.168.10.10 mylocal.example.com mylocal.example.fi other.multilanguage.domain mylocal.de.example.com
-        192.168.10.10 mailhog.local
+        10.10.10.10 mylocal.example.com mylocal.example.fi other.multilanguage.domain mylocal.de.example.com
+        10.10.10.10 mailhog.local
+        
+It is good practise is to have each project to use live in their own IP
+addresses (or range). `local-docker` lives happily behind one IP 
+address.
 
 #### Install Drupal
 
@@ -258,7 +261,7 @@ connect from you IDE to Xdebug using this configuration:
     ; php-container's *INTERNAL* port
     xdebug.remote_port = 9000
     ; Loopback alias IP:
-    xdebug.remote_host = 192.168.10.10
+    xdebug.remote_host = 10.10.10.10
 
 This Xdebug configuration is set in
 [`./docker/docker-for-mac-ip-alias.plist`](./docker/docker-for-mac-ip-alias.plist)
@@ -308,11 +311,11 @@ If you want to use a specific IP address or set domain names in your
 `/etc/hosts` -file, you must add an alias to host's loopback address. On
 macOS this is done with the command
 
-    $ sudo ifconfig lo0 alias 192.168.10.10
+    $ sudo ifconfig lo0 alias 10.10.10.10
 
 On Ubuntu 16.04 and probably other Linux variants
 
-    $ sudo ifconfig docker0:0 192.168.10.10
+    $ sudo ifconfig docker0:0 10.10.10.10
 
 **NOTE**: This must currently be done after each reboot.
 

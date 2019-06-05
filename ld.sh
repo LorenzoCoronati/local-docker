@@ -297,6 +297,11 @@ case "$ACTION" in
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/themes/custom/.gitkeep'
     echo 'Drupal 8 codebase built. Drupal is in ./drupal -folder, and public webroot in ./drupal/web/index.php.'
     sleep 1
+    echo 'Bringing the containers up now... Please wait.'
+    $SCRIPT_NAME up
+    sleep 1
+    echo 'No errors, all good.'
+    sleep 1
     echo 'Happy coding!'
    ;;
 

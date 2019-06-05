@@ -248,18 +248,20 @@ case "$ACTION" in
     if [ -e "docker-sync.skeleton.yml" ] || [ -e "docker-compose.skeleton.yml" ]; then
         read -p "Is this a Skeleton -project? (y/n)" CHOISE
         case "$CHOISE" in
-            y|Y ) $SCRIPT_NAME skeleton-switch;;
-            n|N ) $SCRIPT_NAME skeleton-cleanup;;
+            y|Y ) APP_ROOT='drupal/'; $SCRIPT_NAME skeleton-switch;;
+            n|N ) APP_ROOT='app/'; $SCRIPT_NAME skeleton-cleanup;;
             * ) echo "ERROR: Unclear answer, exiting" && exit;;
         esac
+        if [ ! -d $APP_ROOT ]; then
+            mkdir $APP_ROOT;
+        fi
         read -p "Use project-name based docker-sync -volumes (recommended)? (y/n)" CHOISE
         case "$CHOISE" in
             y|Y ) $SCRIPT_NAME rename-volumes;;
         esac
     fi
-
-    if [ -e "drupal/comopser.json" ]; then
-      echo 'Looks like project is already created? File drupal/composer.json exists.'
+    if [ -e "app/composer.json" ]; then
+      echo 'Looks like project is already created? File app/composer.json exists.'
       echo 'Maybe you should install composer codebase instead:'
       echo $SCRIPT_NAME composer install
       exit 1
@@ -413,7 +415,7 @@ case "$ACTION" in
     echo " - composer: run composer command in PHP container (if up and running)"
     echo " - down: backups databases and removes containers & networks (stops docker-sync)"
     echo " - dump: backup databases to db_dump -folder"
-    echo " - init: build project to ./drupal -folder, using composer and drupal-project"
+    echo " - init: build project to ./app -folder, using composer and drupal-project"
     echo " - nuke-volumes: remove permanently synced volumes (NO BACKUPS!)"
     echo " - rebuild: runs DB backup, builds containers and starts with the restored DB backup (restarts docker-sync too)"
     echo " - restart: down, up and restore (restarts docker-sync too)"

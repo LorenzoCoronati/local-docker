@@ -15,7 +15,7 @@ syncs:
     # which folder to watch / sync from - you can use tilde, it will get expanded.
     # the contents of this directory will be synchronized to the Docker volume with the name of this sync entry ('default-sync' here)
     # NOTE: run `docker-sync[-stack] clean` after any change in src
-    src: './drupal/'
+    src: './app/'
 
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
     sync_args:
@@ -34,9 +34,9 @@ syncs:
     # be aware in case of unison this only gives you a notification on the initial sync, not the syncs after changes.
     notify_terminal: true
 
-  webroot-sync-core-delegated:
+  local-docker-sync-core-delegated:
     sync_strategy: 'native_osx'
-    src: './drupal/'
+    src: './app/'
 
     host_disk_mount_mode: 'delegated' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
     sync_args:

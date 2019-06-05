@@ -245,26 +245,26 @@ case "$ACTION" in
 
 "init")
     # Suggest Skeleton cleanup only when it is relevant.
+    APP_ROOT='app/'
     if [ -e "docker-sync.skeleton.yml" ] || [ -e "docker-compose.skeleton.yml" ]; then
         read -p "Is this a Skeleton -project? (y/n)" CHOISE
         case "$CHOISE" in
             y|Y ) APP_ROOT='drupal/'; $SCRIPT_NAME skeleton-switch;;
-            n|N ) APP_ROOT='app/'; $SCRIPT_NAME skeleton-cleanup;;
+            n|N ) $SCRIPT_NAME skeleton-cleanup;;
             * ) echo "ERROR: Unclear answer, exiting" && exit;;
         esac
-        if [ ! -d $APP_ROOT ]; then
-            mkdir $APP_ROOT;
-        fi
         read -p "Use project-name based docker-sync -volumes (recommended)? (y/n)" CHOISE
         case "$CHOISE" in
             y|Y ) $SCRIPT_NAME rename-volumes;;
         esac
     fi
-    if [ -e "app/composer.json" ]; then
-      echo 'Looks like project is already created? File app/composer.json exists.'
-      echo 'Maybe you should install composer codebase instead:'
+    if [ -e "$APP_ROOT/composer.json" ]; then
+      echo "Looks like project is already created? File $APP_ROOT/composer.json exists."
+      echo "Maybe you should install composer codebase instead:"
       echo $SCRIPT_NAME composer install
       exit 1
+    elif [ ! -d $APP_ROOT ]; then
+      mkdir $APP_ROOT;
     fi
     echo
     sleep 3
@@ -343,7 +343,7 @@ case "$ACTION" in
     DEFAULT=$(basename $CWD)
     VALID=0
     while [ "$VALID" -eq "0" ]; do
-        read -p "Please give me yoru project name ([ENTER]: \"$DEFAULT\")? " PROJECTNAME
+        read -p "Please give me your project name ([ENTER]: \"$DEFAULT\")? " PROJECTNAME
         if [ -z "$PROJECTNAME" ]; then
             PROJECTNAME=$DEFAULT
             VALID=1

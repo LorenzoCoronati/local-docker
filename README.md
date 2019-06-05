@@ -430,6 +430,13 @@ try again. Ootionally you can achieve the same via command line with
 less downloads for you Xcode:
 
         $ xcode-select --install
+
+After initial Command Line Tools installation and updates may need to
+accept the license. You can do this using this command (and agreeing
+with the EULA):
+
+         $ sudo xcodebuild -license
+
         
 If you get an error like this: `xcode-select: error: tool
 'xcodebuild'requires Xcode, but active developer directory

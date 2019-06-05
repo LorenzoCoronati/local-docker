@@ -261,7 +261,7 @@ case "$ACTION" in
     if [ -e "$APP_ROOT/composer.json" ]; then
       echo "Looks like project is already created? File $APP_ROOT/composer.json exists."
       echo "Maybe you should install composer codebase instead:"
-      echo $SCRIPT_NAME composer install
+      echo $SCRIPT_NAME up && $SCRIPT_NAME composer install
       exit 1
     elif [ ! -d $APP_ROOT ]; then
       mkdir $APP_ROOT;

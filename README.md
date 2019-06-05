@@ -408,7 +408,9 @@ system.
 **BE WARNED** This will delete ALL volumes in ALL Docker projects across
 your laptop.
  
-        docker system prune --volumes
+        $ docker kill $(docker ps -q) # Stop all containers.
+        $ docker container prune # Remove all stopped containers.
+        $ docker volume prune # Remove all unused local volumes.
         
 If even that does not help, clean up EVERYTHING Docker -related
 (downloaded images, created volumes and containers).

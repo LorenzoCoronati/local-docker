@@ -63,7 +63,6 @@ Copy all of this repository on top of your current project.
 
         db_dumps/
         docker/
-        drupal/ # if you do not have it yet
         docker-compose*.yml
         docker-sync*.yml
         ld.sh 
@@ -74,10 +73,9 @@ an error, ensure `ld.sh` has execute permission:
 
         chmod 0744 ld.sh
 
-If your project is not Skeleton based, run one of these before stepping
-eny futher:
+Initial setup asks if you is a Skeleton based project. If you have no
+idea what does it mean, do not use it. 
 
-        $ ./ld skeleton-cleanup # ONLY if you don't use this with Skeleton -based project.
         $ ./ld init # asks if you what config to use (Skeleton or not).
         
 If you are applying `local-docker` on a Skeleton -based project, see
@@ -163,17 +161,24 @@ database, you can
  
 #### Skeleton
 
-If you are applying Local-docker on a Skeleton based project do either
-of these two:
+If you are applying Local-docker on a Skeleton based project start by
+copying all things mentioned in "Start using local-docker" -section on
+top of yur project repository. 
 
-        $ ./ld skeleton-switch # ONLY if you do use this with Skeleton -based project.
-        $ ./ld init # asks if you what config to use (Skeleton or not).
+When initial setup asks about Skeleton, answer `y`.
+
+        $ ./ld init
+        Is this a Skeleton -project? (y/n) 
+
+After some configuration your codebase is built, and Docker volumes
+(including volumes used by `docker-sync`) according general Skeleton
+structure.
 
 Drupal should also connect to correct database host. This is usually
-done via your site's `settings.php` -file. Skeleton uses `localhost` as
-the database host. `local-docker` uses `db` container, and by default
-credentials `drupal`/`drupal` with database named `drupal` (simple!).
-Example for Drupal 8:
+done via your site's `settings.php` -file. Where Skeleton may use
+`localhost` as the database host. `local-docker` uses `db` container,
+and by default credentials `drupal`/`drupal` with database named
+`drupal` (simple!). Example for Drupal 8:
 
         <?php 
           $databases['default']['default'] = [
@@ -186,6 +191,10 @@ Example for Drupal 8:
             'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
             'driver' => 'mysql',
           ];
+
+However, editing `settings.php` manually for database connection is
+usually necessary only if you are applying `local-docker` on top of an
+existing Skeleton -project.
 
 ### Daily usage
 

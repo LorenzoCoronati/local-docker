@@ -274,10 +274,7 @@ case "$ACTION" in
         docker-sync start
     fi
     # Use verbose output on this composer command.
-    TMP_FOLDER=/tmp/composer_temp_$(date +%s)
-    COMPOSER_INIT="composer -vv create-project drupal-composer/drupal-project:8.x-dev $TMP_FOLDER --no-interaction --stability=dev"
-    COMPOSER_MOVE="cp -rf $TMP_FOLDER/* /var/www"
-    COMPOSER_CLEAN="rm -rf $TMP_FOLDER"
+    COMPOSER_INIT="composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev"
     docker-compose -f $DOCKER_COMPOSER_FILE up -d php
     OK=$?
     if [ "$OK" -ne "0" ]; then
@@ -286,21 +283,14 @@ case "$ACTION" in
         exit 1
     fi
 
+    echo "============="
     echo "Next: $COMPOSER_INIT"
-    echo "Then: $COMPOSER_MOVE"
-    echo "Finally: $COMPOSER_CLEAN"
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c "$COMPOSER_INIT; $COMPOSER_MOVE; $COMPOSER_CLEAN"
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c "$COMPOSER_INIT"
     echo "============="
-    echo "Project created and copied to /var/www"
-    echo "============="
-    echo "Creating some folder to project created and copied to /var/www"
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -d "config/sync" ]] &&  mkdir -vp config/sync'
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -w "web/sites/default/files" ]] &&  chmod -r 0777 web/sites/default/files'
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -w "web/sites/default/settings.php" ]] && chmod -r 0777 web/sites/default/settings.php'
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'mkdir -vp ./web/modules/custom && mkdir -vp ./web/themes/custom'
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/modules/custom/.gitkeep'
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/themes/custom/.gitkeep'
-    echo 'Drupal 8 codebase built. Drupal is in ./drupal -folder, and public webroot in ./drupal/web/index.php.'
+    echo "Project created to app/ -folder (/var/www in container)"
+    # This must be run after composer install.
+    $SCRIPT_NAME drupal-structure-fix
+    echo 'Drupal 8 codebase built. Drupal is in ./app -folder, and public webroot in ./app/web/index.php.'
     sleep 1
     echo 'Bringing the containers up now... Please wait.'
     $SCRIPT_NAME up
@@ -309,6 +299,18 @@ case "$ACTION" in
     sleep 1
     echo 'Happy coding!'
    ;;
+
+"drupal-structure-fix")
+    echo "============="
+    echo "Creating some folders to project below /var/www"
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -d "config/sync" ]] &&  mkdir -vp config/sync'
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -w "web/sites/default/files" ]] &&  chmod -r 0777 web/sites/default/files'
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/files\"") ]; then echo "web/sites/default/files is writable - GREAT!"; else chmod -v a+wx web/sites/default/files; fi'
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/settings.php\"") ]; then echo "web/sites/default/settings.php is writable - GREAT!"; else chmod -v a+w web/sites/default/settings.php; fi'
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'mkdir -vp ./web/modules/custom && mkdir -vp ./web/themes/custom'
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/modules/custom/.gitkeep'
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/themes/custom/.gitkeep'
+    ;;
 
 "restart")
     $SCRIPT_NAME down

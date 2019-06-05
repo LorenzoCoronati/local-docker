@@ -297,6 +297,12 @@ case "$ACTION" in
     sleep 1
     echo 'No errors, all good.'
     sleep 1
+    echo "After you have installed (or restored) Drupal, you can remove write perms in sites/default -folder with:"
+    echo "docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'chmod -v 0755 web/sites/default'"
+    echo "docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
+    echo "With these changes you can edit settings.php from host, but Drupal is happy not to be allowed to write there."
+    echo
+    sleep 1
     echo 'Happy coding!'
    ;;
 
@@ -357,7 +363,7 @@ case "$ACTION" in
     done;
 
      echo "Renaming volumes to '$PROJECTNAME' for docker-sync, please wait..."
-     replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKERSYNC_FILE
+     replace_in_file "s/webroot-sync/$PROJECTNAME""-sHappy coding!ync/g" $DOCKERSYNC_FILE
      replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKER_COMPOSER_FILE
      echo 'Done. You can now (re)start your project:'
      echo "$SCRIPT_NAME init - installs Drupal 8 codebase if not present"

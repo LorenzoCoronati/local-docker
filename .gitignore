@@ -2,6 +2,5 @@
 .idea
 .docker-sync
 
-# Ignore locations filled by composer create-project.
-drupal/*
-!drupal/.gitkeep
+# Ignore locations filled by composer create-project are set by drupal-project.
+# See app/.gitignore

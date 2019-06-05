@@ -4,9 +4,9 @@
 
 This is a template for local development, mainly targeted for Drupal.
 
-In short: Drupal's all PHP lives in `./drupal` -folder, and index.php -
-the docroot - is in `./drupal/web/index.php` -folder. Composer, Drush
-and Drupal console can be used within `php` -containers shell:
+In short: Drupal's all PHP lives in `./app` -folder, and index.php - the
+docroot - is in `./app/web/index.php` -folder. Composer, Drush and
+Drupal console should be used within `php` -container:
 
         # on host
         $ docker-compose exec php bash
@@ -59,7 +59,22 @@ without no arguments gives you command list.
 
 ### Start using local-docker
 
-Copy all of this repository on top of your current project. 
+This tool can be used both as a base for new Drupal 8 projects and as a
+local development tool for Skeleton based projects (known by Exove
+developers).
+
+#### New project
+Clone this repository as your project folder, remove .git -folder and
+launch the setup:
+
+        $ git clone git@github.com:Exove/local-docker.git my-project
+        $ cd my-project
+        $ rm -rf .git
+        $ ./ld init
+
+#### Existing project
+ 
+Copy all of this repository on top of your current project.
 
         db_dumps/
         docker/

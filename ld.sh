@@ -292,6 +292,9 @@ case "$ACTION" in
     echo "Project created and copied to /var/www"
     echo "============="
     echo "Creating some folder to project created and copied to /var/www"
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -d "config/sync" ]] &&  mkdir -vp config/sync'
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -w "web/sites/default/files" ]] &&  chmod -r 0777 web/sites/default/files'
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -w "web/sites/default/settings.php" ]] && chmod -r 0777 web/sites/default/settings.php'
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'mkdir -vp ./web/modules/custom && mkdir -vp ./web/themes/custom'
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/modules/custom/.gitkeep'
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/themes/custom/.gitkeep'

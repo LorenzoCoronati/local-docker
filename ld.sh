@@ -279,8 +279,8 @@ case "$ACTION" in
     docker-compose -f $DOCKER_COMPOSER_FILE up -d php
     OK=$?
     if [ "$OK" -ne "0" ]; then
-        echo 'Something went wrong when bringing the project back."
-        echo "Check that required ports are not allocated (by other containers or programs) and re-configure them if needed.'
+        echo "ERROR: Something went wrong when initializing the codebase."
+        echo "Check that required ports are not allocated (by other containers or programs) and re-configure them if needed."
         exit 1
     fi
 

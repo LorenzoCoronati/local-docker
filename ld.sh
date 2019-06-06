@@ -52,8 +52,9 @@ find_db_container() {
 is_dockersync() {
     if [ -z "$(which docker-sync)" ] || [ ! -f "$DOCKERSYNC_FILE" ]; then
         echo 0
+    else
+        echo 1
     fi
-    echo 1
 }
 
 IS_DOCKERSYNC=$(is_dockersync)

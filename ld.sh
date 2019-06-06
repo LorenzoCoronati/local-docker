@@ -310,6 +310,7 @@ case "$ACTION" in
     echo "============="
     echo "Creating some folders to project below /var/www"
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -d "config/sync" ]] &&  mkdir -vp config/sync'
+    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -d "web/sites/default/files" ]] &&  mkdir -vp web/sites/default/files'
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -w "web/sites/default/files" ]] &&  chmod -r 0777 web/sites/default/files'
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/files\"") ]; then echo "web/sites/default/files is writable - GREAT!"; else chmod -v a+wx web/sites/default/files; fi'
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/settings.php\"") ]; then echo "web/sites/default/settings.php is writable - GREAT!"; else chmod -v a+w web/sites/default/settings.php; fi'

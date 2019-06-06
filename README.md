@@ -1,6 +1,6 @@
 # Local-docker
 
-**NEVER EVER EVER USE THESE `docker-compse*.yml` FILES IN PRODUCTION**.
+**NEVER EVER EVER USE THESE `docker-compose*.yml` FILES IN PRODUCTION**.
 
 This is a template for local development, mainly targeted for Drupal.
 
@@ -32,7 +32,7 @@ You may have the Docker already installed, in which case
 
 Behind scenes `local-docker` uses Docker. Recipe of what is launched is
 in `docker-compose.yml` (or for the DEVELOPMENT server
-`docker-comopose.dev-vm.yml`).
+`docker-compose.dev-vm.yml`).
 
 To overcome the known technical limitations (ie. nerve wrecking local
 drupal site slowness) `docker-sync` is being used. It sets up
@@ -135,7 +135,7 @@ sane. Safe IP address ranges are `10.` and `192.168.*`.
 
     (Important line is **`inet 10.10.10.10...`**).
 
-2.  Add your desired hostanames to `/etc/hosts` with IP addresses.
+2.  Add your desired (local) domains to `/etc/hosts` with IP addresses.
 
         #######################################################
         ##############  PROJECT NAME    #######################
@@ -178,7 +178,7 @@ database, you can
 
 If you are applying Local-docker on a Skeleton based project start by
 copying all things mentioned in "Start using local-docker" -section on
-top of yur project repository. 
+top of your project repository. 
 
 When initial setup asks about Skeleton, answer `y`.
 
@@ -218,7 +218,7 @@ Behind the scenes script starts and stops files syncing and containers.
 
 More importantly using it helps you to not delete database by mistake,
 but executes (and restores) database backups in `db_dumps/` -folder,
-keeping most recent as the restoreable dump. 
+keeping most recent as the restorable dump. 
 
 #### Initial start
 
@@ -449,13 +449,10 @@ resets everything else but Docker configuration.
 
 `mkmf.rb can't find header files for ruby at /System/Library/Frameworks/Ruby.framework/Versions/2.3/usr/lib/ruby/include/ruby.h`
 
-You have probably updated Xcode but have not yet approved a new license?
+You have probably updated Xcode or Command Line Tools but have not yet
+approved a new license.
 
-**Solution**: Start Xdoce (UI application) and approve the license, and
-try again. Ootionally you can achieve the same via command line with
-less downloads for you Xcode:
-
-        $ xcode-select --install
+**Solution** 
 
 After initial Command Line Tools installation and updates may need to
 accept the license. You can do this using this command (and agreeing
@@ -463,9 +460,14 @@ with the EULA):
 
          $ sudo xcodebuild -license
 
-        
-If you get an error like this: `xcode-select: error: tool
-'xcodebuild'requires Xcode, but active developer directory
+Another option is to start Xdoce, approve the license and try again.
+Optionally you can achieve the same via command line with less downloads
+for you Xcode:
+
+        $ xcode-select --install
+
+If you get this error: `xcode-select: error: tool 'xcodebuild' requires
+Xcode, but active developer directory
 '/Library/Developer/CommandLineTools' is a command line tools instance`
 you should also reset the command line tools path with
  

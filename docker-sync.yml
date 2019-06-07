@@ -34,7 +34,7 @@ syncs:
     # be aware in case of unison this only gives you a notification on the initial sync, not the syncs after changes.
     notify_terminal: true
 
-  local-docker-sync-core-delegated:
+  webroot-sync-core-delegated:
     sync_strategy: 'native_osx'
     src: './app/'
 

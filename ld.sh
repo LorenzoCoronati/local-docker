@@ -39,6 +39,10 @@ if [ ! -f "$DOCKER_COMPOSER_FILE" ]; then
   exit 1
 fi
 
+if [ -z "$(which docker)" ]; then
+  echo "Docker is not running. Docker is required to use local-docker."
+  exit 1
+fi
 
 find_db_container() {
     TMP_NAME=$DOCKER_PROJECT"_"$CONTAINER_DB

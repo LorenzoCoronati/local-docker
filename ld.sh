@@ -52,8 +52,9 @@ find_db_container() {
 is_dockersync() {
     if [ -z "$(which docker-sync)" ] || [ ! -f "$DOCKERSYNC_FILE" ]; then
         echo 0
+    else
+        echo 1
     fi
-    echo 1
 }
 
 IS_DOCKERSYNC=$(is_dockersync)
@@ -131,7 +132,7 @@ case "$ACTION" in
   echo "Stopping containers (volumes and content intact)"
   echo "No backup of database content created."
   docker-compose -f $DOCKER_COMPOSER_FILE stop
-  if [ $IS_DOCKERSYNC -eq "1" ]; then
+  if [ "$IS_DOCKERSYNC" -eq "1" ]; then
     docker-sync clean
   fi
   ;;
@@ -263,7 +264,7 @@ case "$ACTION" in
       echo "Maybe you should install composer codebase instead:"
       echo $SCRIPT_NAME up && $SCRIPT_NAME composer install
       exit 1
-    elif [ ! -d $APP_ROOT ]; then
+    elif [ ! -d "$APP_ROOT" ]; then
       mkdir $APP_ROOT;
     fi
     echo
@@ -343,7 +344,7 @@ case "$ACTION" in
     ;;
 
 "rename-volumes")
-    if [ $IS_DOCKERSYNC -eq "1" ]; then
+    if [ "$IS_DOCKERSYNC" -eq "1" ]; then
         echo 'Turning off docker-sync, please wait...'
         docker-sync clean
     fi

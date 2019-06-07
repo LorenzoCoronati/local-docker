@@ -354,7 +354,7 @@ case "$ACTION" in
         if [ -z "$PROJECTNAME" ]; then
             PROJECTNAME=$DEFAULT
             VALID=1
-        elif [[ $PROJECTNAME =~ ^[0-9a-z\-\_]$ ]]; then
+        elif [[ $PROJECTNAME =~ ^[a-z0-9]([a-z0-9-_]*[^-_])?$ ]]; then
             VALID=1
         else
             echo 'ERROR: Project name can contain only alphabetic characters (a-z), numbers (0-9), underscore (_) and hyphen (-).'

@@ -359,6 +359,7 @@ case "$ACTION" in
             VALID=1
         else
             echo 'ERROR: Project name can contain only alphabetic characters (a-z), numbers (0-9), underscore (_) and hyphen (-).'
+            echo 'ERROR: Also the project name must not start or end with underscore or hyphen.'
             sleep 2
             echo
         fi

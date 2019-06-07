@@ -321,6 +321,14 @@ In depth information can be found in
 -   <https://gist.github.com/ralphschindler/535dc5916ccbd06f53c1b0ee5a868c93> and
 -   <https://www.ashsmith.io/docker/get-xdebug-working-with-docker-for-mac/>
 
+#### Convenience alias
+
+If you find the `./` prefix tedious when using ld, you could add the following
+alias to your shell startup files. In order to not interfere with `/usr/bin/ld`,
+`ld` as alias should be avoided.
+
+    alias lld='if [[ -x "$(pwd)/ld.sh" ]] ; then "$(pwd)/ld.sh"; fi'
+
 ### Launch a new project
 
 `./ld init` creates a drupal-project for you out-of-the-box (this will

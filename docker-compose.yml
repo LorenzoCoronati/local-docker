@@ -25,8 +25,6 @@ services:
     # Custom build contains sendmail_path -fix for Mailhog and OPTION to add
     # overrides (per project) to other PHP config.
     build: ./docker/build/php/7.2
-    ports:
-      - "9010:9000" # xdebug
     volumes:
       # :nocopy must be used with docker-sync
       # See bottom of this file, and ./docker-sync.yml

@@ -3,3 +3,16 @@ alias ls='ls -F'
 alias ll='ls -lha'
 alias drupal=/var/www/vendor/drupal/console/bin/drupal
 alias drush=/var/www/vendor/drush/drush/drush
+
+echo
+echo "Welcome to PHP container!!"
+echo
+echoHP version is $(php -r "print PHP_VERSION;")"
+echo
+echo "Time in this container is $(date +%Y-%m-%d\ %H\:\%M\:%S\ %z\ \(%Z\))."
+echo
+echo "Drush and Drupal console are aliased, so you can use them from wherever you like."
+echo "$ $(alias drush)"
+echo "$ $(alias drupal)"
+echo
+echo "Happy coding!"

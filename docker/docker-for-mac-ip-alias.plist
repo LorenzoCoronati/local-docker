@@ -2,7 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 
 <!-- @see https://gist.github.com/ralphschindler/535dc5916ccbd06f53c1b0ee5a868c93 -->
-<!-- @see https://www.ashsmith.io/docker/get-xdebug-working-with-docker-for-mac/ -->
 
 <!-- HOWTO -INFO
 For Docker For Mac -users use this file as launcher to make sure
@@ -10,19 +9,11 @@ your Docker has always one fixed public address.
 
 1. Copy this file
 
-  $ sudo cp PROJECT_ROOT/docker/docker-for-mac-ip-alias.plist /Library/LaunchDaemons/com.exove.net.docker_192-168-10-10_alias.plist
+  $ sudo cp PROJECT_ROOT/docker/docker-for-mac-ip-alias.plist /Library/LaunchDaemons/com.exove.net.docker_10-10-10-10_alias.plist
 
 2. Run this:
 
-  $ launchctl load /Library/LaunchDaemons/com.exove.net.docker_192-168-10-10_alias.plist
-
-3. Now you can connect to Docker stack using IP 10.10.10.10
-  - for Xdebug configuration use
-```
-xdebug.remote_enable = 1
-xdebug.remote_port = 9000
-xdebug.remote_host= 10.10.10.10
-```
+  $ launchctl load /Library/LaunchDaemons/com.exove.net.docker_10-10-10-10_alias.plist
 -->
 <plist version="1.0">
   <dict>

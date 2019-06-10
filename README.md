@@ -99,7 +99,7 @@ If you are applying `local-docker` on a Skeleton -based project, see
 ### Local IP address and domains
 
 This is not needed unless you wish to use a local domain (ie. type
-something other than IP address 0.0.0.0 in your browser) or use Xdebug.
+something other than IP address 0.0.0.0 in your browser).
 
 Use custom IP alias per project to keep your own `/etc/hosts` -file
 sane. Safe IP address ranges are `10.` and `192.168.*`.
@@ -300,26 +300,30 @@ You can expose nodejs container logs with:
 
 #### Xdebug
 
-`php` -container has Xdebug up and running. You should be able to
-connect from you IDE to Xdebug using this configuration:
+`php` -container has Xdebug up and running. `php` tries to connect to
+IDE's Xdebug server on port `9000` when any PHP is executed:
 
     xdebug.remote_enable = 1
-    ; php-container's *INTERNAL* port
-    xdebug.remote_port = 9000
-    ; Loopback alias IP:
-    xdebug.remote_host = 10.10.10.10
+    xdebug.remote_port = 9010
+    ; Docker for Desktop (on OSX at least) maps host.docker.internal to
+    ; host machine. 
+    xdebug.remote_host = host.docker.internal
 
-This Xdebug configuration is set in
-[`./docker/docker-for-mac-ip-alias.plist`](./docker/docker-for-mac-ip-alias.plist)
--file, and all Xdebug's config can be checked either from Drupal
+Port `9010` is being used to avoid collision with possible php-fpm
+running on the host on port `9000`.
+
+This Xdebug configuration is initially set
+in the base image this project is using (`xoxoxo/php-container`).
+However this can be overridden for example in
+[95-drupal-development.ini -file (PHP 7.2)](./docker/build/php7.2//conf.d/95-drupal-development.ini)
+, and Xdebug's active config can be checked either from Drupal
 (`admin/reports/status/php`) or with command
 
     $ docker-compose exec php sh -c 'exec /usr/local/bin/php -i |grep xdebug'
 
-In depth information can be found in
-
--   <https://gist.github.com/ralphschindler/535dc5916ccbd06f53c1b0ee5a868c93> and
--   <https://www.ashsmith.io/docker/get-xdebug-working-with-docker-for-mac/>
+**Note:** You should set your IDE to use port `9010` for Xdebug in order
+for IDE to setup a Xdebug listener to the port Xdebug is trying to
+connect to on your host. 
 
 #### Convenience alias
 
@@ -363,7 +367,6 @@ allows access to `nginx` from host via port `8080`.
 Docker exposes different services via IP address `0.0.0.0` to allow access to them via all host machine IPs (_right now_ is the time to turn on your firewall if it is not yet enabled). Currently exposed services include:
 
 -   **Nginx** ports 80, 443
--   PHP/**Xdebug** port 9010/9000 \*)
 -   **Adminer** port 8080 - manage databases via UI, host: `db`, user `root`, password `root_password`
 -   **MySQL** port 3306 - manage databases, execute
     `$ docker-compose exec db sh -c 'mysql -h db -uroot -proot_password'`
@@ -387,8 +390,6 @@ Docker's internal networking. Containers connect between each other by
 IP addresses, which are automatically resolved using container aliases
 (see service names in
 [`docker-compose.yml -file`](./docker-compose.yml)).
-
-\*) See "Xdebug" -section for more info.
 
 ## Customize ld -script variables
 

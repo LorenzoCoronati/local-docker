@@ -131,151 +131,6 @@ replace_in_file () {
 
 
 case "$ACTION" in
-"dump")
-    db_connect
-    CONN=$?
-    if [ "$CONN" -ne "0" ]; then
-        exit 1
-    fi
-
-  echo "Using datestamp: $DATE"
-  DUMPER="mysqldump --host db -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --dump-date --tz-utc --verbose"
-  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$DUMPER  2>/dev/null | gzip --fast -f > /var/db_dumps/db-container-dump-$DATE.sql.gz"
-  cd $CWD/db_dumps
-  ln -sf db-container-dump-$DATE.sql.gz db-container-dump-LATEST.sql.gz
-  cd $CWD
-  echo "DB backup in db_dumps/db-container-dump-$DATE.sql.gz"
-  echo "DB backup symlink: db_dumps/db-container-dump-LATEST.sql.gz"
-  ;;
-
-"down")
-  $SCRIPT_NAME dump
-  CONN=$?
-  if [ "$CONN" -ne "0" ]; then
-    exit 1
-  fi
-  docker-compose -f $DOCKER_COMPOSE_FILE  down
-  if [ "$IS_DOCKERSYNC" -eq "1" ]; then
-    docker-sync clean
-  fi
-  ;;
-
-"stop")
-  echo "Stopping containers (volumes and content intact)"
-  echo "No backup of database content created."
-  docker-compose -f $DOCKER_COMPOSE_FILE stop
-  if [ "$IS_DOCKERSYNC" -eq "1" ]; then
-    docker-sync clean
-  fi
-  ;;
-
-"restore")
-    if [ ! -e "db_dumps/db-container-dump-LATEST.sql.gz" ]; then
-        echo
-        echo "********************************************************************************************"
-        echo "** Dump file missing! Create a symlin to your DB backup file:                             **"
-        echo "** ln -s PATH/TO/GZIPPED/MYSQLDUMP/FILE.sql.gz ./db_dumps/db-container-dump-LATEST.sql.gz **"
-        echo "********************************************************************************************"
-        exit 1
-    fi
-
-    db_connect
-    CONN=$?
-
-    if [ "$CONN" -ne 0 ]; then
-        echo "Oww... DB container is not up, even after a few retries. Exiting..."
-        exit 2
-    fi
-
-    echo "Restoring state with DB dump."
-
-  echo
-  echo 'Databases *before* the restore:'
-  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
-  echo
-  echo 'Restoring db...'
-  echo -n "DB backup used: db_dumps/db-container-dump-LATEST.sql.gz => "
-  echo $(readlink db_dumps/db-container-dump-LATEST.sql.gz)
-  echo "[This may take some time...]"
-  RESTORER="gunzip < /var/db_dumps/db-container-dump-LATEST.sql.gz | mysql --host db -uroot -p"$MYSQL_ROOT_PASSWORD""
-  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORER 2>/dev/null"
-  echo
-  echo 'Databases after the restore:'
-  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
-  echo 'Users after the restore:'
-  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$USERS 2>/dev/null"
-  ;;
-
-"up")
-  if [ "$IS_DOCKERSYNC" -eq "1" ]; then
-    docker-sync start
-  fi
-  docker-compose -f $DOCKER_COMPOSE_FILE up -d
-  OK=$?
-  if [ "$OK" -ne "0" ]; then
-    echo
-    echo "ERROR: Something went wrong when bringing the project up."
-    echo "Check that required ports are not allocated (by other containers or programs) and re-configure them if needed."
-    exit 1
-  fi
-
-  db_connect
-  CONN=$?
-
-  if [ "$CONN" -ne 0 ]; then
-    echo "Oww... DB container is not up, even after a few retries."
-    exit 1
-  fi
-
-  echo
-  echo 'Current databases:'
-  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
-  echo 'Current database users:'
-  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$USERS 2>/dev/null"
-  echo 'No DB content restoration done.'
-  echo 'In case you need to do that (Drupal DB is gone?),'
-  echo '1) check your symlink target in db_dumps/db-container-dump-LATEST.sql.gz'
-  echo '2) execute the following command:'
-  echo $SCRIPT_NAME restore
-  ;;
-
-"rebuild")
-    $SCRIPT_NAME down 2&>/dev/null
-    # Return value is not important here.
-    docker-compose -f $DOCKER_COMPOSE_FILE build
-    $SCRIPT_NAME up
-    $SCRIPT_NAME restore
-    ;;
-
-"nuke-volumes")
-    echo " "
-    echo " *************************"
-    echo " ******   WARNING ********"
-    echo " *************************"
-    echo " "
-    echo " ALL volumes localbase* will be destroyed permanently in 5 secs."
-    WAIT=5
-    while [ $WAIT -gt 0 ]; do
-        echo -n "$WAIT ... "
-        ((WAIT--))
-        sleep 1
-    done
-    echo
-    docker-compose -f $DOCKER_COMPOSE_FILE down
-    if [ "$IS_DOCKERSYNC" -eq "1" ]; then
-        docker-sync clean
-    fi
-    for VOL in $(docker volume ls --filter="name=localbase*" -q); do
-        echo "Handling volume: $VOL"
-        for CONT in $(docker ps --filter volume=$VOL -q); do
-            echo "Kill container : $CONT "
-            docker -v kill $CONT
-        done
-        echo "Removing volume: $VOL"
-        docker -v volume rm -f $VOL
-    done
-    ;;
-
 "init")
     # Suggest Skeleton cleanup only when it is relevant.
     APP_ROOT='app/'
@@ -346,17 +201,66 @@ case "$ACTION" in
     echo 'Happy coding!'
    ;;
 
-"drupal-structure-fix")
-    echo "============="
-    echo "Creating some folders to project below /var/www"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c '[[ ! -d "config/sync" ]] &&  mkdir -vp config/sync'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c '[[ ! -d "web/sites/default/files" ]] &&  mkdir -vp web/sites/default/files'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c '[[ ! -w "web/sites/default/files" ]] &&  chmod -r 0777 web/sites/default/files'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/files\"") ]; then echo "web/sites/default/files is writable - GREAT!"; else chmod -v a+wx web/sites/default/files; fi'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/settings.php\"") ]; then echo "web/sites/default/settings.php is writable - GREAT!"; else chmod -v a+w web/sites/default/settings.php; fi'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'mkdir -vp ./web/modules/custom && mkdir -vp ./web/themes/custom'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'echo > ./web/modules/custom/.gitkeep'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'echo > ./web/themes/custom/.gitkeep'
+"up")
+  if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+    docker-sync start
+  fi
+  docker-compose -f $DOCKER_COMPOSE_FILE up -d
+  OK=$?
+  if [ "$OK" -ne "0" ]; then
+    echo
+    echo "ERROR: Something went wrong when bringing the project up."
+    echo "Check that required ports are not allocated (by other containers or programs) and re-configure them if needed."
+    exit 1
+  fi
+
+  db_connect
+  CONN=$?
+
+  if [ "$CONN" -ne 0 ]; then
+    echo "Oww... DB container is not up, even after a few retries."
+    exit 1
+  fi
+
+  echo
+  echo 'Current databases:'
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
+  echo 'Current database users:'
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$USERS 2>/dev/null"
+  echo 'No DB content restoration done.'
+  echo 'In case you need to do that (Drupal DB is gone?),'
+  echo '1) check your symlink target in db_dumps/db-container-dump-LATEST.sql.gz'
+  echo '2) execute the following command:'
+  echo $SCRIPT_NAME restore
+  ;;
+
+"down")
+  $SCRIPT_NAME dump
+  CONN=$?
+  if [ "$CONN" -ne "0" ]; then
+    exit 1
+  fi
+  docker-compose -f $DOCKER_COMPOSE_FILE  down
+  if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+    docker-sync clean
+  fi
+  ;;
+
+"stop")
+  echo "Stopping containers (volumes and content intact)"
+  echo "No backup of database content created."
+  docker-compose -f $DOCKER_COMPOSE_FILE stop
+  if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+    docker-sync clean
+  fi
+  ;;
+
+"rebuild")
+    $SCRIPT_NAME down 2&>/dev/null
+    # Return value is not important here.
+    docker-compose -f $DOCKER_COMPOSE_FILE build
+    $SCRIPT_NAME up
+    $SCRIPT_NAME restore
     ;;
 
 "restart")
@@ -370,6 +274,60 @@ case "$ACTION" in
     $SCRIPT_NAME restore
     ;;
 
+"dump")
+    db_connect
+    CONN=$?
+    if [ "$CONN" -ne "0" ]; then
+        exit 1
+    fi
+
+  echo "Using datestamp: $DATE"
+  DUMPER="mysqldump --host db -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --dump-date --tz-utc --verbose"
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$DUMPER  2>/dev/null | gzip --fast -f > /var/db_dumps/db-container-dump-$DATE.sql.gz"
+  cd $CWD/db_dumps
+  ln -sf db-container-dump-$DATE.sql.gz db-container-dump-LATEST.sql.gz
+  cd $CWD
+  echo "DB backup in db_dumps/db-container-dump-$DATE.sql.gz"
+  echo "DB backup symlink: db_dumps/db-container-dump-LATEST.sql.gz"
+  ;;
+
+"restore")
+    if [ ! -e "db_dumps/db-container-dump-LATEST.sql.gz" ]; then
+        echo
+        echo "********************************************************************************************"
+        echo "** Dump file missing! Create a symlin to your DB backup file:                             **"
+        echo "** ln -s PATH/TO/GZIPPED/MYSQLDUMP/FILE.sql.gz ./db_dumps/db-container-dump-LATEST.sql.gz **"
+        echo "********************************************************************************************"
+        exit 1
+    fi
+
+    db_connect
+    CONN=$?
+
+    if [ "$CONN" -ne 0 ]; then
+        echo "Oww... DB container is not up, even after a few retries. Exiting..."
+        exit 2
+    fi
+
+    echo "Restoring state with DB dump."
+
+  echo
+  echo 'Databases *before* the restore:'
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
+  echo
+  echo 'Restoring db...'
+  echo -n "DB backup used: db_dumps/db-container-dump-LATEST.sql.gz => "
+  echo $(readlink db_dumps/db-container-dump-LATEST.sql.gz)
+  echo "[This may take some time...]"
+  RESTORER="gunzip < /var/db_dumps/db-container-dump-LATEST.sql.gz | mysql --host db -uroot -p"$MYSQL_ROOT_PASSWORD""
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORER 2>/dev/null"
+  echo
+  echo 'Databases after the restore:'
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
+  echo 'Users after the restore:'
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$USERS 2>/dev/null"
+  ;;
+
 "composer")
     CONTAINER_PHP_ID=$CONTAINER_PHP
     if [ ! -z "$CONTAINER_PHP_ID" ]; then
@@ -380,6 +338,48 @@ case "$ACTION" in
     else
         echo "PHP container is not up"
     fi
+    ;;
+
+"nuke-volumes")
+    echo " "
+    echo " *************************"
+    echo " ******   WARNING ********"
+    echo " *************************"
+    echo " "
+    echo " ALL volumes localbase* will be destroyed permanently in 5 secs."
+    WAIT=5
+    while [ $WAIT -gt 0 ]; do
+        echo -n "$WAIT ... "
+        ((WAIT--))
+        sleep 1
+    done
+    echo
+    docker-compose -f $DOCKER_COMPOSE_FILE down
+    if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+        docker-sync clean
+    fi
+    for VOL in $(docker volume ls --filter="name=localbase*" -q); do
+        echo "Handling volume: $VOL"
+        for CONT in $(docker ps --filter volume=$VOL -q); do
+            echo "Kill container : $CONT "
+            docker -v kill $CONT
+        done
+        echo "Removing volume: $VOL"
+        docker -v volume rm -f $VOL
+    done
+    ;;
+
+"drupal-structure-fix")
+    echo "============="
+    echo "Creating some folders to project below /var/www"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c '[[ ! -d "config/sync" ]] &&  mkdir -vp config/sync'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c '[[ ! -d "web/sites/default/files" ]] &&  mkdir -vp web/sites/default/files'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c '[[ ! -w "web/sites/default/files" ]] &&  chmod -r 0777 web/sites/default/files'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/files\"") ]; then echo "web/sites/default/files is writable - GREAT!"; else chmod -v a+wx web/sites/default/files; fi'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/settings.php\"") ]; then echo "web/sites/default/settings.php is writable - GREAT!"; else chmod -v a+w web/sites/default/settings.php; fi'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'mkdir -vp ./web/modules/custom && mkdir -vp ./web/themes/custom'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'echo > ./web/modules/custom/.gitkeep'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'echo > ./web/themes/custom/.gitkeep'
     ;;
 
 "rename-volumes")

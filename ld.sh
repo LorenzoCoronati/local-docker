@@ -251,7 +251,7 @@ case "$ACTION" in
   echo "No backup of database content created."
   docker-compose -f $DOCKER_COMPOSE_FILE stop
   if [ "$IS_DOCKERSYNC" -eq "1" ]; then
-    docker-sync clean
+    docker-sync stop
   fi
   ;;
 

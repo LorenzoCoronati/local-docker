@@ -4,8 +4,9 @@
 ACTION=${1-'help'}
 
 # Use fixed name, since docker-sync is supposed to be locally only.
-DOCKERSYNC_FILE="./docker-sync.yml"
+DOCKERSYNC_FILE="docker-sync.yml"
 DOCKER_COMPOSER_FILE='docker-compose.yml';
+DOCKER_YML_STORAGE="./docker"
 
 CWD=$(pwd)
 DOCKER_PROJECT=$(basename $CWD)
@@ -33,10 +34,12 @@ else
     SCRIPT_NAME="./"$( basename "$0" .sh)
 fi
 
-
 if [ ! -f "$DOCKER_COMPOSER_FILE" ]; then
-  echo "docker-compose file not present ($DOCKER_COMPOSER_FILE)"
-  exit 1
+    echo '$ACTION' is $ACTION
+    if [[ "$ACTION" -ne 'init' ]] && [[ "$ACTION" -ne 'help' ]]; then
+        echo "Starting to initialise local-docker, please wait..."
+        $SCRIPT_NAME init
+    fi
 fi
 
 if [ -z "$(which docker)" ]; then
@@ -54,10 +57,35 @@ find_db_container() {
 }
 
 is_dockersync() {
-    if [ -z "$(which docker-sync)" ] || [ ! -f "$DOCKERSYNC_FILE" ]; then
+    if [ -z "$(which docker-sync)" ] || [ ! -f "./$DOCKERSYNC_FILE" ]; then
         echo 0
     else
         echo 1
+    fi
+}
+
+# Copy conf of your choosing to proejct root, destroy leftovers.
+# Usage
+#   yml_move
+#   yml_move skeleton
+yml_move() {
+    MODE=${1-'common'}
+    echo "MODE: $MODE"
+    if [ -f "$DOCKER_YML_STORAGE/docker-compose.$MODE.yml" ]; then
+        echo "Using $DOCKER_YML_STORAGE/docker-compose.$MODE.yml as the docker-compose recipe."
+        echo "Moving file to project root."
+        mv -v $DOCKER_YML_STORAGE/docker-compose.$MODE.yml ./$DOCKER_COMPOSER_FILE
+        echo "Removing files:"
+        ls $DOCKER_YML_STORAGE/docker-compose.*.yml
+        rm -f "$DOCKER_YML_STORAGE/docker-compose.*.yml"
+    fi
+    if [ -f "$DOCKER_YML_STORAGE/docker-sync.$MODE.yml" ]; then
+        echo "Using $DOCKER_YML_STORAGE/docker-sync.$MODE.yml as the docker-sync recipe."
+        echo "Moving file to project root."
+        mv -v $DOCKER_YML_STORAGE/docker-sync.$MODE.yml ./$DOCKERSYNC_FILE
+        echo "Removing files:"
+        ls $DOCKER_YML_STORAGE/docker-sync.*.yml
+        rm -f "$DOCKER_YML_STORAGE/docker-sync.*.yml"
     fi
 }
 
@@ -251,30 +279,34 @@ case "$ACTION" in
 "init")
     # Suggest Skeleton cleanup only when it is relevant.
     APP_ROOT='app/'
-    if [ -e "docker-sync.skeleton.yml" ] || [ -e "docker-compose.skeleton.yml" ]; then
-        read -p "Is this a Skeleton -project? (y/n)" CHOISE
+    if [ ! -e "docker-sync.yml" ] || [ ! -e "docker-compose.yml" ]; then
+        echo "Copying Docker compose/sync files. What is project type? "
+        echo " [0] New project, application built in ./$APP_ROOT -folder "
+        #echo " [1] Old project, application built in ./$APP_ROOT -folder "
+        echo " [2] Skeleton -proejct. Drupal in drupal/ and custom code spread in src/ folder."
+        read -p "Project type: " CHOISE
         case "$CHOISE" in
-            y|Y ) APP_ROOT='drupal/'; $SCRIPT_NAME skeleton-switch;;
-            n|N ) $SCRIPT_NAME skeleton-cleanup;;
+            0|1 ) yml_move ;;
+            2 ) APP_ROOT='drupal/'; yml_move skeleton;;
             * ) echo "ERROR: Unclear answer, exiting" && exit;;
         esac
-        read -p "Use project-name based docker-sync -volumes (recommended)? (y/n)" CHOISE
+        echo "Use project-name based docker-sync -volumes (recommended, default)?"
+        read -p "Yes (y) / No (n) " CHOISE
         case "$CHOISE" in
-            y|Y ) $SCRIPT_NAME rename-volumes;;
+            ''|y|Y|'yes'|'YES' ) $SCRIPT_NAME rename-volumes;;
+            n|N|'no'|'NO' ) echo "Volume names will start with 'webroot-'";;
         esac
     fi
     if [ -e "$APP_ROOT/composer.json" ]; then
       echo "Looks like project is already created? File $APP_ROOT/composer.json exists."
       echo "Maybe you should install composer codebase instead:"
-      echo $SCRIPT_NAME up && $SCRIPT_NAME composer install
+      echo "$SCRIPT_NAME up && $SCRIPT_NAME composer install"
       exit 1
     elif [ ! -d "$APP_ROOT" ]; then
       mkdir $APP_ROOT;
     fi
     echo
-    sleep 3
     echo 'Installing Drupal project, please wait...'
-    sleep 1
     if [ "$IS_DOCKERSYNC" -eq "1" ]; then
         docker-sync start
     fi
@@ -292,17 +324,20 @@ case "$ACTION" in
     echo "Next: $COMPOSER_INIT"
     docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c "$COMPOSER_INIT"
     echo "============="
-    echo "Project created to app/ -folder (/var/www in container)"
+    echo "Project created to ./$APP_ROOT -folder (/var/www in containers)"
     # This must be run after composer install.
     $SCRIPT_NAME drupal-structure-fix
-    echo 'Drupal 8 codebase built. Drupal is in ./app -folder, and public webroot in ./app/web/index.php.'
+    echo "Drupal 8 codebase built. Drupal is in ./$APP_ROOT -folder, and public webroot in ./$APP_ROOT/web/index.php."
     sleep 1
     echo 'Bringing the containers up now... Please wait.'
     $SCRIPT_NAME up
     sleep 1
     echo 'No errors, all good.'
     sleep 1
-    echo "After you have installed (or restored) Drupal, you can remove write perms in sites/default -folder with:"
+    echo
+    echo "Codebase ready!!"
+    echo
+    echo "NOTE: Once Drupal is installed, you should remove write perms in sites/default -folder with:"
     echo "docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'chmod -v 0755 web/sites/default'"
     echo "docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
     echo "With these changes you can edit settings.php from host, but Drupal is happy not to be allowed to write there."
@@ -355,7 +390,8 @@ case "$ACTION" in
     DEFAULT=$(basename $CWD)
     VALID=0
     while [ "$VALID" -eq "0" ]; do
-        read -p "Please give me your project name ([ENTER]: \"$DEFAULT\")? " PROJECTNAME
+        echo "Please give me your project name (\"$DEFAULT\" default)? "
+        read -p "Project name: " PROJECTNAME
         if [ -z "$PROJECTNAME" ]; then
             PROJECTNAME=$DEFAULT
             VALID=1
@@ -370,54 +406,11 @@ case "$ACTION" in
     done;
 
      echo "Renaming volumes to '$PROJECTNAME' for docker-sync, please wait..."
-     replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKERSYNC_FILE
+     replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" ./$DOCKERSYNC_FILE
      replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKER_COMPOSER_FILE
      echo 'Done. You can now (re)start your project:'
      echo "$SCRIPT_NAME init - installs Drupal 8 codebase if not present"
      echo "$SCRIPT_NAME up - boots up this project"
-    ;;
-
-"skeleton-switch")
-    echo "Replacing docker-sync.yml and docker-composer.yml with Skeleton -versions. This will overwrite any changes in your docker-sync.yml and docker-compose.yml."
-    read -p "Continue (y/n)?" CHOISE
-    case "$CHOISE" in
-        y|Y ) echo "Continuing...please wait.";;
-        n|N ) exit;;
-        * ) exit;;
-    esac
-    if [ ! -f "docker-sync.skeleton.yml" ]; then
-      echo "ERROR: Check that docker-sync.skeleton.yml file exists."
-      exit;
-    fi
-    if [ ! -f "docker-compose.skeleton.yml" ]; then
-      echo "ERROR: Check that docker-compose.skeleton.yml file exists."
-      exit;
-    fi
-    rm -f docker-sync.yml 2>/dev/null
-    rm -f docker-compose.yml 2>/dev/null
-    mv docker-sync.skeleton.yml docker-sync.yml
-    mv docker-compose.skeleton.yml docker-compose.yml
-    echo "Done. Consider renaming your docker-sync volumes next:"
-    echo "$SCRIPT_NAME rename-volumes"
-    echo "Don't forget to ensure your database connection is configure properly (host should be 'db', database 'drupal', credentials 'drupal'/'drupal')"
-    ;;
-
-"skeleton-cleanup")
-    echo "Removing docker-sync.skeleton.yml and docker-composer.skeleton.yml."
-    read -p "Continue (y/n)?" CHOISE
-    case "$CHOISE" in
-        y|Y ) echo "Continuing...please wait.";;
-        n|N ) exit;;
-        * ) exit;;
-    esac
-    if [ -f "docker-sync.skeleton.yml" ]; then
-      rm docker-sync.skeleton.yml
-    fi
-    if [ -f "docker-compose.skeleton.yml" ]; then
-      rm docker-compose.skeleton.yml
-    fi
-    echo "Done. Consider renaming your docker-sync volumes next:"
-    echo "$SCRIPT_NAME rename-volumes"
     ;;
 
 *)
@@ -436,8 +429,6 @@ case "$ACTION" in
     echo " - restart: down, up and restore (restarts docker-sync too)"
     echo " - restore: import latest db. Database container must be running."
     echo " - rename-volumes: Rename your local-docker volumes (helps to avoid collisions with other projects)"
-    echo " - skeleton-cleanup: remove config for Skeleton projects"
-    echo " - skeleton-switch: switch config to Skeleton -based structure"
     echo " - stop: stops containers leaving them hanging around (stops docker-sync)"
     echo " - up: brings containers up (starts docker-sync)"
     exit 0

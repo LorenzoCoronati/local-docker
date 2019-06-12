@@ -5,7 +5,7 @@ ACTION=${1-'help'}
 
 # Use fixed name, since docker-sync is supposed to be locally only.
 DOCKERSYNC_FILE="docker-sync.yml"
-DOCKER_COMPOSER_FILE='docker-compose.yml';
+DOCKER_COMPOSE_FILE='docker-compose.yml';
 DOCKER_YML_STORAGE="./docker"
 
 CWD=$(pwd)
@@ -34,7 +34,7 @@ else
     SCRIPT_NAME="./"$( basename "$0" .sh)
 fi
 
-if [ ! -f "$DOCKER_COMPOSER_FILE" ]; then
+if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
     echo '$ACTION' is $ACTION
     if [[ "$ACTION" -ne 'init' ]] && [[ "$ACTION" -ne 'help' ]]; then
         echo "Starting to initialise local-docker, please wait..."
@@ -64,7 +64,7 @@ is_dockersync() {
     fi
 }
 
-# Copy conf of your choosing to proejct root, destroy leftovers.
+# Copy conf of your choosing to project root, destroy leftovers.
 # Usage
 #   yml_move
 #   yml_move skeleton
@@ -74,7 +74,7 @@ yml_move() {
     if [ -f "$DOCKER_YML_STORAGE/docker-compose.$MODE.yml" ]; then
         echo "Using $DOCKER_YML_STORAGE/docker-compose.$MODE.yml as the docker-compose recipe."
         echo "Moving file to project root."
-        mv -v $DOCKER_YML_STORAGE/docker-compose.$MODE.yml ./$DOCKER_COMPOSER_FILE
+        mv -v $DOCKER_YML_STORAGE/docker-compose.$MODE.yml ./$DOCKER_COMPOSE_FILE
         echo "Removing files:"
         ls $DOCKER_YML_STORAGE/docker-compose.*.yml
         rm -f "$DOCKER_YML_STORAGE/docker-compose.*.yml"
@@ -140,7 +140,7 @@ case "$ACTION" in
 
   echo "Using datestamp: $DATE"
   DUMPER="mysqldump --host db -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --dump-date --tz-utc --verbose"
-  docker-compose -f $DOCKER_COMPOSER_FILE exec $CONTAINER_DB sh -c "$DUMPER  2>/dev/null | gzip --fast -f > /var/db_dumps/db-container-dump-$DATE.sql.gz"
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$DUMPER  2>/dev/null | gzip --fast -f > /var/db_dumps/db-container-dump-$DATE.sql.gz"
   cd $CWD/db_dumps
   ln -sf db-container-dump-$DATE.sql.gz db-container-dump-LATEST.sql.gz
   cd $CWD
@@ -154,7 +154,7 @@ case "$ACTION" in
   if [ "$CONN" -ne "0" ]; then
     exit 1
   fi
-  docker-compose -f $DOCKER_COMPOSER_FILE  down
+  docker-compose -f $DOCKER_COMPOSE_FILE  down
   if [ "$IS_DOCKERSYNC" -eq "1" ]; then
     docker-sync clean
   fi
@@ -163,7 +163,7 @@ case "$ACTION" in
 "stop")
   echo "Stopping containers (volumes and content intact)"
   echo "No backup of database content created."
-  docker-compose -f $DOCKER_COMPOSER_FILE stop
+  docker-compose -f $DOCKER_COMPOSE_FILE stop
   if [ "$IS_DOCKERSYNC" -eq "1" ]; then
     docker-sync clean
   fi
@@ -191,26 +191,26 @@ case "$ACTION" in
 
   echo
   echo 'Databases *before* the restore:'
-  docker-compose -f $DOCKER_COMPOSER_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
   echo
   echo 'Restoring db...'
   echo -n "DB backup used: db_dumps/db-container-dump-LATEST.sql.gz => "
   echo $(readlink db_dumps/db-container-dump-LATEST.sql.gz)
   echo "[This may take some time...]"
   RESTORER="gunzip < /var/db_dumps/db-container-dump-LATEST.sql.gz | mysql --host db -uroot -p"$MYSQL_ROOT_PASSWORD""
-  docker-compose -f $DOCKER_COMPOSER_FILE exec $CONTAINER_DB sh -c "$RESTORER 2>/dev/null"
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORER 2>/dev/null"
   echo
   echo 'Databases after the restore:'
-  docker-compose -f $DOCKER_COMPOSER_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
   echo 'Users after the restore:'
-  docker-compose -f $DOCKER_COMPOSER_FILE exec $CONTAINER_DB sh -c "$USERS 2>/dev/null"
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$USERS 2>/dev/null"
   ;;
 
 "up")
   if [ "$IS_DOCKERSYNC" -eq "1" ]; then
     docker-sync start
   fi
-  docker-compose -f $DOCKER_COMPOSER_FILE up -d
+  docker-compose -f $DOCKER_COMPOSE_FILE up -d
   OK=$?
   if [ "$OK" -ne "0" ]; then
     echo
@@ -229,9 +229,9 @@ case "$ACTION" in
 
   echo
   echo 'Current databases:'
-  docker-compose -f $DOCKER_COMPOSER_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
   echo 'Current database users:'
-  docker-compose -f $DOCKER_COMPOSER_FILE exec $CONTAINER_DB sh -c "$USERS 2>/dev/null"
+  docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$USERS 2>/dev/null"
   echo 'No DB content restoration done.'
   echo 'In case you need to do that (Drupal DB is gone?),'
   echo '1) check your symlink target in db_dumps/db-container-dump-LATEST.sql.gz'
@@ -242,7 +242,7 @@ case "$ACTION" in
 "rebuild")
     $SCRIPT_NAME down 2&>/dev/null
     # Return value is not important here.
-    docker-compose -f $DOCKER_COMPOSER_FILE build
+    docker-compose -f $DOCKER_COMPOSE_FILE build
     $SCRIPT_NAME up
     $SCRIPT_NAME restore
     ;;
@@ -261,7 +261,7 @@ case "$ACTION" in
         sleep 1
     done
     echo
-    docker-compose -f $DOCKER_COMPOSER_FILE down
+    docker-compose -f $DOCKER_COMPOSE_FILE down
     if [ "$IS_DOCKERSYNC" -eq "1" ]; then
         docker-sync clean
     fi
@@ -312,7 +312,7 @@ case "$ACTION" in
     fi
     # Use verbose output on this composer command.
     COMPOSER_INIT="composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev"
-    docker-compose -f $DOCKER_COMPOSER_FILE up -d php
+    docker-compose -f $DOCKER_COMPOSE_FILE up -d php
     OK=$?
     if [ "$OK" -ne "0" ]; then
         echo "ERROR: Something went wrong when initializing the codebase."
@@ -322,7 +322,7 @@ case "$ACTION" in
 
     echo "============="
     echo "Next: $COMPOSER_INIT"
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c "$COMPOSER_INIT"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$COMPOSER_INIT"
     echo "============="
     echo "Project created to ./$APP_ROOT -folder (/var/www in containers)"
     # This must be run after composer install.
@@ -338,8 +338,8 @@ case "$ACTION" in
     echo "Codebase ready!!"
     echo
     echo "NOTE: Once Drupal is installed, you should remove write perms in sites/default -folder with:"
-    echo "docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'chmod -v 0755 web/sites/default'"
-    echo "docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
+    echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0755 web/sites/default'"
+    echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
     echo "With these changes you can edit settings.php from host, but Drupal is happy not to be allowed to write there."
     echo
     sleep 1
@@ -349,14 +349,14 @@ case "$ACTION" in
 "drupal-structure-fix")
     echo "============="
     echo "Creating some folders to project below /var/www"
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -d "config/sync" ]] &&  mkdir -vp config/sync'
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -d "web/sites/default/files" ]] &&  mkdir -vp web/sites/default/files'
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c '[[ ! -w "web/sites/default/files" ]] &&  chmod -r 0777 web/sites/default/files'
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/files\"") ]; then echo "web/sites/default/files is writable - GREAT!"; else chmod -v a+wx web/sites/default/files; fi'
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/settings.php\"") ]; then echo "web/sites/default/settings.php is writable - GREAT!"; else chmod -v a+w web/sites/default/settings.php; fi'
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'mkdir -vp ./web/modules/custom && mkdir -vp ./web/themes/custom'
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/modules/custom/.gitkeep'
-    docker-compose -f $DOCKER_COMPOSER_FILE exec php bash -c 'echo > ./web/themes/custom/.gitkeep'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c '[[ ! -d "config/sync" ]] &&  mkdir -vp config/sync'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c '[[ ! -d "web/sites/default/files" ]] &&  mkdir -vp web/sites/default/files'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c '[[ ! -w "web/sites/default/files" ]] &&  chmod -r 0777 web/sites/default/files'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/files\"") ]; then echo "web/sites/default/files is writable - GREAT!"; else chmod -v a+wx web/sites/default/files; fi'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/settings.php\"") ]; then echo "web/sites/default/settings.php is writable - GREAT!"; else chmod -v a+w web/sites/default/settings.php; fi'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'mkdir -vp ./web/modules/custom && mkdir -vp ./web/themes/custom'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'echo > ./web/modules/custom/.gitkeep'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'echo > ./web/themes/custom/.gitkeep'
     ;;
 
 "restart")
@@ -407,7 +407,7 @@ case "$ACTION" in
 
      echo "Renaming volumes to '$PROJECTNAME' for docker-sync, please wait..."
      replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" ./$DOCKERSYNC_FILE
-     replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKER_COMPOSER_FILE
+     replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKER_COMPOSE_FILE
      echo 'Done. You can now (re)start your project:'
      echo "$SCRIPT_NAME init - installs Drupal 8 codebase if not present"
      echo "$SCRIPT_NAME up - boots up this project"

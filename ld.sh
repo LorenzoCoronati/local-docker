@@ -279,7 +279,7 @@ case "$ACTION" in
 "init")
     # Suggest Skeleton cleanup only when it is relevant.
     APP_ROOT='app/'
-    if [ ! -e "docker-sync.yml" ] || [ ! -e "docker-compose.yml" ]; then
+    if [ ! -e "$DOCKERSYNC_FILE" ] || [ ! -e "$DOCKER_COMPOSE_FILE" ]; then
         echo "Copying Docker compose/sync files. What is project type? "
         echo " [0] New project, application built in ./$APP_ROOT -folder "
         #echo " [1] Old project, application built in ./$APP_ROOT -folder "

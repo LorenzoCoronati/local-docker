@@ -75,16 +75,6 @@ services:
     ports:
       - "8080:8080"
 
-  # This we do not need, becase all things can be done with the composer
-  # installed in host machine.
-  # composer:
-  #   image: composer:1.6.4
-  #   working_dir: /var/www
-  #   volumes:
-  #     - .:/var/www
-  #   depends_on:
-  #     - php
-
   # PHP container needs some Mailhog -configuration.
   mailhog:
     image: mailhog/mailhog:v1.0.0
@@ -96,12 +86,6 @@ services:
 #  nodejs:
 #    image: wodby/drupal-node:1.0-1.0.0
 #    working_dir: /var/www/web/themes/custom/mytheme
-#    environment:
-#      NODE_SERVICE_KEY: node-service-key
-#    labels:
-#      - 'traefik.backend=nodejs'
-#      - 'traefik.port=8080'
-#      - 'traefik.frontend.rule=Host:nodejs.core.localhost'
 #    volumes:
 #      - ./web/themes/mytheme:/var/www/web/themes/mytheme:delegated
 #    command: sh -c 'npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'

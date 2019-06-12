@@ -83,12 +83,15 @@ services:
       - 8025:8025
       - 1025:1025
 
-#  nodejs:
-#    image: wodby/drupal-node:1.0-1.0.0
-#    working_dir: /var/www/web/themes/custom/mytheme
-#    volumes:
-#      - ./web/themes/mytheme:/var/www/web/themes/mytheme:delegated
-#    command: sh -c 'npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
+  # Replcase MYTHEME with your theme name. If you have multiple the  # clone the noodejs -section and rename the containers to something like
+  # - nodejs_mytheme and
+  # - nodejs_my_other_theme.
+  nodejs:
+    image: wodby/drupal-node:1.0-1.0.0
+    working_dir: /var/www/web/themes/custom/MYTHEME
+    volumes:
+      - ./app/web/themes/custom/MYTHEME:/var/www/web/themes/custom/MYTHEME:delegated
+    command: sh -c '[[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
 
 volumes:
   webroot-sync-core:

@@ -78,8 +78,6 @@ Copy all of this repository on top of your current project.
 
         db_dumps/
         docker/
-        docker-compose*.yml
-        docker-sync*.yml
         ld.sh 
         ld  # symlink to ld.sh
 
@@ -183,7 +181,10 @@ top of your project repository.
 When initial setup asks about Skeleton, answer `y`.
 
         $ ./ld init
-        Is this a Skeleton -project? (y/n) 
+        Copying Docker compose/sync files. What is project type?
+         [0] New project, application built in ./app -folder "
+         [2] Skeleton -proejct. Drupal in drupal/ and custom code spread in src/ folder.
+        Project type: 
 
 After some configuration your codebase is built, and Docker volumes
 (including volumes used by `docker-sync`) according general Skeleton

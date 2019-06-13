@@ -326,13 +326,15 @@ However this can be overridden for example in
 for IDE to setup a Xdebug listener to the port Xdebug is trying to
 connect to on your host. 
 
-#### Convenience alias
+#### Convenience "alias" for ./ld.sh
 
 If you find the `./` prefix tedious when using ld, you could add the following
 alias to your shell startup files. In order to not interfere with `/usr/bin/ld`,
 `ld` as alias should be avoided.
 
-    alias lld='if [[ -x "$(pwd)/ld.sh" ]] ; then "$(pwd)/ld.sh"; fi'
+    function lld() { if [[ -x "$(pwd)/ld.sh" ]] ; then "$(pwd)/ld.sh" $@; else echo "ld.sh not found in current directory"; fi }
+
+Then, you can use `lld` instead of `./ld` or `./ld.sh`
 
 ### Launch a new project
 

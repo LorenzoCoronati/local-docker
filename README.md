@@ -466,6 +466,10 @@ approved a new license.
 
 **Solution** 
 
+Makes sure you have Command Line Tools installed:
+
+        $ sudo xcode-select --install
+
 After initial Command Line Tools installation and updates may need to
 accept the license. You can do this using this command (and agreeing
 with the EULA):

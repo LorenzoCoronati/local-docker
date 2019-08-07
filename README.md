@@ -468,19 +468,13 @@ approved a new license.
 
 Makes sure you have Command Line Tools installed:
 
-        $ sudo xcode-select --install
+        $ xcode-select --install
 
 After initial Command Line Tools installation and updates may need to
-accept the license. You can do this using this command (and agreeing
-with the EULA):
+accept the license.
 
-         $ sudo xcodebuild -license
-
-Another option is to start Xdoce, approve the license and try again.
-Optionally you can achieve the same via command line with less downloads
-for you Xcode:
-
-        $ xcode-select --install
+Another option is to install Xdoce from the App store, launch the application
+and approve the license during the initial start. **However**, for the Docker Sync full Xcode is unnecessary, Command Line Tools can handle what's needed.
 
 If you get this error: `xcode-select: error: tool 'xcodebuild' requires
 Xcode, but active developer directory

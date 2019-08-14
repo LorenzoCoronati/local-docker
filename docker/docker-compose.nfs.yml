@@ -8,6 +8,9 @@
 # NFS may have security holes and therefore is not recommended. However it may prove to be
 # more stable compared to docker-sync. In such case use this file - as a reference or in place of
 # non-skeleton project docker-compose.yml.
+# @see
+# https://forums.docker.com/t/nfs-native-support/48531/4
+# https://gist.github.com/seanhandley/7dad300420e5f8f02e7243b7651c6657
 # ====== NOTE ======
 
 version: '3.2'
@@ -98,7 +101,6 @@ services:
       - ./app/web/themes/custom/MYTHEME:/var/www/web/themes/custom/MYTHEME:delegated
     command: sh -c '[[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
 
-# https://forums.docker.com/t/nfs-native-support/48531/4
 volumes:
   nfsmount_app:
     driver: local

@@ -34,9 +34,9 @@ services:
       - webroot-sync-src-patches:/var/www/web/modules/local_patches:nocopy
       - webroot-sync-src-themes:/var/www/web/themes/custom:nocopy
       - webroot-sync-core:/var/www:nocopy
+    env_file:
+      - .env
     working_dir: /var/www
-    # env_file:
-    #   - .env
 
   composer:
     # Run `composer install` during startup.
@@ -47,6 +47,8 @@ services:
       - webroot-sync-core-delegated:/var/www:nocopy
       # Composer may need patches from this folder, too.
       - webroot-sync-src-patches:/var/www/web/modules/local_patches:nocopy
+    env_file:
+      - .env
     working_dir: /var/www
     command: /usr/local/bin/composer install
 
@@ -64,16 +66,22 @@ services:
       # unless stack is down'ed with "--volumes":
       # $ docker-compose down --volumes
       - db_data:/var/lib/mysql
+    # In case of several env files later declared variable
+    # values override earlier ones
+    env_file:
+      - .env
+    # Variable substitution. values in .env -file.
+    # environment overrides values from.env_file(s):
+    # environment:
+    #   MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    #  # These is used to create a database.
+    #   MYSQL_DATABASE: ${DB_DATABASE}
+    #   MYSQL_USER: ${DB_USER}
+    #   MYSQL_PASSWORD: ${DB_PASSWORD}
     working_dir: /var
     restart: always
     # Set max_allowed_packet to 256M (or any other value)
     command: --max_allowed_packet=268435456
-    environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      # These is used to create a database.
-      MYSQL_DATABASE: drupal
-      MYSQL_USER: drupal
-      MYSQL_PASSWORD: drupal
 
   # Maybe use this instead of the one set blow here: https://hub.docker.com/r/eeacms/varnish/
   # varnish:

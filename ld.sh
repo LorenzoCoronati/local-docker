@@ -22,9 +22,37 @@ DATE=$(date +%Y-%m-%d--%H-%I-%S)
 RESTORE_INFO="mysql --host db -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
 USERS="mysql --host db -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e \"SELECT User, Host from mysql.user WHERE User NOT LIKE 'mysql%';\""
 
-# Add support to .env files, allowing overrides to any of our config values.
-if [ -f '.env' ]; then
-    export $(grep -v '^#' .env | xargs)
+# Read (and create if necessary) the .env file, allowing overrides to any of our config values.
+if [[ "$ACTION" != 'help' ]]; then
+    if [[ -h '.env' ]] || [[ ! -f '.env' ]]; then
+        if [ ! -f '.env.example' ]; then
+            echo "File .env.example are .env are missing. Please add either one to project root."
+            echo "Then start over."
+            exit 1
+        fi
+        sleep 2
+        echo "Copying .env.example -file => .env. "
+        sleep 2
+        cp -f ./.env.example .env
+        echo "Please review your .env file:"
+        echo
+        echo "========  START OF .env ========="
+        sleep 1
+        cat .env
+        echo "========  END OF .env   ========="
+        echo
+        sleep 1
+        read -p "Does this look okay? [Y/n] " CHOICE
+        case "$CHOICE" in
+            ''|y|Y|'yes'|'YES' ) echo "Cool, let's continue!" & echo ;;
+            n|N|'no'|'NO' ) echo "Ok, we'll stop here. Please edit .env file manually, and then continue." && exit 1 ;;
+            * ) echo "ERROR: Unclear answer, exiting" && exit 2;;
+        esac
+    else
+        # Read .env -file variables. These override possible values defined
+        # earlier in this script.
+        export $(grep -v '^#' .env | xargs)
+    fi
 fi
 
 # Get current script name, and use a symlink if it exists.

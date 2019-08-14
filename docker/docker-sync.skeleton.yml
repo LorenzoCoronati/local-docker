@@ -9,6 +9,7 @@ options:
   verbose: true
   compose-dev-file-path: 'docker-compose.yml'
   compose-file-path: 'docker-compose.dev-vm.yml'
+
 syncs:
   webroot-sync-core:
     sync_strategy: 'native_osx'
@@ -16,19 +17,13 @@ syncs:
     # the contents of this directory will be synchronized to the Docker volume with the name of this sync entry ('default-sync' here)
     # NOTE: run `docker-sync[-stack] clean` after any change in src
     src: './drupal/'
-
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
     sync_args:
-      - "-ignore='Path ld.sh'"    # no need to send our own OSX -side helper tools
-      - "-ignore='Path ld'"       # no need to send our own OSX -side helper tools
       - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
-      - "-ignore='Path .idea'"          # no need to send PHPStorm config to container
-      - "-ignore='Path .git'"           # ignore the main .git repo
       - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
       - "-ignore='BelowPath node_modules'" # remove this if you need code completion
       - "-ignore='Path node_modules/*'" # remove this if you need code completion
-#     - "-ignore='Path vendor/*'"     # we could ignore the composer vendor folder, but then you won't have code completion in your IDE
-
+      # - "-ignore='Path vendor/*'"     # we could ignore the composer vendor folder, but then you won't have code completion in your IDE
     # enable terminal_notifier. On every sync sends a Terminal Notification regarding files being synced. ( Mac Only ).
     # good thing in case you are developing and want to know exactly when your changes took effect.
     # be aware in case of unison this only gives you a notification on the initial sync, not the syncs after changes.
@@ -37,32 +32,19 @@ syncs:
   webroot-sync-core-delegated:
     sync_strategy: 'native_osx'
     src: './drupal/'
-
     host_disk_mount_mode: 'delegated' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
     sync_args:
-      - "-ignore='Path ld.sh'"    # no need to send our own OSX -side helper tools
-      - "-ignore='Path ld'"       # no need to send our own OSX -side helper tools
       - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
-      - "-ignore='Path .idea'"          # no need to send PHPStorm config to container
-      - "-ignore='Path .git'"           # ignore the main .git repo
       - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
       - "-ignore='BelowPath node_modules'" # remove this if you need code completion
       - "-ignore='Path node_modules/*'" # remove this if you need code completion
+      # - "-ignore='Path vendor/*'"     # we could ignore the composer vendor folder, but then you won't have code completion in your IDE
     notify_terminal: true
 
   webroot-sync-src-config:
     sync_strategy: 'native_osx'
     src: './src/config/'
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
-    sync_args:
-      - "-ignore='Path ld.sh'"    # no need to send our own OSX -side helper tools
-      - "-ignore='Path ld'"       # no need to send our own OSX -side helper tools
-      - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
-      - "-ignore='Path .idea'"          # no need to send PHPStorm config to container
-      - "-ignore='Path .git'"           # ignore the main .git repo
-      - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
-      - "-ignore='BelowPath node_modules'" # remove this if you need code completion
-      - "-ignore='Path node_modules/*'" # remove this if you need code completion
     notify_terminal: true
 
   webroot-sync-src-modules:
@@ -70,29 +52,14 @@ syncs:
     src: './src/modules/'
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
     sync_args:
-      - "-ignore='Path ld.sh'"    # no need to send our own OSX -side helper tools
-      - "-ignore='Path ld'"       # no need to send our own OSX -side helper tools
-      - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
-      - "-ignore='Path .idea'"          # no need to send PHPStorm config to container
-      - "-ignore='Path .git'"           # ignore the main .git repo
       - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
       - "-ignore='BelowPath node_modules'" # remove this if you need code completion
-      - "-ignore='Path node_modules/*'" # remove this if you need code completion
     notify_terminal: true
 
   webroot-sync-src-patches:
     sync_strategy: 'native_osx'
     src: './src/local_patches/'
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
-    sync_args:
-      - "-ignore='Path ld.sh'"    # no need to send our own OSX -side helper tools
-      - "-ignore='Path ld'"       # no need to send our own OSX -side helper tools
-      - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
-      - "-ignore='Path .idea'"          # no need to send PHPStorm config to container
-      - "-ignore='Path .git'"           # ignore the main .git repo
-      - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
-      - "-ignore='BelowPath node_modules'" # remove this if you need code completion
-      - "-ignore='Path node_modules/*'" # remove this if you need code completion
     notify_terminal: true
 
   webroot-sync-src-themes:
@@ -100,11 +67,6 @@ syncs:
     src: './src/themes/'
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
     sync_args:
-      - "-ignore='Path ld.sh'"    # no need to send our own OSX -side helper tools
-      - "-ignore='Path ld'"       # no need to send our own OSX -side helper tools
-      - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
-      - "-ignore='Path .idea'"          # no need to send PHPStorm config to container
-      - "-ignore='Path .git'"           # ignore the main .git repo
       - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
       - "-ignore='BelowPath node_modules'" # remove this if you need code completion
       - "-ignore='Path node_modules/*'" # remove this if you need code completion

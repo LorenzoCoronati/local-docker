@@ -1,6 +1,7 @@
 .DS_Store
 .idea
 .docker-sync
+.env
 
 # Ignore locations filled by composer create-project are set by drupal-project.
 # See app/.gitignore

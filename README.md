@@ -45,7 +45,9 @@ there.
 of time (up to a few minutes). Once that is done local is ... ready.
 Files syncing between host and docker containers may take a few seconds,
 but running `docker-sync logs -f` on a terminal will expose what and
-when is being synced.
+when is being synced. It is also the fastest tested flavor of various
+ways to share folders between host and containers (including NFS
+mounts).
 
 **Pros** No rotten local development environments ever again! At least
 for the handful of years a head of you. The trick is local environment
@@ -64,12 +66,26 @@ local development tool for Skeleton based projects (known by Exove
 developers).
 
 #### New project
-Clone this repository as your project folder, remove .git -folder and
-launch the setup:
+Clone this repository as your project folder, reconfigure Git repository
+and start the initialisation.
 
         $ git clone git@github.com:Exove/local-docker.git my-project
         $ cd my-project
-        $ rm -rf .git
+        # Reconfigure first git remote 'origin' (so you do not push to
+        # local-docker -repository by mistake).
+        $ git remote set-url origin ssh://git.example.com/my-project.git
+        # Verify you have correct remote url's.
+        $ git remote -v
+        # Create a disconnected temporary branch w/ no commits. This new 
+        # branch is not connected to the old repository branches.
+        $ git checkout --orphan master-new
+        # Commit clean project base to the new and still empty branch.
+        $ git commit -am'Initial commit for my-project from local-docker'
+        # Delete old master branch (with the full commit history), and
+        # rename your temporary branch to master.
+        $ git branch -D master
+        $ git branch -m master-new master
+        $ git push
         $ ./ld init
 
 #### Existing project
@@ -78,6 +94,7 @@ Copy all of this repository on top of your current project.
 
         db_dumps/
         docker/
+        .env.example 
         ld.sh 
         ld  # symlink to ld.sh
 

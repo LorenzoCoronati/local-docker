@@ -4,6 +4,12 @@
 # # Fix images to minor release tags to make all container updates deliberate,
 # # while still allowing patch releases.
 
+# ====== NOTE ======
+# NFS may have security holes and therefore is not recommended. However it may prove to be
+# more stable compared to docker-sync. In such case use this file - as a reference or in place of
+# non-skeleton project docker-compose.yml.
+# ====== NOTE ======
+
 version: '3.2'
 
 services:
@@ -14,9 +20,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      # :nocopy must be used with docker-sync
       # See bottom of this file, and ./docker-sync.yml
-      - webroot-sync-core:/var/www:nocopy
+      - nfsmount_app:/var/www:nocopy
     depends_on: # This key affects the order of which containers get started.
       - php
     working_dir: /var/www/web
@@ -28,8 +33,7 @@ services:
     build: ./docker/build/php/7.2
     volumes:
       # :nocopy must be used with docker-sync
-      # See bottom of this file, and ./docker-sync.yml
-      - webroot-sync-core:/var/www:nocopy
+      - nfsmount_app:/var/www:nocopy
     working_dir: /var/www
    # env_file:
    #   - .env
@@ -38,10 +42,7 @@ services:
     # Run `composer install` during startup.
     build: ./docker/build/php/7.2
     volumes:
-      # This share gets writes from within the container by Composer.
-      # :nocopy must be used with docker-sync
-      # See bottom of this file, and ./docker-sync.yml
-      - webroot-sync-core-delegated:/var/www:nocopy
+      - nfsmount_app:/var/www:nocopy
     working_dir: /var/www
     command: /usr/local/bin/composer install
 
@@ -51,10 +52,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      # This folder contains database dumps (mostly written by container).
-      # :nocopy must be used with docker-sync
-      # See bottom of this file, and ./docker-sync.yml
-      - webroot-sync-db-dumps:/var/db_dumps:nocopy
+      - nfsmount_db_dumps:/var/www:nocopy
       # Named volume for db table data. Docker keeps this volume around
       # unless stack is down'ed with "--volumes":
       # $ docker-compose down --volumes
@@ -100,12 +98,18 @@ services:
       - ./app/web/themes/custom/MYTHEME:/var/www/web/themes/custom/MYTHEME:delegated
     command: sh -c '[[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
 
+# https://forums.docker.com/t/nfs-native-support/48531/4
 volumes:
-  webroot-sync-core:
-    external: true
-  webroot-sync-core-delegated:
-    external: true
-  webroot-sync-db-dumps:
-    external: true
+  nfsmount_app:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=host.docker.internal,rw,nolock,nfsvers=3
+      device: ":${PWD}/app"
+  nfsmount_db_dumps:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=host.docker.internal,rw,nolock,nfsvers=3
+      device: ":${PWD}/db_dumps"
   db_data: {}
-

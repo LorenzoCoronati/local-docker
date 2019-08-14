@@ -51,7 +51,12 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./db_dumps:/var/db_dumps:cached
+      # This folder contains database dumps (mostly written by container).
+      - webroot-sync-db-dumps:/var/db_dumps:nocopy
+      # Named volume for db table data. Docker keeps this volume around
+      # unless stack is down'ed with "--volumes":
+      # $ docker-compose down --volumes
+      - db_data:/var/lib/mysql
     working_dir: /var
     restart: always
     # Set max_allowed_packet to 256M (or any other value)
@@ -100,4 +105,5 @@ volumes:
     external: true
   webroot-sync-db-dumps:
     external: true
+  db_data: {}
 

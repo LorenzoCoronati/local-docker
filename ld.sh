@@ -22,9 +22,37 @@ DATE=$(date +%Y-%m-%d--%H-%I-%S)
 RESTORE_INFO="mysql --host db -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
 USERS="mysql --host db -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e \"SELECT User, Host from mysql.user WHERE User NOT LIKE 'mysql%';\""
 
-# Add support to .env files, allowing overrides to any of our config values.
-if [ -f '.env' ]; then
-    export $(grep -v '^#' .env | xargs)
+# Read (and create if necessary) the .env file, allowing overrides to any of our config values.
+if [[ "$ACTION" != 'help' ]]; then
+    if [[ -h '.env' ]] || [[ ! -f '.env' ]]; then
+        if [ ! -f '.env.example' ]; then
+            echo "File .env.example are .env are missing. Please add either one to project root."
+            echo "Then start over."
+            exit 1
+        fi
+        sleep 2
+        echo "Copying .env.example -file => .env. "
+        sleep 2
+        cp -f ./.env.example .env
+        echo "Please review your .env file:"
+        echo
+        echo "========  START OF .env ========="
+        sleep 1
+        cat .env
+        echo "========  END OF .env   ========="
+        echo
+        sleep 1
+        read -p "Does this look okay? [Y/n] " CHOICE
+        case "$CHOICE" in
+            ''|y|Y|'yes'|'YES' ) echo "Cool, let's continue!" & echo ;;
+            n|N|'no'|'NO' ) echo "Ok, we'll stop here. Please edit .env file manually, and then continue." && exit 1 ;;
+            * ) echo "ERROR: Unclear answer, exiting" && exit 2;;
+        esac
+    else
+        # Read .env -file variables. These override possible values defined
+        # earlier in this script.
+        export $(grep -v '^#' .env | xargs)
+    fi
 fi
 
 # Get current script name, and use a symlink if it exists.
@@ -36,7 +64,7 @@ fi
 
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
     echo '$ACTION' is $ACTION
-    if [[ "$ACTION" -ne 'init' ]] && [[ "$ACTION" -ne 'help' ]]; then
+    if [[ "$ACTION" != 'init' ]] && [[ "$ACTION" != 'help' ]]; then
         echo "Starting to initialise local-docker, please wait..."
         $SCRIPT_NAME init
     fi
@@ -136,24 +164,23 @@ case "$ACTION" in
     APP_ROOT='app/'
     if [ ! -e "$DOCKERSYNC_FILE" ] || [ ! -e "$DOCKER_COMPOSE_FILE" ]; then
         echo "Copying Docker compose/sync files. What is project type? "
-        echo " [0] New project, application built in ./$APP_ROOT -folder "
+        echo " [0] New project, application built in ./$APP_ROOT -folder [default]"
         #echo " [1] Old project, application built in ./$APP_ROOT -folder "
         echo " [2] Skeleton -proejct. Drupal in drupal/ and custom code spread in src/ folder."
-        read -p "Project type: " CHOISE
-        case "$CHOISE" in
-            0|1 ) yml_move ;;
+        read -p "Project type: " CHOICE
+        case "$CHOICE" in
+            ''|0|1 ) yml_move ;;
             2 ) APP_ROOT='drupal/'; yml_move skeleton;;
             * ) echo "ERROR: Unclear answer, exiting" && exit;;
         esac
-        echo "Use project-name based docker-sync -volumes (recommended, default)?"
-        read -p "Yes (y) / No (n) " CHOISE
-        case "$CHOISE" in
+        read -p "Use project-name based docker-sync -volumes [default]? [Y/n]" CHOICE
+        case "$CHOICE" in
             ''|y|Y|'yes'|'YES' ) $SCRIPT_NAME rename-volumes;;
             n|N|'no'|'NO' ) echo "Volume names will start with 'webroot-'";;
         esac
     fi
-    if [ -e "$APP_ROOT/composer.json" ]; then
-      echo "Looks like project is already created? File $APP_ROOT/composer.json exists."
+    if [ -e "$APP_ROOT""composer.json" ]; then
+      echo "Looks like project is already created? File "$APP_ROOT"composer.json exists."
       echo "Maybe you should install composer codebase instead:"
       echo "$SCRIPT_NAME up && $SCRIPT_NAME composer install"
       exit 1
@@ -390,7 +417,7 @@ case "$ACTION" in
     DEFAULT=$(basename $CWD)
     VALID=0
     while [ "$VALID" -eq "0" ]; do
-        echo "Please give me your project name (\"$DEFAULT\" default)? "
+        echo "Please give me your project name [default: \"$DEFAULT\"]? "
         read -p "Project name: " PROJECTNAME
         if [ -z "$PROJECTNAME" ]; then
             PROJECTNAME=$DEFAULT

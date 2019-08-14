@@ -1,0 +1,115 @@
+# Use images from Docker Hub to use community/or-alike maintained images.
+# @see https://hub.docker.com/explore/
+#
+# # Fix images to minor release tags to make all container updates deliberate,
+# # while still allowing patch releases.
+
+# ====== NOTE ======
+# NFS may have security holes and therefore is not recommended. However it may prove to be
+# more stable compared to docker-sync. In such case use this file - as a reference or in place of
+# non-skeleton project docker-compose.yml.
+# ====== NOTE ======
+
+version: '3.2'
+
+services:
+
+  nginx:
+    build: ./docker/build/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # See bottom of this file, and ./docker-sync.yml
+      - nfsmount_app:/var/www:nocopy
+    depends_on: # This key affects the order of which containers get started.
+      - php
+    working_dir: /var/www/web
+
+  php:
+    # Available builds: https://hub.docker.com/r/xoxoxo/php-container/tags
+    # Custom build contains sendmail_path -fix for Mailhog and OPTION to add
+    # overrides (per project) to other PHP config.
+    build: ./docker/build/php/7.2
+    volumes:
+      # :nocopy must be used with docker-sync
+      - nfsmount_app:/var/www:nocopy
+    working_dir: /var/www
+   # env_file:
+   #   - .env
+
+  composer:
+    # Run `composer install` during startup.
+    build: ./docker/build/php/7.2
+    volumes:
+      - nfsmount_app:/var/www:nocopy
+    working_dir: /var/www
+    command: /usr/local/bin/composer install
+
+  db:
+    # mysql:8.0.11 keeps restarting.
+    image: mysql:5.7.26
+    ports:
+      - "3306:3306"
+    volumes:
+      - nfsmount_db_dumps:/var/www:nocopy
+      # Named volume for db table data. Docker keeps this volume around
+      # unless stack is down'ed with "--volumes":
+      # $ docker-compose down --volumes
+      - db_data:/var/lib/mysql
+    working_dir: /var
+    restart: always
+    # Set max_allowed_packet to 256M (or any other value)
+    command: --max_allowed_packet=268435456
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      # These is used to create a database.
+      MYSQL_DATABASE: drupal
+      MYSQL_USER: drupal
+      MYSQL_PASSWORD: drupal
+
+  # Maybe use this instead of the one set blow here: https://hub.docker.com/r/eeacms/varnish/
+  # varnish:
+  #   image: jonbaldie/varnish:8056b94
+  #   ports:
+  #     - "8017:80"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+  # PHP container needs some Mailhog -configuration.
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
+    restart: always
+    ports:
+      - 8025:8025
+      - 1025:1025
+
+  # Replcase MYTHEME with your theme name. If you have multiple the  # clone the noodejs -section and rename the containers to something like
+  # - nodejs_mytheme and
+  # - nodejs_my_other_theme.
+  nodejs:
+    image: wodby/drupal-node:1.0-1.0.0
+    working_dir: /var/www/web/themes/custom/MYTHEME
+    volumes:
+      - ./app/web/themes/custom/MYTHEME:/var/www/web/themes/custom/MYTHEME:delegated
+    command: sh -c '[[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
+
+# https://forums.docker.com/t/nfs-native-support/48531/4
+volumes:
+  nfsmount_app:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=host.docker.internal,rw,nolock,nfsvers=3
+      device: ":${PWD}/app"
+  nfsmount_db_dumps:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=host.docker.internal,rw,nolock,nfsvers=3
+      device: ":${PWD}/db_dumps"
+  db_data: {}

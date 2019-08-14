@@ -107,4 +107,6 @@ volumes:
     external: true
   webroot-sync-src-themes:
     external: true
+  webroot-sync-db-dumps:
+    external: true
 

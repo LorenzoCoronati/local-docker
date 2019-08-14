@@ -71,3 +71,9 @@ syncs:
       - "-ignore='BelowPath node_modules'" # remove this if you need code completion
       - "-ignore='Path node_modules/*'" # remove this if you need code completion
     notify_terminal: true
+
+  webroot-sync-db-dumps:
+    sync_strategy: 'native_osx'
+    src: './db_dumps/'
+    host_disk_mount_mode: 'delegated' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
+    notify_terminal: true

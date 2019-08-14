@@ -98,4 +98,6 @@ volumes:
     external: true
   webroot-sync-core-delegated:
     external: true
+  webroot-sync-db-dumps:
+    external: true
 

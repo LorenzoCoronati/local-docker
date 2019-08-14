@@ -64,7 +64,7 @@ fi
 
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
     echo '$ACTION' is $ACTION
-    if [[ "$ACTION" -ne 'init' ]] && [[ "$ACTION" -ne 'help' ]]; then
+    if [[ "$ACTION" != 'init' ]] && [[ "$ACTION" != 'help' ]]; then
         echo "Starting to initialise local-docker, please wait..."
         $SCRIPT_NAME init
     fi
@@ -164,24 +164,23 @@ case "$ACTION" in
     APP_ROOT='app/'
     if [ ! -e "$DOCKERSYNC_FILE" ] || [ ! -e "$DOCKER_COMPOSE_FILE" ]; then
         echo "Copying Docker compose/sync files. What is project type? "
-        echo " [0] New project, application built in ./$APP_ROOT -folder "
+        echo " [0] New project, application built in ./$APP_ROOT -folder [default]"
         #echo " [1] Old project, application built in ./$APP_ROOT -folder "
         echo " [2] Skeleton -proejct. Drupal in drupal/ and custom code spread in src/ folder."
-        read -p "Project type: " CHOISE
-        case "$CHOISE" in
-            0|1 ) yml_move ;;
+        read -p "Project type: " CHOICE
+        case "$CHOICE" in
+            ''|0|1 ) yml_move ;;
             2 ) APP_ROOT='drupal/'; yml_move skeleton;;
             * ) echo "ERROR: Unclear answer, exiting" && exit;;
         esac
-        echo "Use project-name based docker-sync -volumes (recommended, default)?"
-        read -p "Yes (y) / No (n) " CHOISE
-        case "$CHOISE" in
+        read -p "Use project-name based docker-sync -volumes [default]? [Y/n]" CHOICE
+        case "$CHOICE" in
             ''|y|Y|'yes'|'YES' ) $SCRIPT_NAME rename-volumes;;
             n|N|'no'|'NO' ) echo "Volume names will start with 'webroot-'";;
         esac
     fi
-    if [ -e "$APP_ROOT/composer.json" ]; then
-      echo "Looks like project is already created? File $APP_ROOT/composer.json exists."
+    if [ -e "$APP_ROOT""composer.json" ]; then
+      echo "Looks like project is already created? File "$APP_ROOT"composer.json exists."
       echo "Maybe you should install composer codebase instead:"
       echo "$SCRIPT_NAME up && $SCRIPT_NAME composer install"
       exit 1
@@ -418,7 +417,7 @@ case "$ACTION" in
     DEFAULT=$(basename $CWD)
     VALID=0
     while [ "$VALID" -eq "0" ]; do
-        echo "Please give me your project name (\"$DEFAULT\" default)? "
+        echo "Please give me your project name [default: \"$DEFAULT\"]? "
         read -p "Project name: " PROJECTNAME
         if [ -z "$PROJECTNAME" ]; then
             PROJECTNAME=$DEFAULT

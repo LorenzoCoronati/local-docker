@@ -124,7 +124,6 @@ db_connect() {
   RESPONSE=0
   ROUND=0
   ROUNDS_MAX=30
-  RET='-'
   if [ -z "$CONTAINER_DB_ID" ]; then
     echo "DB container not running (or not yet created)."
     exit 1
@@ -132,23 +131,23 @@ db_connect() {
     echo "Connecting to DB container ($CONTAINER_DB_ID), please wait..."
   fi
 
-  while [ "$RESPONSE" -eq "0" ]; do
+  while [ -z "$RESPONSE" ] || [ "$RESPONSE" -eq "0" ]; do
     ROUND=$(( $ROUND + 1 ))
     RESPONSE=$(docker exec $CONTAINER_DB_ID sh -c '/usr/bin/mysqladmin -uroot -proot_password status 2>/dev/null |wc -l ')
-    if [ "$RESPONSE" -ne "0" ]; then
-      RET=0
-      break;
+    if [ "${#RESPONSE}" -gt "0" ]; then
+        if [ "$RESPONSE" -ne "0" ]; then
+          return 0;
+        fi
     elif [ "$ROUND" -ge  "$ROUNDS_MAX" ]; then
       echo "DB container did not respond in due time."
-      RET=1
       break;
     else
-      echo "Please wait, trying ($ROUND/$ROUNDS_MAX)..."
+      echo "Still trying ($ROUND/$ROUNDS_MAX), please wait..."
       sleep 1
     fi
   done
 
-  return $RET
+  return 1
 }
 
 # Cross-OS way to do in-place find-and-replace with sed.

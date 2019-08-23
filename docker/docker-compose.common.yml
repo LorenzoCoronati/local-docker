@@ -67,14 +67,6 @@ services:
     # values override earlier ones
     env_file:
       - .env
-    # Variable substitution. values in .env -file.
-    # environment overrides values from.env_file(s):
-    # environment:
-    #   MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-    #  # These is used to create a database.
-    #   MYSQL_DATABASE: ${DB_DATABASE}
-    #   MYSQL_USER: ${DB_USER}
-    #   MYSQL_PASSWORD: ${DB_PASSWORD}
     working_dir: /var
     restart: always
     # Set max_allowed_packet to 256M (or any other value)

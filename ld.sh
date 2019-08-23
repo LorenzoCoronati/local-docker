@@ -128,17 +128,19 @@ db_connect() {
 
   while [ -z "$RESPONSE" ] || [ "$RESPONSE" -eq "0" ]; do
     ROUND=$(( $ROUND + 1 ))
-    RESPONSE=$(docker exec $CONTAINER_DB_ID sh -c '/usr/bin/mysqladmin -uroot -proot_password status 2>/dev/null |wc -l ')
+    echo -n '.'
+    COMMAND="/usr/bin/mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD status 2>/dev/null |wc -l "
+    RESPONSE=$(docker exec $CONTAINER_DB_ID sh -c "$COMMAND")
     if [ "${#RESPONSE}" -gt "0" ]; then
         if [ "$RESPONSE" -ne "0" ]; then
           return 0;
         fi
-    elif [ "$ROUND" -ge  "$ROUNDS_MAX" ]; then
+    fi
+    if [ "$ROUND" -lt  "$ROUNDS_MAX" ]; then
+      sleep 1
+    else
       echo "DB container did not respond in due time."
       break;
-    else
-      echo "Still trying ($ROUND/$ROUNDS_MAX), please wait..."
-      sleep 1
     fi
   done
 

@@ -165,7 +165,7 @@ case "$ACTION" in
         echo " [2] Skeleton -proejct. Drupal in drupal/ and custom code spread in src/ folder."
         read -p "Project type: " CHOICE
         case "$CHOICE" in
-            ''|0|1 ) yml_move ;;
+            ''|0|1 ) yml_move && IS_DOCKERSYNC=$(is_dockersync);;
             2 ) APP_ROOT='drupal/'; yml_move skeleton;;
             * ) echo "ERROR: Unclear answer, exiting" && exit;;
         esac

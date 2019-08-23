@@ -187,8 +187,7 @@ database, you can
 
 3. or use your favourite SQL GUI app (SequelPro or similar), and connect
    using IP (host) `0.0.0.0`, default port `3306`, username `root` and
-   password from `docker-composer.yml`,
-   `db.environment.MYSQL_ROOT_PASSWORD`.
+   password from your `.env`-file, `MYSQL_ROOT_PASSWORD`.
  
 #### Skeleton
 

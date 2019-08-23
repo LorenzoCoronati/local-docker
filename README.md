@@ -8,10 +8,10 @@ In short: Drupal's all PHP lives in `./app` -folder, and index.php - the
 docroot - is in `./app/web/index.php` -folder. Composer, Drush and
 Drupal console should be used within `php` -container:
 
-        # on host
-        $ docker-compose exec php bash
-        # inside php container get status of site in `web/sites/default`
-        /var/www # drush status 
+    # on host
+    $ docker-compose exec php bash
+    # inside php container get status of site in `web/sites/default`
+    /var/www # drush status 
 
 ## Requirements
 
@@ -21,10 +21,10 @@ as [Docker-sync](https://docker-sync.readthedocs.io). Install
 [Homebrew](https://brew.sh/) if you have not done it already, and run
 this on you host (in any directory):
 
-         $ brew install cask 
-         $ brew cask install docker-edge # edge channel OR
-         $ brew cask install docker # stable channel
-         $ sudo gem install docker-sync
+    $ brew install cask 
+    $ brew cask install docker-edge # edge channel OR
+    $ brew cask install docker # stable channel
+    $ sudo gem install docker-sync
 
 You may have the Docker already installed, in which case
 [Homebrew](https://brew.sh/) will tell you.
@@ -70,45 +70,45 @@ developers).
 Clone this repository as your project folder, reconfigure Git repository
 and start the initialisation.
 
-        $ git clone git@github.com:Exove/local-docker.git my-project
-        $ cd my-project
-        # Reconfigure first git remote 'origin' (so you do not push to
-        # local-docker -repository by mistake).
-        $ git remote set-url origin ssh://git.example.com/my-project.git
-        # Verify you have correct remote url's.
-        $ git remote -v
-        # Create a disconnected temporary branch w/ no commits. This new 
-        # branch is not connected to the old repository branches.
-        $ git checkout --orphan master-new
-        # Commit clean project base to the new and still empty branch.
-        $ git commit -am'Initial commit for my-project from local-docker'
-        # Delete old master branch (with the full commit history), and
-        # rename your temporary branch to master.
-        $ git branch -D master
-        $ git branch -m master-new master
-        $ git push
-        $ ./ld init
+    $ git clone git@github.com:Exove/local-docker.git my-project
+    $ cd my-project
+    # Reconfigure first git remote 'origin' (so you do not push to
+    # local-docker -repository by mistake).
+    $ git remote set-url origin ssh://git.example.com/my-project.git
+    # Verify you have correct remote url's.
+    $ git remote -v
+    # Create a disconnected temporary branch w/ no commits. This new 
+    # branch is not connected to the old repository branches.
+    $ git checkout --orphan master-new
+    # Commit clean project base to the new and still empty branch.
+    $ git commit -am'Initial commit for my-project from local-docker'
+    # Delete old master branch (with the full commit history), and
+    # rename your temporary branch to master.
+    $ git branch -D master
+    $ git branch -m master-new master
+    $ git push
+    $ ./ld init
 
 #### Existing project
  
 Copy all of this repository on top of your current project.
 
-        db_dumps/
-        docker/
-        .env.example 
-        ld.sh 
-        ld  # symlink to ld.sh
+    db_dumps/
+    docker/
+    .env.example 
+    ld.sh 
+    ld  # symlink to ld.sh
 
 Open your favourite terminal, type `./ld` and hit \[ENTER]. If you get
 an error, ensure `ld.sh` has execute permission:
 
-        chmod 0744 ld.sh
+    $ chmod 0744 ld.sh
 
 Initial setup asks if you is a Skeleton based project. If you have no
 idea what does it mean, do not use it. 
 
-        $ ./ld init # asks if you what config to use (Skeleton or not).
-        
+    $ ./ld init # asks if you what config to use (Skeleton or not).
+
 If you are applying `local-docker` on a Skeleton -based project, see
 "Skeleton" -section .
 
@@ -132,22 +132,22 @@ sane. Safe IP address ranges are `10.` and `192.168.*`.
 
     1.  Copy [this plist -file](docker/docker-for-mac-ip-alias.plist) to your `/Library/LauchDaemons` (will be loaded automatically after each reboot)
 
-              $ sudo cp PROJECT_ROOT/docker/docker-for-mac-ip-alias.plist /Library/LaunchDaemons/com.exove.net.docker_10-10-10-10_alias.plist
+            $ sudo cp PROJECT_ROOT/docker/docker-for-mac-ip-alias.plist /Library/LaunchDaemons/com.exove.net.docker_10-10-10-10_alias.plist
 
     2.  Run this or reboot your MacOS:
 
-              $ launchctl load /Library/LaunchDaemons/com.exove.net.docker_10-10-10-10_alias.plist
+            $ launchctl load /Library/LaunchDaemons/com.exove.net.docker_10-10-10-10_alias.plist
 
     You should have similar configuration now in in your [loopback interface](https://en.wikipedia.org/wiki/Loopback#LOOPBACK-INTERFACE)
 
-          $ ifconfig lo0
-          lo0: flags=8049<UP,LOOPBACK,RUNNING,MULTICAST> mtu 16384
-          options=1203<RXCSUM,TXCSUM,TXSTATUS,SW_TIMESTAMP>
-          inet 127.0.0.1 netmask 0xff000000
-          inet6 ::1 prefixlen 128
-          inet6 fe80::1%lo0 prefixlen 64 scopeid 0x1
-          inet 10.10.10.10 netmask 0xffffff00   # **** ALIAS! *****
-          nd6 options=201<PERFORMNUD,DAD>
+        $ ifconfig lo0
+        lo0: flags=8049<UP,LOOPBACK,RUNNING,MULTICAST> mtu 16384
+        options=1203<RXCSUM,TXCSUM,TXSTATUS,SW_TIMESTAMP>
+        inet 127.0.0.1 netmask 0xff000000
+        inet6 ::1 prefixlen 128
+        inet6 fe80::1%lo0 prefixlen 64 scopeid 0x1
+        inet 10.10.10.10 netmask 0xffffff00   # **** ALIAS! *****
+        nd6 options=201<PERFORMNUD,DAD>
 
     (Important line is **`inet 10.10.10.10...`**).
 
@@ -179,7 +179,6 @@ database, you can
 1) connect to `db` container either via shell
 
         $ docker-compose exec db sh
-        
 
 2. or use Adminer with your browser (port is configured in
    `docker-composer.yml`, see `adminer.ports`):
@@ -197,11 +196,11 @@ top of your project repository.
 
 When initial setup asks about Skeleton, answer `y`.
 
-        $ ./ld init
-        Copying Docker compose/sync files. What is project type?
-         [0] New project, application built in ./app -folder "
-         [2] Skeleton -proejct. Drupal in drupal/ and custom code spread in src/ folder.
-        Project type: 
+    $ ./ld init
+    Copying Docker compose/sync files. What is project type?
+     [0] New project, application built in ./app -folder "
+     [2] Skeleton -proejct. Drupal in drupal/ and custom code spread in src/ folder.
+    Project type: 
 
 After some configuration your codebase is built, and Docker volumes
 (including volumes used by `docker-sync`) according general Skeleton
@@ -213,17 +212,17 @@ done via your site's `settings.php` -file. Where Skeleton may use
 and by default credentials `drupal`/`drupal` with database named
 `drupal` (simple!). Example for Drupal 8:
 
-        <?php 
-          $databases['default']['default'] = [
-            'database' => 'drupal',
-            'username' => 'drupal',
-            'password' => 'drupal',
-            'prefix' => '',
-            'host' => 'db',   // <== IMPORTANT!
-            'port' => '3306',
-            'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
-            'driver' => 'mysql',
-          ];
+    <?php 
+      $databases['default']['default'] = [
+        'database' => 'drupal',
+        'username' => 'drupal',
+        'password' => 'drupal',
+        'prefix' => '',
+        'host' => 'db',   // <== IMPORTANT!
+        'port' => '3306',
+        'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
+        'driver' => 'mysql',
+      ];
 
 However, editing `settings.php` manually for database connection is
 usually necessary only if you are applying `local-docker` on top of an
@@ -242,7 +241,7 @@ keeping most recent as the restorable dump.
 
 It is recommended to start the project first time with:
 
-        ./ld init
+    $ ./ld init
 
 and answer some question to set up things properly.
 
@@ -250,20 +249,20 @@ and answer some question to set up things properly.
 
 If containers are not pulles/built yet, this will do it for you. 
 
-     ./ld up            # or  
-     docker-sync start && docker-compose up -d
+    $ ./ld up            # or  
+    $ docker-sync start && docker-compose up -d
 
 #### Stop local
 
 Put local to sleep:
 
-    ./ld stop # or 
-    docker-compose stop [; docker-sync clean]
+    $ ./ld stop # or 
+    $ docker-compose stop [; docker-sync clean]
 
 Stop (ie. remove volumes with content, containers):
 
-    ./ld down # or 
-    docker-compose down; docker-sync clean
+    $ ./ld down # or 
+    $ docker-compose down; docker-sync clean
 
 Note that files sync must be started in order to start other containers,
 and it keeps 1-n pcs of containers running when it is started.
@@ -272,20 +271,20 @@ and it keeps 1-n pcs of containers running when it is started.
 
 It may be helpful to keep eye on files sync logs.
  
-     docker-sync logs -f
+    $ docker-sync logs -f
 
 #### Create a snapshot/backup of database
 
 This is done automatically when you stop or destroy your containers.
 
-    ./ld dump
+    $ ./ld dump
 
 #### Restore (old) db backup
  
  Put a file in `db_dumps/` -folder and create a symlink pointing to it:
  
-    ln -s db_dumps/GZIPPED_MYSQLDUMP_FILE.sql.gz ./db_dumps/db-container-dump-LATEST.sql.gz
-    ./ld restore
+    $ ln -s MY_GZIPPED_MYSQLDUMP_FILE.sql.gz ./db_dumps/db-container-dump-LATEST.sql.gz
+    $ ./ld restore
 
 
 #### Composer, Drush, Drupal
@@ -293,18 +292,18 @@ This is done automatically when you stop or destroy your containers.
 Composer, Drush or Drupal console are aliased inside `php` container. Do
 your thing:
 
-       $ docker-compose exec php bash
-       /var/www # drush status
-       /var/www # composer require drupal/pathauto:^1
+    $ docker-compose exec php bash
+    /var/www # drush status
+    /var/www # composer require drupal/pathauto:^1
 
 Composer commands can be launched from your host (but executed inside
 container):
 
-       $ ./ld composer require drupal/pathauto:^1
+    $ ./ld composer require drupal/pathauto:^1
 
 Another way is run one-off commands in `php` -container:
 
-       $ docker-compose exec php bash -c "drush status"
+    $ docker-compose exec php bash -c "drush status"
 
 #### Compile CSS
 
@@ -314,7 +313,7 @@ booted up.
 
 You can expose nodejs container logs with:
 
-      $ docker-compose logs -f nodejs
+    $ docker-compose logs -f nodejs
 
 #### Xdebug
 
@@ -359,9 +358,9 @@ Then, you can use `lld` instead of `./ld` or `./ld.sh`
 take a few minutes). If you already have a `drupal/composer.json` file
 you should not do that, but rather execute composer install:
 
-       $ docker-compose exec php bash -c "composer install"
-       # OR
-       $ ./ld composer install
+    $ ./ld composer install
+    # OR
+    $ docker-compose exec php bash -c "composer install"
 
 ## Projects in parallel?
 
@@ -419,9 +418,9 @@ in the root of the project and changing some variable values.
 
 File should contain key=value -pairs, such as
 
-        # Comment starts with hash.
-        MYSQL_ROOT_PASSWORD=some_password
-        ANOTHER_KEY=the-value
+    # Comment starts with hash.
+    MYSQL_ROOT_PASSWORD=some_password
+    ANOTHER_KEY=the-value
 
 ## ISSUES 
 
@@ -431,7 +430,7 @@ File should contain key=value -pairs, such as
   
    Turn of yor local (on Mac) web server (Apache, Nginx, whatever):
    
-        $ sudo apachectl stop && sudo service nginx stop
+       $ sudo apachectl stop && sudo service nginx stop
 
     Turn off your local MySQL (on Mac):  
     > System preferences -> MySQL ->stop
@@ -461,9 +460,9 @@ system.
 **BE WARNED** This will delete ALL volumes in ALL Docker projects across
 your laptop.
  
-        $ docker kill $(docker ps -q) # Stop all containers.
-        $ docker container prune # Remove all stopped containers.
-        $ docker volume prune # Remove all unused local volumes.
+    $ docker kill $(docker ps -q) # Stop all containers.
+    $ docker container prune # Remove all stopped containers.
+    $ docker volume prune # Remove all unused local volumes.
         
 If even that does not help, clean up EVERYTHING Docker -related
 (downloaded images, created volumes and containers).
@@ -472,7 +471,7 @@ If even that does not help, clean up EVERYTHING Docker -related
 containers in ALL Docker projects across your whole laptop. Sorts of
 resets everything else but Docker configuration.
 
-        docker system prune
+    $ docker system prune
 
 #### Docker-stack does not start
 
@@ -485,7 +484,7 @@ approved a new license.
 
 Makes sure you have Command Line Tools installed:
 
-        $ xcode-select --install
+    $ xcode-select --install
 
 After initial Command Line Tools installation and updates may need to
 accept the license.
@@ -498,7 +497,7 @@ Xcode, but active developer directory
 '/Library/Developer/CommandLineTools' is a command line tools instance`
 you should also reset the command line tools path with
  
-        $ sudo xcode-select -r
+    $ sudo xcode-select -r
 
 ## Why my favourite feature is not there?
 

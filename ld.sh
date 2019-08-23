@@ -11,16 +11,15 @@ DOCKER_YML_STORAGE="./docker"
 CWD=$(pwd)
 DOCKER_PROJECT=$(basename $CWD)
 
-# DB container name, ie. the container key that holds mysql/mariadb.
-CONTAINER_DB='db';
-CONTAINER_PHP='php';
-
-# This is one of the reasons to NEVER use the local-docker publicly:
-MYSQL_ROOT_PASSWORD=root_password
+if [ -f '.env' ]; then
+          # Read .env -file variables. These override possible values defined
+        # earlier in this script.
+        export $(grep -v '^#' .env | xargs)
+fi
 
 DATE=$(date +%Y-%m-%d--%H-%I-%S)
-RESTORE_INFO="mysql --host db -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
-USERS="mysql --host db -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e \"SELECT User, Host from mysql.user WHERE User NOT LIKE 'mysql%';\""
+RESTORE_INFO="mysql --host "$CONTAINER_DB" -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
+USERS="mysql --host "$CONTAINER_DB" -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e \"SELECT User, Host from mysql.user WHERE User NOT LIKE 'mysql%';\""
 
 # Read (and create if necessary) the .env file, allowing overrides to any of our config values.
 if [[ "$ACTION" != 'help' ]]; then
@@ -48,10 +47,6 @@ if [[ "$ACTION" != 'help' ]]; then
             n|N|'no'|'NO' ) echo "Ok, we'll stop here. Please edit .env file manually, and then continue." && exit 1 ;;
             * ) echo "ERROR: Unclear answer, exiting" && exit 2;;
         esac
-    else
-        # Read .env -file variables. These override possible values defined
-        # earlier in this script.
-        export $(grep -v '^#' .env | xargs)
     fi
 fi
 
@@ -133,17 +128,19 @@ db_connect() {
 
   while [ -z "$RESPONSE" ] || [ "$RESPONSE" -eq "0" ]; do
     ROUND=$(( $ROUND + 1 ))
-    RESPONSE=$(docker exec $CONTAINER_DB_ID sh -c '/usr/bin/mysqladmin -uroot -proot_password status 2>/dev/null |wc -l ')
+    echo -n '.'
+    COMMAND="/usr/bin/mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD status 2>/dev/null |wc -l "
+    RESPONSE=$(docker exec $CONTAINER_DB_ID sh -c "$COMMAND")
     if [ "${#RESPONSE}" -gt "0" ]; then
         if [ "$RESPONSE" -ne "0" ]; then
           return 0;
         fi
-    elif [ "$ROUND" -ge  "$ROUNDS_MAX" ]; then
+    fi
+    if [ "$ROUND" -lt  "$ROUNDS_MAX" ]; then
+      sleep 1
+    else
       echo "DB container did not respond in due time."
       break;
-    else
-      echo "Still trying ($ROUND/$ROUNDS_MAX), please wait..."
-      sleep 1
     fi
   done
 
@@ -168,7 +165,7 @@ case "$ACTION" in
         echo " [2] Skeleton -proejct. Drupal in drupal/ and custom code spread in src/ folder."
         read -p "Project type: " CHOICE
         case "$CHOICE" in
-            ''|0|1 ) yml_move ;;
+            ''|0|1 ) yml_move && IS_DOCKERSYNC=$(is_dockersync);;
             2 ) APP_ROOT='drupal/'; yml_move skeleton;;
             * ) echo "ERROR: Unclear answer, exiting" && exit;;
         esac
@@ -308,7 +305,7 @@ case "$ACTION" in
     fi
 
   echo "Using datestamp: $DATE"
-  DUMPER="mysqldump --host db -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --dump-date --tz-utc --verbose"
+  DUMPER="mysqldump --host "$CONTAINER_DB" -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --dump-date --tz-utc --verbose"
   docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$DUMPER  2>/dev/null | gzip --fast -f > /var/db_dumps/db-container-dump-$DATE.sql.gz"
   cd $CWD/db_dumps
   ln -sf db-container-dump-$DATE.sql.gz db-container-dump-LATEST.sql.gz
@@ -345,7 +342,7 @@ case "$ACTION" in
   echo -n "DB backup used: db_dumps/db-container-dump-LATEST.sql.gz => "
   echo $(readlink db_dumps/db-container-dump-LATEST.sql.gz)
   echo "[This may take some time...]"
-  RESTORER="gunzip < /var/db_dumps/db-container-dump-LATEST.sql.gz | mysql --host db -uroot -p"$MYSQL_ROOT_PASSWORD""
+  RESTORER="gunzip < /var/db_dumps/db-container-dump-LATEST.sql.gz | mysql --host "$CONTAINER_DB" -uroot -p"$MYSQL_ROOT_PASSWORD""
   docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORER 2>/dev/null"
   echo
   echo 'Databases after the restore:'

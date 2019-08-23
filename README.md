@@ -22,7 +22,8 @@ as [Docker-sync](https://docker-sync.readthedocs.io). Install
 this on you host (in any directory):
 
          $ brew install cask 
-         $ brew cask install docker
+         $ brew cask install docker-edge # edge channel OR
+         $ brew cask install docker # stable channel
          $ sudo gem install docker-sync
 
 You may have the Docker already installed, in which case

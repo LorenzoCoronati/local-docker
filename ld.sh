@@ -363,6 +363,18 @@ case "$ACTION" in
     fi
     ;;
 
+"drush")
+    CONTAINER_PHP_ID=$CONTAINER_PHP
+    if [ ! -z "$CONTAINER_PHP_ID" ]; then
+        COMM="docker-compose exec ${CONTAINER_PHP} /var/www/vendor/drush/drush/drush ${@:2}"
+        echo "=========================================================="
+        echo "COMMAND: $COMM"
+        $COMM
+    else
+        echo "PHP container is not up"
+    fi
+    ;;
+
 "nuke-volumes")
     echo " "
     echo " *************************"

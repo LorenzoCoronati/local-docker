@@ -455,9 +455,9 @@ case "$ACTION" in
     echo 'Usage:'
     echo "$SCRIPT_NAME [composer|down|dump|init|nuke-volumes|rebuild|restart|restore|stop|up]"
     echo
-    echo " - drush: run drush command in PHP container (if up and running)"
     echo " - composer: run composer command in PHP container (if up and running)"
     echo " - down: backups databases and removes containers & networks (stops docker-sync)"
+    echo " - drush: run drush command in PHP container (if up and running)"
     echo " - dump: backup databases to db_dump -folder"
     echo " - init: build project to ./app -folder, using composer and drupal-project"
     echo " - nuke-volumes: remove permanently synced volumes (NO BACKUPS!)"

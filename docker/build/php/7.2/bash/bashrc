@@ -7,7 +7,7 @@ alias drush=/var/www/vendor/drush/drush/drush
 echo
 echo "Welcome to PHP container!!"
 echo
-echo "PHP version is $(php -r "print PHP_VERSION;")"
+echo "PHP version is $(php --version |grep 'built')"
 echo
 echo "Time in this container is $(date +%Y-%m-%d\ %H\:\%M\:%S\ %z\ \(%Z\))."
 echo

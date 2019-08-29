@@ -363,6 +363,18 @@ case "$ACTION" in
     fi
     ;;
 
+"drush")
+    CONTAINER_PHP_ID=$CONTAINER_PHP
+    if [ ! -z "$CONTAINER_PHP_ID" ]; then
+        COMM="docker-compose exec ${CONTAINER_PHP} /var/www/vendor/drush/drush/drush ${@:2}"
+        echo "=========================================================="
+        echo "COMMAND: $COMM"
+        $COMM
+    else
+        echo "PHP container is not up"
+    fi
+    ;;
+
 "nuke-volumes")
     echo " "
     echo " *************************"
@@ -445,6 +457,7 @@ case "$ACTION" in
     echo
     echo " - composer: run composer command in PHP container (if up and running)"
     echo " - down: backups databases and removes containers & networks (stops docker-sync)"
+    echo " - drush: run drush command in PHP container (if up and running)"
     echo " - dump: backup databases to db_dump -folder"
     echo " - init: build project to ./app -folder, using composer and drupal-project"
     echo " - nuke-volumes: remove permanently synced volumes (NO BACKUPS!)"

@@ -20,6 +20,7 @@ services:
     depends_on: # This key affects the order of which containers get started.
       - php
     working_dir: /var/www/web
+    user: nginx
 
   php:
     # Available builds: https://hub.docker.com/r/xoxoxo/php-container/tags
@@ -37,6 +38,7 @@ services:
     env_file:
       - .env
     working_dir: /var/www
+    user: www-data
 
   composer:
     # Run `composer install` during startup.
@@ -51,6 +53,7 @@ services:
       - .env
     working_dir: /var/www
     command: /usr/local/bin/composer install
+    user: www-data
 
   db:
     # mysql:8.0.11 keeps restarting.

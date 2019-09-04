@@ -205,6 +205,7 @@ case "$ACTION" in
     echo "Project created to ./$APP_ROOT -folder (/var/www in containers)"
     # This must be run after composer install.
     $SCRIPT_NAME drupal-structure-fix
+    $SCRIPT_NAME drupal-files-folder-perms
     echo "Drupal 8 codebase built. Drupal is in ./$APP_ROOT -folder, and public webroot in ./$APP_ROOT/web/index.php."
     sleep 1
     echo 'Bringing the containers up now... Please wait.'
@@ -229,6 +230,7 @@ case "$ACTION" in
     docker-sync start
   fi
   docker-compose -f $DOCKER_COMPOSE_FILE up -d
+  $SCRIPT_NAME drupal-files-folder-perms
   OK=$?
   if [ "$OK" -ne "0" ]; then
     echo
@@ -407,14 +409,20 @@ case "$ACTION" in
 "drupal-structure-fix")
     echo "============="
     echo "Creating some folders to project below /var/www"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c '[[ ! -d "config/sync" ]] &&  mkdir -vp config/sync'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c '[[ ! -d "web/sites/default/files" ]] &&  mkdir -vp web/sites/default/files'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c '[[ ! -w "web/sites/default/files" ]] &&  chmod -r 0777 web/sites/default/files'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/files\"") ]; then echo "web/sites/default/files is writable - GREAT!"; else chmod -v a+wx web/sites/default/files; fi'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/settings.php\"") ]; then echo "web/sites/default/settings.php is writable - GREAT!"; else chmod -v a+w web/sites/default/settings.php; fi'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'mkdir -vp ./web/modules/custom && mkdir -vp ./web/themes/custom'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'echo > ./web/modules/custom/.gitkeep'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'echo > ./web/themes/custom/.gitkeep'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP bash -c '[[ ! -d "config/sync" ]] &&  mkdir -vp config/sync'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP bash -c '[[ ! -d "web/sites/default/files" ]] &&  mkdir -vp web/sites/default/files'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP bash -c '[[ ! -w "web/sites/default/files" ]] &&  chmod -r 0777 web/sites/default/files'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/files\"") ]; then echo "web/sites/default/files is writable - GREAT!"; else chmod -v a+wx web/sites/default/files; fi'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP bash -c 'if [ $(su -s /bin/sh www-data -c "test -w \"web/sites/default/settings.php\"") ]; then echo "web/sites/default/settings.php is writable - GREAT!"; else chmod -v a+w web/sites/default/settings.php; fi'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP bash -c 'mkdir -vp ./web/modules/custom && mkdir -vp ./web/themes/custom'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP bash -c 'echo > ./web/modules/custom/.gitkeep'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP bash -c 'echo > ./web/themes/custom/.gitkeep'
+    ;;
+
+"drupal-files-folder-perms")
+    echo 'Restoring files directory ownership...'
+    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP ba2esh -c "chown -R www-data:www-data /var/www/web/sites/*/files"
+    echo 'Restoring done.'
     ;;
 
 "rename-volumes")
@@ -457,6 +465,7 @@ case "$ACTION" in
     echo
     echo " - composer: run composer command in PHP container (if up and running)"
     echo " - down: backups databases and removes containers & networks (stops docker-sync)"
+    echo " - drupal-files-folder-perms: ensure all Drupal sites files -dirs are writable"
     echo " - drush: run drush command in PHP container (if up and running)"
     echo " - dump: backup databases to db_dump -folder"
     echo " - init: build project to ./app -folder, using composer and drupal-project"

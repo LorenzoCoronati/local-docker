@@ -1,7 +1,17 @@
+# This file contains default .gitignore rules. To use it, copy it to .gitignore,
+# and it will cause files like your Docker-sync cache and environment specific
+# configuration (.env file) to be excluded from Git version control.
+# This is a common strategy to avoid accidentally including private information
+# in public repositories and patch files.
+
+# Also note that subdirectories may and do have their own .gitignore -files
+# affecting content in these directories and their subdirectories further down
+# in the tree hierarchy.
+
+# See db_dumps/.gitignore
+# See app/.gitignore
+
 .DS_Store
 .idea
 .docker-sync
 .env
-
-# Ignore locations filled by composer create-project are set by drupal-project.
-# See app/.gitignore

@@ -96,8 +96,9 @@ Copy all of this repository on top of your current project.
     db_dumps/
     docker/
     .env.example 
+    .gitignore.example # (or copy rules to your existing .gitignore)
     ld.sh 
-    ld  # symlink to ld.sh
+    ld  # (ensure you have this symlinking to correct ld.sh)
 
 Open your favourite terminal, type `./ld` and hit \[ENTER]. If you get
 an error, ensure `ld.sh` has execute permission:

@@ -454,7 +454,7 @@ case "$ACTION" in
 
 "drupal-files-folder-perms")
     echo 'Restoring files directory ownership...'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP ba2esh -c "chown -R www-data:www-data /var/www/web/sites/*/files"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP bash -c "chown -R www-data:www-data /var/www/web/sites/*/files"
     echo 'Restoring done.'
     ;;
 

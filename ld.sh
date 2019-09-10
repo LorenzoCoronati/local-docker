@@ -175,6 +175,20 @@ case "$ACTION" in
             n|N|'no'|'NO' ) echo "Volume names will start with 'webroot-'";;
         esac
     fi
+    if [[ "$(docker-compose -f $DOCKER_COMPOSE_FILE ps)" ]]; then
+        echo "Turning off current container stack."
+        docker-compose -f $DOCKER_COMPOSE_FILE down
+        echo 'ALL containers: stopped.'
+    fi
+    if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+        docker-sync clean
+        docker-sync start
+    fi
+    echo 'Starting PHP container only, to use it to build the codebase.'
+    docker-compose -f $DOCKER_COMPOSE_FILE up -d php
+    echo 'PHP container: started.'
+
+    DELETE_ROOT=
     if [ -e "$APP_ROOT""composer.json" ]; then
       echo "Looks like project is already created? File "$APP_ROOT"composer.json exists."
       echo "Maybe you should install composer codebase instead:"
@@ -183,24 +197,43 @@ case "$ACTION" in
     elif [ ! -d "$APP_ROOT" ]; then
       mkdir $APP_ROOT;
     fi
+    echo "Verify application root can be used to install codebase (must be empty)..."
+    APP_ROOT_FILES="ls -lha /var/www"
+    echo "Next: $APP_ROOT_FILES"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$APP_ROOT_FILES"
+    echo "Currently on host $APP_ROOT:"
+    ls -lha $APP_ROOT
+
+    if [ "$(ls -A $APP_ROOT)" ]; then
+      echo "Application root folder $APP_ROOT is not empty. Installation requires an empty folder. Currently there is: "
+      ls -A $APP_ROOT
+      read -p "WARNING: If you continue all of these will be deleted. Type 'PLEASE-DELETE' to continue: " CHOICE
+      case "$CHOICE" in
+          'PLEASE-DELETE' ) rm -rf $APP_ROOT && mkdir $APP_ROOT && DELETE_ROOT=1;;
+          * ) echo "Clear the folder manually and start overm - or initialize codebase manually." && exit;;
+      esac
+    fi
+
     echo
     echo 'Installing Drupal project, please wait...'
-    if [ "$IS_DOCKERSYNC" -eq "1" ]; then
-        docker-sync start
+    echo "============="
+    if [[ ! -z "$DELETE_ROOT" ]]; then
+        echo "Clearing old things from the app root."
+        CLEAN_ROOT="rm -rf /var/www/*"
+        echo "Next: $CLEAN_ROOT"
+        docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$CLEAN_ROOT"
     fi
+
     # Use verbose output on this composer command.
     COMPOSER_INIT="composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev"
-    docker-compose -f $DOCKER_COMPOSE_FILE up -d php
+    echo "Next: $COMPOSER_INIT"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$COMPOSER_INIT"
     OK=$?
     if [ "$OK" -ne "0" ]; then
         echo "ERROR: Something went wrong when initializing the codebase."
         echo "Check that required ports are not allocated (by other containers or programs) and re-configure them if needed."
         exit 1
     fi
-
-    echo "============="
-    echo "Next: $COMPOSER_INIT"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$COMPOSER_INIT"
     echo "============="
     echo "Project created to ./$APP_ROOT -folder (/var/www in containers)"
     # This must be run after composer install.
@@ -421,7 +454,7 @@ case "$ACTION" in
 
 "drupal-files-folder-perms")
     echo 'Restoring files directory ownership...'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP ba2esh -c "chown -R www-data:www-data /var/www/web/sites/*/files"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_PHP bash -c "chown -R www-data:www-data /var/www/web/sites/*/files"
     echo 'Restoring done.'
     ;;
 

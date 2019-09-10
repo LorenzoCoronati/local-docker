@@ -51,7 +51,7 @@ services:
     env_file:
       - .env
     working_dir: /var/www
-    command: /usr/local/bin/composer install
+    command: sh -c '[[ ! -e "/var/www/composer.lock" ]] && exit 0 || /usr/local/bin/composer install'
 
   db:
     # mysql:8.0.11 keeps restarting.
@@ -106,9 +106,9 @@ services:
   # - nodejs_my_other_theme.
   nodejs:
     image: wodby/drupal-node:1.0-1.0.0
-    working_dir: /var/www/web/themes/custom/MYTHEME
+    working_dir: /var/www
     volumes:
-      - ./app/web/themes/custom/MYTHEME:/var/www/web/themes/custom/MYTHEME:delegated
+      - ./app:/var/www/:delegated
     command: sh -c '[[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
 
 volumes:

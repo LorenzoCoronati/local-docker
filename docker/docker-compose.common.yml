@@ -47,7 +47,7 @@ services:
     env_file:
       - .env
     working_dir: /var/www
-    command: /usr/local/bin/composer install
+    command: sh -c '[[ ! -e "/var/www/composer.lock" ]] && exit 0 || /usr/local/bin/composer install'
 
   db:
     # mysql:8.0.11 keeps restarting.

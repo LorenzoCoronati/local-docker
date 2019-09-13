@@ -96,19 +96,13 @@ yml_move() {
     echo "MODE: $MODE"
     if [ -f "$DOCKER_YML_STORAGE/docker-compose.$MODE.yml" ]; then
         echo "Using $DOCKER_YML_STORAGE/docker-compose.$MODE.yml as the docker-compose recipe."
-        echo "Moving file to project root."
         mv -v $DOCKER_YML_STORAGE/docker-compose.$MODE.yml ./$DOCKER_COMPOSE_FILE
-        echo "Removing files:"
-        ls $DOCKER_YML_STORAGE/docker-compose.*.yml
-        rm -f "$DOCKER_YML_STORAGE/docker-compose.*.yml"
+        rm -f $DOCKER_YML_STORAGE/docker-compose.*.yml
     fi
     if [ -f "$DOCKER_YML_STORAGE/docker-sync.$MODE.yml" ]; then
         echo "Using $DOCKER_YML_STORAGE/docker-sync.$MODE.yml as the docker-sync recipe."
-        echo "Moving file to project root."
         mv -v $DOCKER_YML_STORAGE/docker-sync.$MODE.yml ./$DOCKERSYNC_FILE
-        echo "Removing files:"
-        ls $DOCKER_YML_STORAGE/docker-sync.*.yml
-        rm -f "$DOCKER_YML_STORAGE/docker-sync.*.yml"
+        rm -f $DOCKER_YML_STORAGE/docker-sync.*.yml
     fi
 }
 

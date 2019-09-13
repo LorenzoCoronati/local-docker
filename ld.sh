@@ -96,23 +96,15 @@ yml_move() {
     echo "MODE: $MODE"
     if [ -f "$DOCKER_YML_STORAGE/docker-compose.$MODE.yml" ]; then
         echo "Using $DOCKER_YML_STORAGE/docker-compose.$MODE.yml as the docker-compose recipe."
-        echo "Moving file to project root."
         mv -v $DOCKER_YML_STORAGE/docker-compose.$MODE.yml ./$DOCKER_COMPOSE_FILE
-        echo "Removing files:"
-        ls $DOCKER_YML_STORAGE/docker-compose.*.yml
-        rm -f "$DOCKER_YML_STORAGE/docker-compose.*.yml"
+        rm -f $DOCKER_YML_STORAGE/docker-compose.*.yml
     fi
     if [ -f "$DOCKER_YML_STORAGE/docker-sync.$MODE.yml" ]; then
         echo "Using $DOCKER_YML_STORAGE/docker-sync.$MODE.yml as the docker-sync recipe."
-        echo "Moving file to project root."
         mv -v $DOCKER_YML_STORAGE/docker-sync.$MODE.yml ./$DOCKERSYNC_FILE
-        echo "Removing files:"
-        ls $DOCKER_YML_STORAGE/docker-sync.*.yml
-        rm -f "$DOCKER_YML_STORAGE/docker-sync.*.yml"
+        rm -f $DOCKER_YML_STORAGE/docker-sync.*.yml
     fi
 }
-
-IS_DOCKERSYNC=$(is_dockersync)
 
 db_connect() {
   CONTAINER_DB_ID=$(find_db_container)
@@ -165,7 +157,7 @@ case "$ACTION" in
         echo " [2] Skeleton -proejct. Drupal in drupal/ and custom code spread in src/ folder."
         read -p "Project type: " CHOICE
         case "$CHOICE" in
-            ''|0|1 ) yml_move && IS_DOCKERSYNC=$(is_dockersync);;
+            ''|0|1 ) yml_move;;
             2 ) APP_ROOT='drupal/'; yml_move skeleton;;
             * ) echo "ERROR: Unclear answer, exiting" && exit;;
         esac
@@ -180,7 +172,7 @@ case "$ACTION" in
         docker-compose -f $DOCKER_COMPOSE_FILE down
         echo 'ALL containers: stopped.'
     fi
-    if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+    if is_dockersync; then
         docker-sync clean
         docker-sync start
     fi
@@ -259,7 +251,7 @@ case "$ACTION" in
    ;;
 
 "up")
-  if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+  if is_dockersync; then
     docker-sync start
   fi
   docker-compose -f $DOCKER_COMPOSE_FILE up -d
@@ -299,7 +291,7 @@ case "$ACTION" in
     exit 1
   fi
   docker-compose -f $DOCKER_COMPOSE_FILE  down
-  if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+  if is_dockersync; then
     docker-sync clean
   fi
   ;;
@@ -308,7 +300,7 @@ case "$ACTION" in
   echo "Stopping containers (volumes and content intact)"
   echo "No backup of database content created."
   docker-compose -f $DOCKER_COMPOSE_FILE stop
-  if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+  if is_dockersync; then
     docker-sync stop
   fi
   ;;
@@ -425,7 +417,7 @@ case "$ACTION" in
     done
     echo
     docker-compose -f $DOCKER_COMPOSE_FILE down
-    if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+    if is_dockersync; then
         docker-sync clean
     fi
     for VOL in $(docker volume ls --filter="name=localbase*" -q); do
@@ -459,7 +451,7 @@ case "$ACTION" in
     ;;
 
 "rename-volumes")
-    if [ "$IS_DOCKERSYNC" -eq "1" ]; then
+    if is_dockersync; then
         echo 'Turning off docker-sync, please wait...'
         docker-sync clean
     fi

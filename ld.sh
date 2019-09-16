@@ -157,6 +157,7 @@ case "$ACTION" in
             2 ) APP_ROOT='drupal/'; yml_move skeleton;;
             * ) echo "ERROR: Unclear answer, exiting" && exit;;
         esac
+        [ ! -d $APP_ROOT ] && mkdir $APP_ROOT
         read -p "Use project-name based docker-sync -volumes [default]? [Y/n]" CHOICE
         case "$CHOICE" in
             ''|y|Y|'yes'|'YES' ) $SCRIPT_NAME rename-volumes;;

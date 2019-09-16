@@ -80,11 +80,7 @@ find_db_container() {
 }
 
 is_dockersync() {
-    if [ -z "$(which docker-sync)" ] || [ ! -f "./$DOCKERSYNC_FILE" ]; then
-        echo 0
-    else
-        echo 1
-    fi
+    [ ! -z "$(which docker-sync)" ] && [ -f "./$DOCKERSYNC_FILE" ]
 }
 
 # Copy conf of your choosing to project root, destroy leftovers.
@@ -161,6 +157,7 @@ case "$ACTION" in
             2 ) APP_ROOT='drupal/'; yml_move skeleton;;
             * ) echo "ERROR: Unclear answer, exiting" && exit;;
         esac
+        [ ! -d $APP_ROOT ] && mkdir $APP_ROOT
         read -p "Use project-name based docker-sync -volumes [default]? [Y/n]" CHOICE
         case "$CHOICE" in
             ''|y|Y|'yes'|'YES' ) $SCRIPT_NAME rename-volumes;;

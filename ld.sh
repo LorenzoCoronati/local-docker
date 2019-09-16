@@ -80,11 +80,7 @@ find_db_container() {
 }
 
 is_dockersync() {
-    if [ -z "$(which docker-sync)" ] || [ ! -f "./$DOCKERSYNC_FILE" ]; then
-        echo 0
-    else
-        echo 1
-    fi
+    [ ! -z "$(which docker-sync)" ] && [ -f "./$DOCKERSYNC_FILE" ]
 }
 
 # Copy conf of your choosing to project root, destroy leftovers.

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Get colors
+. ./docker/scripts/ld.colors.sh
+
 # 1st param, The Command.
 ACTION=${1-'help'}
 
@@ -35,17 +38,16 @@ if [[ "$ACTION" != 'help' ]]; then
         cp -f ./.env.example .env
         echo "Please review your .env file:"
         echo
-        echo "========  START OF .env ========="
+        echo -e "${BIWhite}========  START OF .env =========${Color_Off}"
         sleep 1
         cat .env
-        echo "========  END OF .env   ========="
+        echo -e "${BIWhite}========  END OF .env =========${Color_Off}"
         echo
-        sleep 1
         read -p "Does this look okay? [Y/n] " CHOICE
         case "$CHOICE" in
             ''|y|Y|'yes'|'YES' ) echo "Cool, let's continue!" & echo ;;
-            n|N|'no'|'NO' ) echo "Ok, we'll stop here. Please edit .env file manually, and then continue." && exit 1 ;;
-            * ) echo "ERROR: Unclear answer, exiting" && exit 2;;
+            n|N|'no'|'NO' ) echo -e "Ok, we'll stop here. ${BYellow}Please edit .env file manually, and then continue.${Color_Off}" && exit 1 ;;
+            * ) echo -e "${BRed}ERROR: Unclear answer, exiting.${Color_Off}" && exit 2;;
         esac
     fi
 fi
@@ -66,7 +68,7 @@ if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
 fi
 
 if [ -z "$(which docker)" ]; then
-  echo "Docker is not running. Docker is required to use local-docker."
+  echo -e "${Red}Docker is not running. Docker is required to use local-docker.${Color_Off}"
   exit 1
 fi
 
@@ -108,10 +110,10 @@ db_connect() {
   ROUND=0
   ROUNDS_MAX=30
   if [ -z "$CONTAINER_DB_ID" ]; then
-    echo "DB container not running (or not yet created)."
+    echo -e "${Red}DB container not running (or not yet created).${Color_Off}"
     exit 1
   else
-    echo "Connecting to DB container ($CONTAINER_DB_ID), please wait..."
+    echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
   fi
 
   while [ -z "$RESPONSE" ] || [ "$RESPONSE" -eq "0" ]; do
@@ -121,13 +123,15 @@ db_connect() {
     RESPONSE=$(docker exec $CONTAINER_DB_ID sh -c "$COMMAND")
     if [ "${#RESPONSE}" -gt "0" ]; then
         if [ "$RESPONSE" -ne "0" ]; then
+          echo -e " ${Green}connected.${Color_Off}"
           return 0;
         fi
     fi
     if [ "$ROUND" -lt  "$ROUNDS_MAX" ]; then
       sleep 1
     else
-      echo "DB container did not respond in due time."
+      echo -e " ${BRed}failed!${Color_Off}"
+      echo -e "${BRed}DB container did not respond in due time.${Color_Off}"
       break;
     fi
   done
@@ -157,7 +161,7 @@ case "$ACTION" in
             2 ) APP_ROOT='drupal/'; yml_move skeleton;;
             * ) echo "ERROR: Unclear answer, exiting" && exit;;
         esac
-        [ ! -d $APP_ROOT ] && mkdir $APP_ROOT
+        echo 'APP_ROOT='$APP_ROOT >> ./.env
         read -p "Use project-name based docker-sync -volumes [default]? [Y/n]" CHOICE
         case "$CHOICE" in
             ''|y|Y|'yes'|'YES' ) $SCRIPT_NAME rename-volumes;;
@@ -504,6 +508,3 @@ case "$ACTION" in
 esac
 
 cd $CWD
-
-
-

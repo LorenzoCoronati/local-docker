@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
+PROJECT_ROOT=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+if [[ ! -d "$PROJECT_ROOT" ]]; then PROJECT_ROOT="$PWD"; fi
+
 # Get colors.
-. ./docker/scripts/ld.colors.sh
+. $PROJECT_ROOT/docker/scripts/ld.colors.sh
 
 # Get functions.
-. ./docker/scripts/ld.functions.sh
+. $PROJECT_ROOT/docker/scripts/ld.functions.sh
 
 # 1st param, The Command.
 ACTION=${1-'help'}

@@ -13,7 +13,7 @@ find_db_container() {
 }
 
 is_dockersync() {
-    [ ! -z "$(which docker-sync)" ] && [ -f "./$DOCKERSYNC_FILE" ]
+    [ ! -z "$(which docker-sync)" ] && [ -f "$PROJECT_ROOT/$DOCKERSYNC_FILE" ]
 }
 
 # Copy conf of your choosing to project root, destroy leftovers.
@@ -74,4 +74,16 @@ db_connect() {
 # Use: replace_in_file PATTERN FILENAME
 replace_in_file () {
     sed --version >/dev/null 2>&1 && sed -i -- "$@" || sed -i "" "$@"
+}
+
+import_root_env() {
+    ENV_FILE="$PROJECT_ROOT/.env"
+
+    if [ -f "$ENV_FILE" ]; then
+        # Read .env -file variables. These override possible values defined
+        # earlier in this script.
+        export $(grep -v '^#' $ENV_FILE | xargs)
+        return 0
+    fi
+    exit 1
 }

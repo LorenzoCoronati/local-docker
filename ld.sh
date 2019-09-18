@@ -13,18 +13,13 @@ if [[ ! -d "$PROJECT_ROOT" ]]; then PROJECT_ROOT="$PWD"; fi
 ACTION=${1-'help'}
 
 # Use fixed name, since docker-sync is supposed to be locally only.
-DOCKERSYNC_FILE="docker-sync.yml"
-DOCKER_COMPOSE_FILE='docker-compose.yml';
-DOCKER_YML_STORAGE="./docker"
+DOCKERSYNC_FILE=docker-sync.yml
+DOCKER_COMPOSE_FILE=docker-compose.yml
+DOCKER_YML_STORAGE=$PROJECT_ROOT/docker
+DOCKER_PROJECT=$(basename $PROJECT_ROOT)
 
-CWD=$(pwd)
-DOCKER_PROJECT=$(basename $CWD)
-
-if [ -f '.env' ]; then
-    # Read .env -file variables. These override possible values defined
-    # earlier in this script.
-    export $(grep -v '^#' .env | xargs)
-fi
+import_root_env
+ENV_IMPORT_FAILED=$?
 
 DATE=$(date +%Y-%m-%d--%H-%I-%S)
 RESTORE_INFO="mysql --host "$CONTAINER_DB" -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
@@ -32,26 +27,26 @@ USERS="mysql --host "$CONTAINER_DB" -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e
 
 # Read (and create if necessary) the .env file, allowing overrides to any of our config values.
 if [[ "$ACTION" != 'help' ]]; then
-    if [[ -h '.env' ]] || [[ ! -f '.env' ]]; then
-        if [ ! -f '.env.example' ]; then
-            echo "File .env.example are .env are missing. Please add either one to project root."
+    if [[ "$ENV_IMPORT_FAILED" -ne "0" ]]; then
+        if [ ! -f "$PROJECT_ROOT/.env.example" ]; then
+            echo "Files .env.example are .env are missing. Please add either one to project root."
             echo "Then start over."
             exit 1
         fi
         sleep 2
         echo "Copying .env.example -file => .env. "
         sleep 2
-        cp -f ./.env.example .env
+        cp -f $PROJECT_ROOT/.env.example $PROJECT_ROOT/.env
         echo "Please review your .env file:"
         echo
         echo -e "${BIWhite}========  START OF .env =========${Color_Off}"
         sleep 1
-        cat .env
+        cat $PROJECT_ROOT/.env
         echo -e "${BIWhite}========  END OF .env =========${Color_Off}"
         echo
         read -p "Does this look okay? [Y/n] " CHOICE
         case "$CHOICE" in
-            ''|y|Y|'yes'|'YES' ) echo "Cool, let's continue!" & echo ;;
+            ''|y|Y|'yes'|'YES' ) import_root_env && echo "Cool, let's continue!" & echo ;;
             n|N|'no'|'NO' ) echo -e "Ok, we'll stop here. ${BYellow}Please edit .env file manually, and then continue.${Color_Off}" && exit 1 ;;
             * ) echo -e "${BRed}ERROR: Unclear answer, exiting.${Color_Off}" && exit 2;;
         esac
@@ -60,9 +55,9 @@ fi
 
 # Get current script name, and use a symlink if it exists.
 if [ ! -L "$( basename "$0" .sh)" ]; then
-    SCRIPT_NAME="./"$( basename "$0")
+    SCRIPT_NAME=$PROJECT_ROOT/$( basename "$0")
 else
-    SCRIPT_NAME="./"$( basename "$0" .sh)
+    SCRIPT_NAME=$PROJECT_ROOT/$( basename "$0" .sh)
 fi
 
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
@@ -93,7 +88,7 @@ case "$ACTION" in
             2 ) APP_ROOT='drupal/'; yml_move skeleton;;
             * ) echo "ERROR: Unclear answer, exiting" && exit;;
         esac
-        echo 'APP_ROOT='$APP_ROOT >> ./.env
+        echo 'APP_ROOT='$APP_ROOT >> $PROJECT_ROOT/.env
         read -p "Use project-name based docker-sync -volumes [default]? [Y/n]" CHOICE
         case "$CHOICE" in
             ''|y|Y|'yes'|'YES' ) $SCRIPT_NAME rename-volumes;;
@@ -267,9 +262,9 @@ case "$ACTION" in
   echo "Using datestamp: $DATE"
   DUMPER="mysqldump --host "$CONTAINER_DB" -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --dump-date --tz-utc --verbose"
   docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$DUMPER  2>/dev/null | gzip --fast -f > /var/db_dumps/db-container-dump-$DATE.sql.gz"
-  cd $CWD/db_dumps
+  cd $PROJECT_ROOT/db_dumps
   ln -sf db-container-dump-$DATE.sql.gz db-container-dump-LATEST.sql.gz
-  cd $CWD
+  cd $PROJECT_ROOT
   echo "DB backup in db_dumps/db-container-dump-$DATE.sql.gz"
   echo "DB backup symlink: db_dumps/db-container-dump-LATEST.sql.gz"
   ;;
@@ -388,7 +383,7 @@ case "$ACTION" in
         echo 'Turning off docker-sync, please wait...'
         docker-sync clean
     fi
-    DEFAULT=$(basename $CWD)
+    DEFAULT=$(basename $PROJECT_ROOT)
     VALID=0
     while [ "$VALID" -eq "0" ]; do
         echo "Please give me your project name [default: \"$DEFAULT\"]? "
@@ -407,7 +402,7 @@ case "$ACTION" in
     done;
 
      echo "Renaming volumes to '$PROJECTNAME' for docker-sync, please wait..."
-     replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" ./$DOCKERSYNC_FILE
+     replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKERSYNC_FILE
      replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKER_COMPOSE_FILE
      echo 'Done. You can now (re)start your project:'
      echo "$SCRIPT_NAME init - installs Drupal 8 codebase if not present"
@@ -439,4 +434,4 @@ case "$ACTION" in
 
 esac
 
-cd $CWD
+cd $PROJECT_ROOT

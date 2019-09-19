@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
+CWD=$(pwd)
+
 PROJECT_ROOT=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
 if [[ ! -d "$PROJECT_ROOT" ]]; then PROJECT_ROOT="$PWD"; fi
+
+cd $PROJECT_ROOT
 
 # Get colors.
 . $PROJECT_ROOT/docker/scripts/ld.colors.sh
@@ -31,6 +35,7 @@ if [[ "$ACTION" != 'help' ]]; then
         if [ ! -f "$PROJECT_ROOT/.env.example" ]; then
             echo "Files .env.example are .env are missing. Please add either one to project root."
             echo "Then start over."
+            cd $CWD
             exit 1
         fi
         sleep 2
@@ -48,7 +53,7 @@ if [[ "$ACTION" != 'help' ]]; then
         case "$CHOICE" in
             ''|y|Y|'yes'|'YES' ) import_root_env && echo "Cool, let's continue!" & echo ;;
             n|N|'no'|'NO' ) echo -e "Ok, we'll stop here. ${BYellow}Please edit .env file manually, and then continue.${Color_Off}" && exit 1 ;;
-            * ) echo -e "${BRed}ERROR: Unclear answer, exiting.${Color_Off}" && exit 2;;
+            * ) echo -e "${BRed}ERROR: Unclear answer, exiting.${Color_Off}" && cd $CWD && exit 2;;
         esac
     fi
 fi
@@ -56,8 +61,10 @@ fi
 # Get current script name, and use a symlink if it exists.
 if [ ! -L "$( basename "$0" .sh)" ]; then
     SCRIPT_NAME=$PROJECT_ROOT/$( basename "$0")
+    SCRIPT_NAME_SHORT=./$( basename "$0")
 else
     SCRIPT_NAME=$PROJECT_ROOT/$( basename "$0" .sh)
+    SCRIPT_NAME_SHORT=./$( basename "$0" .sh)
 fi
 
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
@@ -70,6 +77,7 @@ fi
 
 if [ -z "$(which docker)" ]; then
   echo -e "${Red}Docker is not running. Docker is required to use local-docker.${Color_Off}"
+  cd $CWD
   exit 1
 fi
 
@@ -86,7 +94,7 @@ case "$ACTION" in
         case "$CHOICE" in
             ''|0|1 ) yml_move;;
             2 ) APP_ROOT='drupal/'; yml_move skeleton;;
-            * ) echo "ERROR: Unclear answer, exiting" && exit;;
+            * ) echo "ERROR: Unclear answer, exiting" && cd $CWD && exit;;
         esac
         echo 'APP_ROOT='$APP_ROOT >> $PROJECT_ROOT/.env
         read -p "Use project-name based docker-sync -volumes [default]? [Y/n]" CHOICE
@@ -112,7 +120,8 @@ case "$ACTION" in
     if [ -e "$APP_ROOT""composer.json" ]; then
       echo "Looks like project is already created? File "$APP_ROOT"composer.json exists."
       echo "Maybe you should install composer codebase instead:"
-      echo "$SCRIPT_NAME up && $SCRIPT_NAME composer install"
+      echo "$SCRIPT_NAME_SHORT up && $SCRIPT_NAME_SHORT composer install"
+      cd $CWD
       exit 1
     elif [ ! -d "$APP_ROOT" ]; then
       mkdir $APP_ROOT;
@@ -130,7 +139,7 @@ case "$ACTION" in
       read -p "WARNING: If you continue all of these will be deleted. Type 'PLEASE-DELETE' to continue: " CHOICE
       case "$CHOICE" in
           'PLEASE-DELETE' ) rm -rf $APP_ROOT && mkdir $APP_ROOT && DELETE_ROOT=1;;
-          * ) echo "Clear the folder manually and start overm - or initialize codebase manually." && exit;;
+          * ) echo "Clear the folder manually and start overm - or initialize codebase manually." && cd $CWD && exit;;
       esac
     fi
 
@@ -152,6 +161,7 @@ case "$ACTION" in
     if [ "$OK" -ne "0" ]; then
         echo "ERROR: Something went wrong when initializing the codebase."
         echo "Check that required ports are not allocated (by other containers or programs) and re-configure them if needed."
+        cd $CWD
         exit 1
     fi
     echo "============="
@@ -189,6 +199,7 @@ case "$ACTION" in
     echo
     echo "ERROR: Something went wrong when bringing the project up."
     echo "Check that required ports are not allocated (by other containers or programs) and re-configure them if needed."
+    cd $CWD
     exit 1
   fi
 
@@ -197,6 +208,7 @@ case "$ACTION" in
 
   if [ "$CONN" -ne 0 ]; then
     echo "Oww... DB container is not up, even after a few retries."
+    cd $CWD
     exit 1
   fi
 
@@ -209,13 +221,14 @@ case "$ACTION" in
   echo 'In case you need to do that (Drupal DB is gone?),'
   echo '1) check your symlink target in db_dumps/db-container-dump-LATEST.sql.gz'
   echo '2) execute the following command:'
-  echo $SCRIPT_NAME restore
+  echo $SCRIPT_NAME_SHORT restore
   ;;
 
 "down")
   $SCRIPT_NAME dump
   CONN=$?
   if [ "$CONN" -ne "0" ]; then
+    cd $CWD
     exit 1
   fi
   docker-compose -f $DOCKER_COMPOSE_FILE  down
@@ -246,6 +259,7 @@ case "$ACTION" in
     OK=$?
     if [ "$OK" -ne "0" ]; then
         echo 'Putting local down failed. Database backup may have failed, so stopping process here.'
+        cd $CWD
         exit 1
     fi
     $SCRIPT_NAME up
@@ -256,6 +270,7 @@ case "$ACTION" in
     db_connect
     CONN=$?
     if [ "$CONN" -ne "0" ]; then
+        cd $CWD
         exit 1
     fi
 
@@ -276,6 +291,7 @@ case "$ACTION" in
         echo "** Dump file missing! Create a symlin to your DB backup file:                             **"
         echo "** ln -s PATH/TO/GZIPPED/MYSQLDUMP/FILE.sql.gz ./db_dumps/db-container-dump-LATEST.sql.gz **"
         echo "********************************************************************************************"
+        cd $CWD
         exit 1
     fi
 
@@ -284,6 +300,7 @@ case "$ACTION" in
 
     if [ "$CONN" -ne 0 ]; then
         echo "Oww... DB container is not up, even after a few retries. Exiting..."
+        cd $CWD
         exit 2
     fi
 
@@ -405,8 +422,8 @@ case "$ACTION" in
      replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKERSYNC_FILE
      replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKER_COMPOSE_FILE
      echo 'Done. You can now (re)start your project:'
-     echo "$SCRIPT_NAME init - installs Drupal 8 codebase if not present"
-     echo "$SCRIPT_NAME up - boots up this project"
+     echo "$SCRIPT_NAME_SHORT init - installs Drupal 8 codebase if not present"
+     echo "$SCRIPT_NAME_SHORT up - boots up this project"
     ;;
 
 *)
@@ -414,7 +431,7 @@ case "$ACTION" in
     echo "If you have docker-sync installed and configuration present (docker-sync.yml) it controls that too."
     echo
     echo 'Usage:'
-    echo "$SCRIPT_NAME [composer|down|dump|init|nuke-volumes|rebuild|restart|restore|stop|up]"
+    echo "$SCRIPT_NAME_SHORT [composer|down|dump|init|nuke-volumes|rebuild|restart|restore|stop|up]"
     echo
     echo " - composer: run composer command in PHP container (if up and running)"
     echo " - down: backups databases and removes containers & networks (stops docker-sync)"
@@ -429,9 +446,10 @@ case "$ACTION" in
     echo " - rename-volumes: Rename your local-docker volumes (helps to avoid collisions with other projects)"
     echo " - stop: stops containers leaving them hanging around (stops docker-sync)"
     echo " - up: brings containers up (starts docker-sync)"
+    cd $CWD
     exit 0
     ;;
 
 esac
 
-cd $PROJECT_ROOT
+cd $CWD

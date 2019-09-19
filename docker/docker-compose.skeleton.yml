@@ -93,16 +93,16 @@ services:
     restart: always
     ports:
       - "${MY_DOCKER_IP:-127.0.0.1}:8025:8025"
-      - "${MY_DOCKER_IP:-127.0.0.1}:1025:1025"
 
-  # Replcase MYTHEME with your theme name. If you have multiple the  # clone the noodejs -section and rename the containers to something like
+  # Replcase MYTHEME with your theme name. If you have multiple the
+  # clone the noodejs -section and rename the containers to something like
   # - nodejs_mytheme and
   # - nodejs_my_other_theme.
   nodejs:
     image: wodby/drupal-node:1.0-1.0.0
     working_dir: /var/www
     volumes:
-      - ./app:/var/www/:delegated
+      - webroot-sync-core-delegated:/var/www:nocopy
     command: sh -c '[[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
 
 volumes:

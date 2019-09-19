@@ -113,66 +113,27 @@ idea what does it mean, do not use it.
 If you are applying `local-docker` on a Skeleton -based project, see
 "Skeleton" -section .
 
-### Local IP address and domains
+### Local domains
 
-This is not needed unless you wish to use a local domain (ie. type
-something other than IP address 0.0.0.0 in your browser).
+This is needed to use a local domain (ie. type something other
+than http://0.0.0.0 or http://localhost in your browser).
 
-Use custom IP alias per project to keep your own `/etc/hosts` -file
-sane. Safe IP address ranges are `10.` and `192.168.*`.
-
-1.  **A) Create alias to your loopback -address** with a specific IP
-    address (you will need to repeat this step after each reboot unless
-    you do also step 2.):
-
-          $ sudo ifconfig lo0 alias 10.10.10.10
-
-    More info in "Local IP addresses and ports" -section
-
-    **OR B) Make loopback -alias to be loaded automatically (MacOS only)**
-
-    1.  Copy [this plist -file](docker/docker-for-mac-ip-alias.plist) to your `/Library/LauchDaemons` (will be loaded automatically after each reboot)
-
-            $ sudo cp PROJECT_ROOT/docker/docker-for-mac-ip-alias.plist /Library/LaunchDaemons/com.exove.net.docker_10-10-10-10_alias.plist
-
-    2.  Run this or reboot your MacOS:
-
-            $ launchctl load /Library/LaunchDaemons/com.exove.net.docker_10-10-10-10_alias.plist
-
-    You should have similar configuration now in in your [loopback interface](https://en.wikipedia.org/wiki/Loopback#LOOPBACK-INTERFACE)
-
-        $ ifconfig lo0
-        lo0: flags=8049<UP,LOOPBACK,RUNNING,MULTICAST> mtu 16384
-        options=1203<RXCSUM,TXCSUM,TXSTATUS,SW_TIMESTAMP>
-        inet 127.0.0.1 netmask 0xff000000
-        inet6 ::1 prefixlen 128
-        inet6 fe80::1%lo0 prefixlen 64 scopeid 0x1
-        inet 10.10.10.10 netmask 0xffffff00   # **** ALIAS! *****
-        nd6 options=201<PERFORMNUD,DAD>
-
-    (Important line is **`inet 10.10.10.10...`**).
-
-2.  Add your desired (local) domains to `/etc/hosts` with IP addresses.
+1.  Add your desired (local) domains to `/etc/hosts`.
 
         #######################################################
         ##############  PROJECT NAME    #######################
-        10.10.10.10 mylocal.example.com mylocal.example.fi other.multilanguage.domain mylocal.de.example.com
-        10.10.10.10 mailhog.local
-        
-It is good practise is to have each project to use live in their own IP
-addresses (or range). `local-docker` lives happily behind one IP 
-address.
+        127.0.0.1 mylocal.example.com mylocal.example.fi other.multilanguage.domain mylocal.de.example.com
+        127.0.0.1 mailhog.local
 
 #### Install Drupal
 
-After setting IP addresses and domains as your project needs them point
-your browser to the correct domain. If all is well adn Drupal is not yet
-installed you'll be redirected to
+After setting your domains point your browser to the correct domain. If
+all is well and Drupal is not yet installed you'll be redirected to
 `mylocal.example.com/core/install.php`.
 
 Install Drupal as usual. Be default database -container (`db`) has one
 database (`drupal`) and credentials for accessing (`drupal`/`drupal`).
-**Database hostname should be `db`** (database container name). Docker
+**Database hostname must be `db`** (database container name). Docker
 connects containers internally using container names.
 
 If you need more databases or need to manage anything inside Drupal's
@@ -382,34 +343,25 @@ containers configuration for `ports`, format is HOST:CONTAINER. In other
 words, 80:80 exposes `nginx` port `80` to host as-is, and `8080:80`
 allows access to `nginx` from host via port `8080`.
 
-### Local IP addresses and ports
+### Local ports
 
-Docker exposes different services via IP address `0.0.0.0` to allow access to them via all host machine IPs (_right now_ is the time to turn on your firewall if it is not yet enabled). Currently exposed services include:
+Docker exposes services to host using ports configured in
+[`docker-compose.yml -file`](./docker-compose.yml) file. Access to these
+ports is limited to the host machine for security. Currently exposed
+services include:
 
 -   **Nginx** ports 80, 443
 -   **Adminer** port 8080 - manage databases via UI, host: `db`, user `root`, password `root_password`
--   **MySQL** port 3306 - manage databases, execute
-    `$ docker-compose exec db sh -c 'mysql -h db -uroot -proot_password'`
-    to connect via shell
+-   **MySQL** port 3306 - use this with - say - SequelPro
 -   **Mailhog** port 8025 - catches all emails sent by PHP
 
-If you want to use a specific IP address or set domain names in your 
-`/etc/hosts` -file, you must add an alias to host's loopback address. On
-macOS this is done with the command
-
-    $ sudo ifconfig lo0 alias 10.10.10.10
-
-On Ubuntu 16.04 and probably other Linux variants
-
-    $ sudo ifconfig docker0:0 10.10.10.10
-
-**NOTE**: This must currently be done after each reboot.
-
-Note that all containers can access other containers services  using
+Note that all containers can access other containers services using
 Docker's internal networking. Containers connect between each other by
-IP addresses, which are automatically resolved using container aliases
-(see service names in
-[`docker-compose.yml -file`](./docker-compose.yml)).
+IP addresses, which are automatically resolved using container names.
+
+**NOTE:** Port binds for **local development** must be defined with the
+localhost IP address to restrict access to your host machine (restricted
+from current network - ie. everybody else in the same wi-fi).
 
 ## Customize ld -script variables
 

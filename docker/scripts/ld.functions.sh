@@ -87,3 +87,8 @@ import_root_env() {
     fi
     exit 1
 }
+
+function_exists() {
+    declare -f -F $1 > /dev/null
+    return $?
+}

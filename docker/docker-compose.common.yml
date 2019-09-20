@@ -76,7 +76,7 @@ services:
   # varnish:
   #   image: jonbaldie/varnish:8056b94
   #   ports:
-  #     - "${MY_DOCKER_IP:-127.0.0.1}:${CONTAINER_PORT_VARNISH}:80"
+  #     - "${MY_DOCKER_IP:-127.0.0.1}:${CONTAINER_PORT_VARNISH:-8017}:80"
 
   adminer:
     image: adminer

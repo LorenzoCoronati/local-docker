@@ -3,13 +3,16 @@
 #
 # This file contains functions for local-docker script ld.sh.
 
-find_db_container() {
-    TMP_NAME=$DOCKER_PROJECT"_"$CONTAINER_DB
-    FOUND_NAME=$(docker ps  | grep "$TMP_NAME" | sed 's/.*\ //' )
-    if [ -z "$FOUND_NAME" ]; then
-        echo ''
+find_container() {
+    if [ -z "$1" ]; then
+        echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
+        return 1
     fi
-    echo $FOUND_NAME;
+    TMP_NAME=$DOCKER_PROJECT"_"$1
+    FOUND_NAME=$(docker ps  | grep "$TMP_NAME" | sed 's/.*\ //' )
+    if [ ! -z "$FOUND_NAME" ]; then
+        echo $FOUND_NAME;
+    fi
 }
 
 is_dockersync() {
@@ -36,16 +39,16 @@ yml_move() {
 }
 
 db_connect() {
-  CONTAINER_DB_ID=$(find_db_container)
-  RESPONSE=0
-  ROUND=0
-  ROUNDS_MAX=30
-  if [ -z "$CONTAINER_DB_ID" ]; then
-    echo -e "${Red}DB container not running (or not yet created).${Color_Off}"
-    exit 1
-  else
-    echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
-  fi
+    CONTAINER_DB_ID=$(find_container db)
+    RESPONSE=0
+    ROUND=0
+    ROUNDS_MAX=30
+    if [ -z "$CONTAINER_DB_ID" ]; then
+        echo -e "${Red}DB container not running (or not yet created).${Color_Off}"
+        exit 1
+    else
+        echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
+    fi
 
   while [ -z "$RESPONSE" ] || [ "$RESPONSE" -eq "0" ]; do
     ROUND=$(( $ROUND + 1 ))

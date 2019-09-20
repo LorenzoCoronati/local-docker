@@ -338,22 +338,26 @@ root-level key `volumes`). If you collapse with other projects:
    
 Another thing that may be needed is changing exposed ports. As an
 example `nginx` exposes port 80 and only one project can use the port at
-a time. You can change exposed ports in `docker-compose.yml` file, see
-containers configuration for `ports`, format is HOST:CONTAINER. In other
-words, 80:80 exposes `nginx` port `80` to host as-is, and `8080:80`
-allows access to `nginx` from host via port `8080`.
+a time. You can change exposed ports in `.env` file, look for variable
+names starting `CONTAINER_PORT_`.
 
 ### Local ports
 
 Docker exposes services to host using ports configured in
-[`docker-compose.yml -file`](./docker-compose.yml) file. Access to these
-ports is limited to the host machine for security. Currently exposed
-services include:
+[`.env -file`](./.env) file. Access to these ports is by default limited
+to the host machine loopback interface (`127.0.0.1`) for security
+(configurable). Currently the default exposed services and ports are:
 
 -   **Nginx** ports 80, 443
 -   **Adminer** port 8080 - manage databases via UI, host: `db`, user `root`, password `root_password`
 -   **MySQL** port 3306 - use this with - say - SequelPro
 -   **Mailhog** port 8025 - catches all emails sent by PHP
+
+Ports can be configured in [`.env -file`](./.env) file. It is a good
+practise to share the `.env` file when bringing new developers into the
+project. However, `.env` file should not be committed to project
+repository, but non-secure information can be shared via project
+repository's `REAMDE.md` -file.
 
 Note that all containers can access other containers services using
 Docker's internal networking. Containers connect between each other by

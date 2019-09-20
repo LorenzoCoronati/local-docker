@@ -57,7 +57,7 @@ for some minor *config* adjustments).
 
 ## Usage
 
-Main usage is done using a `ld.sh `script: `./ld`. Executing the scrip
+Main usage is done using a `ld.sh `script: `./ld`. Executing the script
 without no arguments gives you command list.
 
 ### Start using local-docker
@@ -161,7 +161,7 @@ When initial setup asks about Skeleton, answer `y`.
     $ ./ld init
     Copying Docker compose/sync files. What is project type?
      [0] New project, application built in ./app -folder "
-     [2] Skeleton -proejct. Drupal in drupal/ and custom code spread in src/ folder.
+     [2] Skeleton -project. Drupal in drupal/ and custom code in src/ folder.
     Project type: 
 
 After some configuration your codebase is built, and Docker volumes
@@ -280,7 +280,7 @@ You can expose nodejs container logs with:
 #### Xdebug
 
 `php` -container has Xdebug up and running. `php` tries to connect to
-IDE's Xdebug server on port `9000` when any PHP is executed:
+IDE's Xdebug server on port `9010` when any PHP is executed:
 
     xdebug.remote_enable = 1
     xdebug.remote_port = 9010
@@ -365,9 +365,9 @@ from current network - ie. everybody else in the same wi-fi).
 
 ## Customize ld -script variables
 
-Main script supports .env -file overrides. You can override any configs
-found in the upper part of `ld.sh` -file by placing a file named `.env`
-in the root of the project and changing some variable values.
+Main script supports `.env` -file overrides. You can override any
+configs found in the upper part of `ld.sh` -file by changing variable
+values.
 
 File should contain key=value -pairs, such as
 
@@ -397,7 +397,7 @@ File should contain key=value -pairs, such as
 If you feel file sync is not working properly, start by checking logs
 and editing some files that should be synced:
 
-    $ docker-sync logs -f # -f flag keeps log tracker opened
+    $ docker-sync logs -f
 
 If none of your edits in host or in container are being synced, clean up
 and restart:
@@ -432,8 +432,6 @@ resets everything else but Docker configuration.
 
 You have probably updated Xcode or Command Line Tools but have not yet
 approved a new license.
-
-**Solution** 
 
 Makes sure you have Command Line Tools installed:
 

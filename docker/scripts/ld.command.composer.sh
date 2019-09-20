@@ -9,7 +9,7 @@ function ld_command_composer_exec() {
         echo -e "${Red}Ensure you have variable 'CONTAINER_PHP' set in configuration.${Color_Off}"
         exit 1
     fi
-    $CONT_ID=$(find_container $CONTAINER_PHP)
+    CONT_ID=$(find_container $CONTAINER_PHP)
     if [ -z "$CONT_ID" ]; then
         echo -e "${Red}ERROR: PHP container ('$CONTAINER_PHP')is not up.${Color_Off}"
         exit 1

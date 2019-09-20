@@ -20,8 +20,8 @@ services:
   nginx:
     build: ./docker/build/nginx
     ports:
-      - "${MY_DOCKER_IP:-127.0.0.1}:80:80"
-      - "${MY_DOCKER_IP:-127.0.0.1}:443:443"
+      - "${MY_DOCKER_IP:-127.0.0.1}:${CONTAINER_PORT_NGINX_HTTP:-80}:80"
+      - "${MY_DOCKER_IP:-127.0.0.1}:${CONTAINER_PORT_NGINX_HTTPS:-443}:443"
     volumes:
       # See bottom of this file, and ./docker-sync.yml
       - nfsmount_app:/var/www:nocopy
@@ -57,7 +57,7 @@ services:
     # mysql:8.0.11 keeps restarting.
     image: mysql:5.7.26
     ports:
-      - "${MY_DOCKER_IP:-127.0.0.1}:3306:3306"
+      - "${MY_DOCKER_IP:-127.0.0.1}:${CONTAINER_PORT_DB:-3306}:3306"
     volumes:
       - nfsmount_db_dumps:/var/www:nocopy
       # Named volume for db table data. Docker keeps this volume around
@@ -85,20 +85,20 @@ services:
   # varnish:
   #   image: jonbaldie/varnish:8056b94
   #   ports:
-  #     - "${MY_DOCKER_IP:-127.0.0.1}:8017:80"
+  #     - "${MY_DOCKER_IP:-127.0.0.1}:${CONTAINER_PORT_VARNISH:-8017}:80"
 
   adminer:
     image: adminer
     restart: always
     ports:
-      - "${MY_DOCKER_IP:-127.0.0.1}:8080:8080"
+      - "${MY_DOCKER_IP:-127.0.0.1}:${CONTAINER_PORT_ADMINER:-8080}:8080"
 
   # PHP container needs some Mailhog -configuration.
   mailhog:
     image: mailhog/mailhog:v1.0.0
     restart: always
     ports:
-      - "${MY_DOCKER_IP:-127.0.0.1}:8025:8025"
+      - "${MY_DOCKER_IP:-127.0.0.1}:${CONTAINER_PORT_MAILHOG:-8025}:8025"
 
   # Replcase MYTHEME with your theme name. If you have multiple the
   # clone the noodejs -section and rename the containers to something like

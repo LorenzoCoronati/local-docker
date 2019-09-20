@@ -8,16 +8,16 @@ if [[ ! -d "$PROJECT_ROOT" ]]; then PROJECT_ROOT="$PWD"; fi
 cd $PROJECT_ROOT
 
 # Get colors.
-. $PROJECT_ROOT/docker/scripts/ld.colors.sh
+. ./docker/scripts/ld.colors.sh
 
 # Get functions.
-. $PROJECT_ROOT/docker/scripts/ld.functions.sh
+. ./docker/scripts/ld.functions.sh
 
 # 1st param, The Command.
 ACTION=${1-'help'}
 
 # Collect all available commands.
-for FILE in $(ls $PROJECT_ROOT/docker/scripts/ld.command.*.sh ); do
+for FILE in $(ls ./docker/scripts/ld.command.*.sh ); do
     FILE=$(basename $FILE)
     COMMAND=$(cut -d'.' -f3 <<<"$FILE")
     COMMANDS="$COMMANDS $COMMAND"
@@ -25,7 +25,7 @@ done
 # Use fixed name, since docker-sync is supposed to be locally only.
 DOCKERSYNC_FILE=docker-sync.yml
 DOCKER_COMPOSE_FILE=docker-compose.yml
-DOCKER_YML_STORAGE=$PROJECT_ROOT/docker
+DOCKER_YML_STORAGE=./docker
 DOCKER_PROJECT=$(basename $PROJECT_ROOT)
 
 import_root_env
@@ -38,7 +38,7 @@ USERS="mysql --host "$CONTAINER_DB" -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e
 # Read (and create if necessary) the .env file, allowing overrides to any of our config values.
 if [[ "$ACTION" != 'help' ]]; then
     if [[ "$ENV_IMPORT_FAILED" -ne "0" ]]; then
-        if [ ! -f "$PROJECT_ROOT/.env.example" ]; then
+        if [ ! -f "./.env.example" ]; then
             echo "Files .env.example are .env are missing. Please add either one to project root."
             echo "Then start over."
             cd $CWD
@@ -47,12 +47,12 @@ if [[ "$ACTION" != 'help' ]]; then
         sleep 2
         echo "Copying .env.example -file => .env. "
         sleep 2
-        cp -f $PROJECT_ROOT/.env.example $PROJECT_ROOT/.env
+        cp -f ./.env.example ./.env
         echo "Please review your .env file:"
         echo
         echo -e "${BIWhite}========  START OF .env =========${Color_Off}"
         sleep 1
-        cat $PROJECT_ROOT/.env
+        cat ./.env
         echo -e "${BIWhite}========  END OF .env =========${Color_Off}"
         echo
         read -p "Does this look okay? [Y/n] " CHOICE
@@ -101,7 +101,7 @@ case "$ACTION" in
 
     # Loop through all commands printing whatever they explain to be doing.
     for COMMAND in ${COMMANDS[@]}; do
-      FILE=$PROJECT_ROOT/docker/scripts/ld.command.$COMMAND.sh
+      FILE=./docker/scripts/ld.command.$COMMAND.sh
       if [[ -f "$FILE" ]]; then
           . $FILE
           FUNCTION="ld_command_"$COMMAND"_help"
@@ -115,7 +115,7 @@ case "$ACTION" in
 
 *)
     # Loop through all commands printing whatever they explain to be doing.
-    FILE=$PROJECT_ROOT/docker/scripts/ld.command.$ACTION.sh
+    FILE=./docker/scripts/ld.command.$ACTION.sh
 
     if [[ -f "$FILE" ]]; then
         . $FILE

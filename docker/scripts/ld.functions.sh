@@ -50,27 +50,27 @@ db_connect() {
         echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
     fi
 
-  while [ -z "$RESPONSE" ] || [ "$RESPONSE" -eq "0" ]; do
-    ROUND=$(( $ROUND + 1 ))
-    echo -n '.'
-    COMMAND="/usr/bin/mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD status 2>/dev/null |wc -l "
-    RESPONSE=$(docker exec $CONTAINER_DB_ID sh -c "$COMMAND")
-    if [ "${#RESPONSE}" -gt "0" ]; then
-        if [ "$RESPONSE" -ne "0" ]; then
-          echo -e " ${Green}connected.${Color_Off}"
-          return 0;
+    while [ -z "$RESPONSE" ] || [ "$RESPONSE" -eq "0" ]; do
+        ROUND=$(( $ROUND + 1 ))
+        echo -n '.'
+        COMMAND="/usr/bin/mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD status 2>/dev/null |wc -l "
+        RESPONSE=$(docker exec $CONTAINER_DB_ID sh -c "$COMMAND")
+        if [ "${#RESPONSE}" -gt "0" ]; then
+            if [ "$RESPONSE" -ne "0" ]; then
+                echo -e " ${Green}connected.${Color_Off}"
+                return 0;
+            fi
         fi
-    fi
-    if [ "$ROUND" -lt  "$ROUNDS_MAX" ]; then
-      sleep 1
-    else
-      echo -e " ${BRed}failed!${Color_Off}"
-      echo -e "${BRed}DB container did not respond in due time.${Color_Off}"
-      break;
-    fi
-  done
+        if [ "$ROUND" -lt  "$ROUNDS_MAX" ]; then
+            sleep 1
+        else
+            echo -e " ${BRed}failed!${Color_Off}"
+            echo -e "${BRed}DB container did not respond in due time.${Color_Off}"
+            break;
+        fi
+    done
 
-  return 1
+    return 1
 }
 
 # Cross-OS way to do in-place find-and-replace with sed.

@@ -38,12 +38,12 @@ function ld_command_init_exec() {
     LOCAL_DOMAIN=$(echo "$LOCAL_DOMAIN" | sed 's/[[:space:]]/./g')
     ensure_envvar_present LOCAL_DOMAIN $LOCAL_DOMAIN
 
-    echo  -e "${BBlack}What is the local development IP address?${Color_Off}"
-    echo  "Random 10.10.0.0./16 will be generated for you if you so wish?"
-    read -p "Use the random IP address 10.10.0.0./16 [Y/n]? " LOCAL_IP
+    echo -e "${BBlack}What is the local development IP address?${Color_Off}"
+    echo "Random 127.0.0.0./16 will be generated for you if you so wish?"
+    read -p "Use the random IP address 127.0.0.0./16 [Y/n]? " LOCAL_IP
     case "$LOCAL_IP" in
         'n'|'N'|'no'|'NO') LOCAL_IP='127.0.0.1';;
-        *) LOCAL_IP=$( printf "10.10.%d.%d\n" "$((RANDOM % 256))" "$((RANDOM % 256))");;
+        *) LAST=$((RANDOM % 240 + 3 )) && LOCAL_IP=$( printf "127.0.%d.%d\n" "$((RANDOM % 256))" "$LAST");;
     esac
     echo -e "${Yellow}Using IP address $LOCAL_IP.${Color_Off}"
     ensure_envvar_present LOCAL_IP $LOCAL_IP

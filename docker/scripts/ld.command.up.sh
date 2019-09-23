@@ -4,6 +4,9 @@
 # This file contains up -command for local-docker script ld.sh.
 
 function ld_command_up_exec() {
+
+    $SCRIPT_NAME configure-network
+
     if is_dockersync; then
         docker-sync start
     fi

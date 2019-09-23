@@ -8,27 +8,27 @@ function ld_command_rename-volumes_exec() {
         echo 'Turning off docker-sync, please wait...'
         docker-sync clean
     fi
-    DEFAULT=$(basename $PROJECT_ROOT)
+    VOL_BASE_NAME=$1
     VALID=0
     while [ "$VALID" -eq "0" ]; do
-        echo "Please give me your project name [default: \"$DEFAULT\"]? "
-        read -p "Project name: " PROJECTNAME
-        if [ -z "$PROJECTNAME" ]; then
-            PROJECTNAME=$DEFAULT
+        echo "Please give me your container volume base name? "
+        read -p "Container volume base name ['$VOL_BASE_NAME']: " ANSWER
+        if [ -z "$ANSWER" ]; then
             VALID=1
-        elif [[ "$PROJECTNAME" =~ ^[a-z0-9]([a-z0-9_-]*[a-z0-9])?$ ]]; then
+        elif [[ "$ANSWER" =~ ^[a-z0-9]([a-z0-9_-]*[a-z0-9])?$ ]]; then
+            VOL_BASE_NAME=$ANSWER
             VALID=1
         else
-            echo -e "${Red}ERROR: Project name can contain only alphabetic characters (a-z), numbers (0-9), underscore (_) and hyphen (-).${Color_Off}"
-            echo -e "${Red}ERROR: Also the project name must not start or end with underscore or hyphen.${Color_Off}"
+            echo -e "${Red}ERROR: Volume base name can contain only alphabetic characters (a-z), numbers (0-9), underscore (_) and hyphen (-).${Color_Off}"
+            echo -e "${Red}ERROR: Volume base name must not start or end with underscore or hyphen.${Color_Off}"
             sleep 2
             echo
         fi
     done;
 
-     echo "Renaming volumes to '$PROJECTNAME' for docker-sync, please wait..."
-     replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKERSYNC_FILE
-     replace_in_file "s/webroot-sync/$PROJECTNAME""-sync/g" $DOCKER_COMPOSE_FILE
+     echo "Renaming volumes to '$VOL_BASE_NAME' for docker-sync, please wait..."
+     replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKERSYNC_FILE
+     replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKER_COMPOSE_FILE
 }
 
 #function ld_command_rename-volumes_help() {

@@ -77,7 +77,7 @@ function ld_command_init_exec() {
     ensure_folders_present $DATABASE_DUMP_STORAGE
     echo -e "${Yellow}Database dumps will appear in $DATABASE_DUMP_STORAGE.${Color_Off}"
 
-    read -p "Use project-name based docker-sync -volumes [default]? [Y/n]" CHOICE
+    read -p "Use project-name based docker-sync -volumes ['${PROJECT_NAME}-*']? [Y/n]" CHOICE
     case "$CHOICE" in
         ''|y|Y|'yes'|'YES' ) $SCRIPT_NAME rename-volumes $PROJECT_NAME;;
         *) echo "Volume names will start with 'webroot-'";;

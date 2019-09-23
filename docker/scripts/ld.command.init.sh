@@ -96,8 +96,8 @@ function ld_command_init_exec() {
     echo 'PHP container: started.'
 
     DELETE_ROOT=
-    if [ -e "$APP_ROOT""composer.json" ]; then
-        echo -e "${Yellow}Looks like project is already created? File "$APP_ROOT"composer.json exists.${Color_Off}"
+    if [ -e "${APP_ROOT}/composer.json" ]; then
+        echo -e "${Yellow}Looks like project is already created? File "$APP_ROOT"/composer.json exists.${Color_Off}"
         echo -e "${Yellow}Maybe you should install codebase using composer:${Color_Off}"
         echo -e "${Yellow}$SCRIPT_NAME_SHORT up && $SCRIPT_NAME_SHORT composer install${Color_Off}"
         cd $CWD
@@ -162,5 +162,5 @@ function ld_command_init_exec() {
 }
 
 function ld_command_init_help() {
-    echo "Builds project to ./app -folder, using composer and drupal-project (default)"
+    echo "Builds the project (default: codebase in./app -folder, use composer, use drupal-project)"
 }

@@ -4,7 +4,7 @@
 # This file contains restore -command for local-docker script ld.sh.
 
 function ld_command_restore_exec() {
-    if [ ! -e "db_dumps/db-container-dump-LATEST.sql.gz" ]; then
+    if [ ! -e "$DATABASE_DUMP_STORAGE/db-container-dump-LATEST.sql.gz" ]; then
         echo -e "${Red}"
         echo "********************************************************************************************"
         echo "** Dump file missing! Create a symlin to your DB backup file:                             **"
@@ -31,8 +31,8 @@ function ld_command_restore_exec() {
     docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
     echo
     echo 'Restoring db...'
-    echo -n "DB backup used: db_dumps/db-container-dump-LATEST.sql.gz => "
-    echo $(readlink db_dumps/db-container-dump-LATEST.sql.gz)
+    echo -n "DB backup used: $DATABASE_DUMP_STORAGE/db-container-dump-LATEST.sql.gz => "
+    echo $(readlink $DATABASE_DUMP_STORAGE/db-container-dump-LATEST.sql.gz)
     echo "[This may take some time...]"
     RESTORER="gunzip < /var/db_dumps/db-container-dump-LATEST.sql.gz | mysql --host "$CONTAINER_DB" -uroot -p"$MYSQL_ROOT_PASSWORD""
     docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORER 2>/dev/null"

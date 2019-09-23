@@ -28,8 +28,8 @@ function ld_command_init_exec() {
 
     ensure_envvar_present PROJECT_NAME $PROJECT_NAME
 
-    echo  -e "${BBlack}What is the local development domain?${Color_Off}"
-    echo  " Do not add protocol, but just the domain name. For clarity it is recommended to use specified domains locally."
+    echo -e "${BBlack}What is the local development domain?${Color_Off}"
+    echo " Do not add protocol, but just the domain name. For clarity it is recommended to use specified domains locally."
     read -p "Domain [$PROJECT_NAME.ld] " LOCAL_DOMAIN
     case "$LOCAL_DOMAIN" in
         '') LOCAL_DOMAIN="$PROJECT_NAME.ld"
@@ -142,7 +142,7 @@ function ld_command_init_exec() {
         exit 1
     fi
     echo
-    echo echo -e "${Green}Project created to ./$APP_ROOT -folder (/var/www in containers).${Color_Off}"
+    echo -e "${Green}Project created to ./$APP_ROOT -folder (/var/www in containers).${Color_Off}"
     # This must be run after composer install.
     $SCRIPT_NAME drupal-structure-fix
     $SCRIPT_NAME drupal-files-folder-perms
@@ -153,7 +153,7 @@ function ld_command_init_exec() {
     echo
     echo -e "${Green}Codebase ready!!${Color_Off}"
     echo
-    echo-e "${Yellow}NOTE: Once Drupal is installed, you should remove write perms in sites/default -folder:${Color_Off}"
+    echo -e "${Yellow}NOTE: Once Drupal is installed, you should remove write perms in sites/default -folder:${Color_Off}"
     echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0755 web/sites/default'"
     echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
     echo "With these changes you can edit settings.php from host, but Drupal is happy not to be allowed to write there."

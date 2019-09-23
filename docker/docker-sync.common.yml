@@ -16,7 +16,7 @@ syncs:
     # which folder to watch / sync from - you can use tilde, it will get expanded.
     # the contents of this directory will be synchronized to the Docker volume with the name of this sync entry ('default-sync' here)
     # NOTE: run `docker-sync[-stack] clean` after any change in src
-    src: './app/'
+    src: './${APP_ROOT}/'
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
     sync_args:
       - "-ignore='Path ld.sh'"    # no need to send our own OSX -side helper tools
@@ -35,7 +35,7 @@ syncs:
 
   webroot-sync-core-delegated:
     sync_strategy: 'native_osx'
-    src: './app/'
+    src: './${APP_ROOT}/'
     host_disk_mount_mode: 'delegated' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
     sync_args:
       - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
@@ -49,6 +49,6 @@ syncs:
 
   webroot-sync-db-dumps:
     sync_strategy: 'native_osx'
-    src: './db_dumps/'
+    src: './${DATABASE_DUMP_STORAGE}/'
     host_disk_mount_mode: 'delegated' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
     notify_terminal: true

@@ -120,7 +120,7 @@ case "$ACTION" in
     if [[ -f "$FILE" ]]; then
         . $FILE
         FUNCTION="ld_command_"$ACTION"_exec"
-        function_exists $FUNCTION && $FUNCTION || echo -e "${Red}ERROR: Command not found (hook '$FUNCTION' missing for command $ACTION).${Color_Off}."
+        function_exists $FUNCTION && $FUNCTION ${@:2} || echo -e "${Red}ERROR: Command not found (hook '$FUNCTION' missing for command $ACTION).${Color_Off}."
     else
         echo -e "${Red}ERROR: Command not found (hook file missing).${Color_Off}."
     fi

@@ -104,3 +104,27 @@ function_exists() {
     declare -f -F $1 > /dev/null
     return $?
 }
+
+function ensure_folders_present() {
+    for DIR in $@; do
+       if [ ! -e "$DIR" ]; then
+            mkdir -vp $DIR
+       fi
+    done
+}
+
+function ensure_envvar_present() {
+    NAME=$1
+    VAL=$2
+    if [ ! -e ".env" ]; then
+        echo -e "${Red}ERROR: File .env not present while trying to store a value into it.${Color_Off}";
+        exit;
+    fi
+    EXISTS=$(grep $NAME .env | wc -l)
+    if [ "$EXISTS" -gt "0" ]; then
+        PATTERN="s/^$NAME=.*/$NAME=$VAL/"
+        replace_in_file $PATTERN .env
+    else
+        echo "${NAME}=${VAL}" >> $PROJECT_ROOT/.env
+    fi
+}

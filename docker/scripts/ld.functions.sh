@@ -97,7 +97,7 @@ import_root_env() {
         export $(grep -v '^#' $ENV_FILE | xargs)
         return 0
     fi
-    exit 1
+    return 1
 }
 
 function_exists() {

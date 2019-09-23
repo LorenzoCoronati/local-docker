@@ -14,7 +14,7 @@ function ld_command_drush_exec() {
         echo -e "${Red}ERROR: PHP container ('$CONTAINER_PHP')is not up.${Color_Off}"
         exit 1
     fi
-    COMM="docker-compose exec ${CONTAINER_PHP} /var/www/vendor/drush/drush/drush ${@:2}"
+    COMM="docker-compose exec ${CONTAINER_PHP} /var/www/vendor/drush/drush/drush $@"
     echo -e "${Cyan}Next: $COMM${Color_Off}"
     $COMM
 }

@@ -20,21 +20,30 @@ is_dockersync() {
 }
 
 # Copy conf of your choosing to project root, destroy leftovers.
+# Template must be found using filename patters
+# TPL-NAME => $DOCKER_YML_STORAGE/docker-compose.TPL-NAME.yml,
+# usually: docker/docker-compose.TPL-NAME.yml
 # Usage
-#   yml_move
-#   yml_move skeleton
+#   yml_move template-name
 yml_move() {
-    MODE=${1-'common'}
-    echo "MODE: $MODE"
+    MODE=$1
+    if [ -z "$MODE" ]; then
+       echo -e "${Red}Trying to use yml files without project type.${Color_Off}"
+       exit 1
+    fi
+
     if [ -f "$DOCKER_YML_STORAGE/docker-compose.$MODE.yml" ]; then
         echo "Using $DOCKER_YML_STORAGE/docker-compose.$MODE.yml as the docker-compose recipe."
-        mv -v $DOCKER_YML_STORAGE/docker-compose.$MODE.yml ./$DOCKER_COMPOSE_FILE
-        rm -f $DOCKER_YML_STORAGE/docker-compose.*.yml
+        cp $DOCKER_YML_STORAGE/docker-compose.$MODE.yml ./$DOCKER_COMPOSE_FILE
+    else
+        echo -e "${Red} Docker-compose template file missing: $DOCKER_YML_STORAGE/docker-compose.$MODE.yml"
     fi
-    if [ -f "$DOCKER_YML_STORAGE/docker-sync.$MODE.yml" ]; then
+    # NFS template does not have docker-sync -flavor, as it uses nfs mounts for folder sharing.
+    if [ "$MODE" != "nfs" ] && [ -f "$DOCKER_YML_STORAGE/docker-sync.$MODE.yml" ]; then
         echo "Using $DOCKER_YML_STORAGE/docker-sync.$MODE.yml as the docker-sync recipe."
-        mv -v $DOCKER_YML_STORAGE/docker-sync.$MODE.yml ./$DOCKERSYNC_FILE
-        rm -f $DOCKER_YML_STORAGE/docker-sync.*.yml
+        cp $DOCKER_YML_STORAGE/docker-sync.$MODE.yml ./$DOCKERSYNC_FILE
+    else
+        echo -e "${Red} Docker-sync template file missing: $DOCKER_YML_STORAGE/docker-sync.$MODE.yml"
     fi
 }
 
@@ -94,4 +103,28 @@ import_root_env() {
 function_exists() {
     declare -f -F $1 > /dev/null
     return $?
+}
+
+function ensure_folders_present() {
+    for DIR in $@; do
+       if [ ! -e "$DIR" ]; then
+            mkdir -vp $DIR
+       fi
+    done
+}
+
+function ensure_envvar_present() {
+    NAME=$1
+    VAL=$2
+    if [ ! -e ".env" ]; then
+        echo -e "${Red}ERROR: File .env not present while trying to store a value into it.${Color_Off}";
+        exit;
+    fi
+    EXISTS=$(grep $NAME .env | wc -l)
+    if [ "$EXISTS" -gt "0" ]; then
+        PATTERN="s/^$NAME=.*/$NAME=$VAL/"
+        replace_in_file $PATTERN .env
+    else
+        echo "${NAME}=${VAL}" >> $PROJECT_ROOT/.env
+    fi
 }

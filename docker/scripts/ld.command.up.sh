@@ -7,6 +7,7 @@ function ld_command_up_exec() {
     if is_dockersync; then
         docker-sync start
     fi
+    ensure_folders_present $DATABASE_DUMP_STORAGE
     docker-compose -f $DOCKER_COMPOSE_FILE up -d
     $SCRIPT_NAME drupal-files-folder-perms
     OK=$?

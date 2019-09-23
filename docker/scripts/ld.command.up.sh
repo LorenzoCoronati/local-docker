@@ -4,6 +4,9 @@
 # This file contains up -command for local-docker script ld.sh.
 
 function ld_command_up_exec() {
+
+    $SCRIPT_NAME configure-network
+
     if is_dockersync; then
         docker-sync start
     fi
@@ -23,7 +26,7 @@ function ld_command_up_exec() {
     CONN=$?
 
     if [ "$CONN" -ne 0 ]; then
-        echo "${Red}Oww... DB container is not up, even after a few retries.${Color_Off}"
+        echo -e "${Red}Oww... DB container is not up, even after a few retries.${Color_Off}"
         cd $CWD
         exit 1
     fi
@@ -33,7 +36,7 @@ function ld_command_up_exec() {
     docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
     echo 'Current database users:'
     docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$USERS 2>/dev/null"
-    echo "${Yellow}NOTE: No database dump restored.${Color_Off}"
+    echo -e "${Yellow}NOTE: No database dump restored.${Color_Off}"
     echo 'In case you need to do that (Drupal DB is gone?),'
     echo '1) check your symlink target in db_dumps/db-container-dump-LATEST.sql.gz'
     echo '2) execute the following command:'

@@ -14,6 +14,7 @@ function ld_command_down_exec() {
     if is_dockersync; then
         docker-sync clean
     fi
+    $SCRIPT_NAME configure-network-down
 }
 
 function ld_command_down_help() {

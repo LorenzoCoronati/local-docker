@@ -105,25 +105,19 @@ an error, ensure `ld.sh` has execute permission:
 
     $ chmod 0744 ld.sh
 
-Initial setup asks if you is a Skeleton based project. If you have no
-idea what does it mean, do not use it. 
+Initial setup asks if you some generic information. 
 
-    $ ./ld init # asks if you what config to use (Skeleton or not).
+    $ ./ld init
 
 If you are applying `local-docker` on a Skeleton -based project, see
 "Skeleton" -section .
 
 ### Local domains
 
-This is needed to use a local domain (ie. type something other
-than http://0.0.0.0 or http://localhost in your browser).
-
-1.  Add your desired (local) domains to `/etc/hosts`.
-
-        #######################################################
-        ##############  PROJECT NAME    #######################
-        127.0.0.1 mylocal.example.com mylocal.example.fi other.multilanguage.domain mylocal.de.example.com
-        127.0.0.1 mailhog.local
+`./ld init` sets up your local IP addresses and domains. You'll be asked
+for a local development domain among ohter things, and `local-docker`
+will write a `/etc/hosts` -record for you and maintain localhost IP
+address aliases.
 
 #### Install Drupal
 
@@ -156,13 +150,7 @@ If you are applying Local-docker on a Skeleton based project start by
 copying all things mentioned in "Start using local-docker" -section on
 top of your project repository. 
 
-When initial setup asks about Skeleton, answer `y`.
-
-    $ ./ld init
-    Copying Docker compose/sync files. What is project type?
-     [0] New project, application built in ./app -folder "
-     [2] Skeleton -project. Drupal in drupal/ and custom code in src/ folder.
-    Project type: 
+    $ ./ld init skeleton
 
 After some configuration your codebase is built, and Docker volumes
 (including volumes used by `docker-sync`) according general Skeleton
@@ -211,20 +199,17 @@ and answer some question to set up things properly.
 
 If containers are not pulles/built yet, this will do it for you. 
 
-    $ ./ld up            # or  
-    $ docker-sync start && docker-compose up -d
+    $ ./ld up
 
 #### Stop local
 
 Put local to sleep:
 
-    $ ./ld stop # or 
-    $ docker-compose stop [; docker-sync clean]
+    $ ./ld stop 
 
-Stop (ie. remove volumes with content, containers):
+Stop (ie. remove volumes unless they are persistent):
 
-    $ ./ld down # or 
-    $ docker-compose down; docker-sync clean
+    $ ./ld down
 
 Note that files sync must be started in order to start other containers,
 and it keeps 1-n pcs of containers running when it is started.
@@ -251,21 +236,23 @@ This is done automatically when you stop or destroy your containers.
 
 #### Composer, Drush, Drupal
 
-Composer, Drush or Drupal console are aliased inside `php` container. Do
-your thing:
+Composer, Drush or Drupal console are aliased inside `php` container as
+well as commands in `./ld [drush|drupal|composer]`.
 
     $ docker-compose exec php bash
     /var/www # drush status
     /var/www # composer require drupal/pathauto:^1
+    /var/www # drupal ce --exclude-config-hash --directory=../config/sync
 
-Composer commands can be launched from your host (but executed inside
-container):
+These commands are funcionality-wise the same:
 
+    $ ./ld drush status
     $ ./ld composer require drupal/pathauto:^1
+    $ ./ld drupal ce --exclude-config-hash --directory=../config/sync
 
-Another way is run one-off commands in `php` -container:
+You can also execute commands directly in the shell:
 
-    $ docker-compose exec php bash -c "drush status"
+    $ docker-compose exec php bash -c "drush status" # OR $ ./ld drush status
 
 #### Compile CSS
 
@@ -314,16 +301,6 @@ alias to your shell startup files. In order to not interfere with `/usr/bin/ld`,
 
 Then, you can use `lld` instead of `./ld` or `./ld.sh`
 
-### Launch a new project
-
-`./ld init` creates a drupal-project for you out-of-the-box (this will
-take a few minutes). If you already have a `drupal/composer.json` file
-you should not do that, but rather execute composer install:
-
-    $ ./ld composer install
-    # OR
-    $ docker-compose exec php bash -c "composer install"
-
 ## Projects in parallel?
 
 Docker volumes are using volume names from `docker-composer.yml` (see
@@ -338,8 +315,10 @@ root-level key `volumes`). If you collapse with other projects:
    
 Another thing that may be needed is changing exposed ports. As an
 example `nginx` exposes port 80 and only one project can use the port at
-a time. You can change exposed ports in `.env` file, look for variable
-names starting `CONTAINER_PORT_`.
+a time in the same IP address. Separating IP addresses per project
+should be enough, but in case you bump into weird issues you can always 
+change exposed ports in `.env` file, look for variable names starting
+`CONTAINER_PORT_`.
 
 ### Local ports
 

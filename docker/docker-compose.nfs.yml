@@ -35,7 +35,7 @@ services:
     # Available builds: https://hub.docker.com/r/xoxoxo/php-container/tags
     # Custom build contains sendmail_path -fix for Mailhog and OPTION to add
     # overrides (per project) to other PHP config.
-    build: ./docker/build/php/7.2
+    build: ./docker/build/php/${PROJECT_PHP_VERSION}
     volumes:
       # :nocopy must be used with docker-sync
       - nfsmount_app:/var/www:nocopy
@@ -45,7 +45,7 @@ services:
 
   composer:
     # Run `composer install` during startup.
-    build: ./docker/build/php/7.2
+    build: ./docker/build/php/${PROJECT_PHP_VERSION}
     volumes:
       - nfsmount_app:/var/www:nocopy
     env_file:

@@ -36,6 +36,8 @@ services:
       - webroot-sync-core:/var/www:nocopy
     env_file:
       - .env
+    environment:
+        XDEBUG_CONFIG: "remote_enable=${PHP_XDEBUG_REMOTE_ENABLE}"
     working_dir: /var/www
 
   composer:

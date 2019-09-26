@@ -141,8 +141,10 @@ database, you can
    [http://mylocal.example.com:8080](http://mylocal.example.com:8080)
 
 3. or use your favourite SQL GUI app (SequelPro or similar), and connect
-   using IP (host) `0.0.0.0`, default port `3306`, username `root` and
-   password from your `.env`-file, `MYSQL_ROOT_PASSWORD`.
+   using IP (env variable `LOCAL_IP`), port (env variable
+   `CONTAINER_PORT_DB`), username `root` and password (env variable
+   `MYSQL_ROOT_PASSWORD`). Environment variables are defined in your
+   `.env`-file.
  
 #### Skeleton
 
@@ -254,14 +256,6 @@ You can also execute commands directly in the shell:
 
     $ docker-compose exec php bash -c "drush status" # OR $ ./ld drush status
 
-#### Xdebug
-
-`php` container has Xdebug installed. It is turned on by default, and 
-controlled by varialble `PHP_XDEBUG_REMOTE_ENABLE` in `.env` file. 
-
-Get or set status with this command:
-`./ld xdebug ['on'|1'|'off'|0]`
-
 #### Compile CSS
 
 Look at the `nodejs` -container in `docker-compose*.yml`, correct file
@@ -274,21 +268,20 @@ You can expose nodejs container logs with:
 
 #### Xdebug
 
-`php` -container has Xdebug up and running. `php` tries to connect to
-IDE's Xdebug server on port `9010` when any PHP is executed:
+`php` container has Xdebug installed. It is turned on by default, and 
+controlled by varialble `PHP_XDEBUG_REMOTE_ENABLE` in `.env` file. 
 
-    xdebug.remote_enable = 1
-    xdebug.remote_port = 9010
-    ; Docker for Desktop (on OSX at least) maps host.docker.internal to
-    ; host machine. 
-    xdebug.remote_host = host.docker.internal
+Get or set status with this command:
 
-Port `9010` is being used to avoid collision with possible php-fpm
-running on the host on port `9000`.
+    $ ./ld xdebug ['on'|1|'off'|0]
 
-This Xdebug configuration is initially set
-in the base image this project is using (`xoxoxo/php-container`).
-However this can be overridden for example in
+`php` tries to connect to IDE's Xdebug server on port `9010` when any
+PHP is executed. Port, xdebug log location and remote host values are
+controlled by variables in `.env` file.
+
+This Xdebug configuration is initially set in the base image this
+project is using (`xoxoxo/php-container`). However this can be
+overridden for example in
 [95-drupal-development.ini -file (PHP 7.2)](./docker/build/php7.2//conf.d/95-drupal-development.ini)
 , and Xdebug's active config can be checked either from Drupal
 (`admin/reports/status/php`) or with command

@@ -88,6 +88,8 @@ replace_in_file () {
     sed --version >/dev/null 2>&1 && sed -i -- "$@" || sed -i "" "$@"
 }
 
+# Import all environment variables from .env -file.
+# This should be done every time after vars are updated.
 import_root_env() {
     ENV_FILE="$PROJECT_ROOT/.env"
 
@@ -127,4 +129,6 @@ function ensure_envvar_present() {
     else
         echo "${NAME}=${VAL}" >> $PROJECT_ROOT/.env
     fi
+    # Re-import all vars to take effect in host and container shell, too.
+    import_root_env
 }

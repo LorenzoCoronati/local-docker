@@ -256,14 +256,6 @@ You can also execute commands directly in the shell:
 
     $ docker-compose exec php bash -c "drush status" # OR $ ./ld drush status
 
-#### Xdebug
-
-`php` container has Xdebug installed. It is turned on by default, and 
-controlled by varialble `PHP_XDEBUG_REMOTE_ENABLE` in `.env` file. 
-
-Get or set status with this command:
-`./ld xdebug ['on'|1'|'off'|0]`
-
 #### Compile CSS
 
 Look at the `nodejs` -container in `docker-compose*.yml`, correct file

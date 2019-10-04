@@ -1,8 +1,4 @@
-# Use images from Docker Hub to use community/or-alike maintained images.
-# @see https://hub.docker.com/explore/
-#
-# # Fix images to minor release tags to make all container updates deliberate,
-# # while still allowing patch releases.
+# Template: docker-compose.common.yml
 
 version: '3.2'
 

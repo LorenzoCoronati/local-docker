@@ -115,6 +115,20 @@ services:
   #   ports:
   #     - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_VARNISH:-8017}:80"
 
+  solr:
+    image: solr:8.2.0
+    container_name: "${PROJECT_NAME}_solr"
+    restart: always
+    command:
+      - solr-precreate
+      - gettingstarted
+    labels:
+      - "traefik.http.routers.web-ui-solr.rule=Host(`solr.${LOCAL_DOMAIN}`)"
+    env_file:
+      - .env
+    volumes:
+      - solr_data:/var/solr
+
   adminer:
     image: adminer:4.7.3
     container_name: "${PROJECT_NAME}_adminer"
@@ -159,4 +173,4 @@ volumes:
   webroot-sync-db-dumps:
     external: true
   db_data: {}
-
+  solr_data: {}

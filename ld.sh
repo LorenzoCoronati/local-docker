@@ -75,7 +75,7 @@ fi
 
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
     echo '$ACTION' is $ACTION
-    if [[ "$ACTION" != 'init' ]] && [[ "$ACTION" != 'help' ]]; then
+    if [[ "$ACTION" != 'init' ]] && [[ "$ACTION" != 'help' ]] && [[ "$ACTION" != 'self-update' ]]; then
         echo "Starting to initialise local-docker, please wait..."
         $SCRIPT_NAME init
     fi

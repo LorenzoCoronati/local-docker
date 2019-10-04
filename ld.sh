@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+LOCAL_DOCKER_VERSION=1.0
+
 CWD=$(pwd)
 
 PROJECT_ROOT=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
@@ -74,8 +76,7 @@ else
 fi
 
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
-    echo '$ACTION' is $ACTION
-    if [[ "$ACTION" != 'init' ]] && [[ "$ACTION" != 'help' ]]; then
+    if [[ "$ACTION" != 'init' ]] && [[ "$ACTION" != 'help' ]] && [[ "$ACTION" != 'self-update' ]]; then
         echo "Starting to initialise local-docker, please wait..."
         $SCRIPT_NAME init
     fi
@@ -91,7 +92,10 @@ case "$ACTION" in
 
 "help")
 
+    echo "Local-docker, version $LOCAL_DOCKER_VERSION"
+    echo
     echo "This is a simple script, aimed to help in developer's daily use of local environment."
+    echo "While local-docker is mainly targeted for Drupal, it works with any Composer managed codebase."
     echo "If you have docker-sync installed and configuration present (docker-sync.yml) it controls that too."
     echo
     echo 'Usage:'

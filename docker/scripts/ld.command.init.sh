@@ -9,11 +9,12 @@ function ld_command_init_exec() {
     while [ "$VALID" -eq "0" ]; do
         echo  -e "${BBlack}What is the project name?${Color_Off}"
         echo  "Provide a string without spaces and use chars a-z and 0-9."
-        PROJECT_NAME=$(basename $PROJECT_ROOT)
+        PROJECT_NAME=${PROJECT_NAME:-$(basename $PROJECT_ROOT)}
         read -p "Project name ['$PROJECT_NAME']: " ANSWER
         if [ -z "$ANSWER" ]; then
             VALID=1
-        elif [[ "$ANSWER" =~ ^[a-z0-9]([a-z0-9_-]*[a-z0-9])?$ ]]; then
+        elif [[ "" =~ ^[a-z0-9]([a-z0-9_-]*[a-z0-9])?$ ]]; then
+#        elif [[ "$ANSWER" =~ ^[a-z0-9]([a-z0-9_-]*[a-z0-9])?$ ]]; then
             PROJECT_NAME=$ANSWER
             VALID=1
         else
@@ -22,18 +23,31 @@ function ld_command_init_exec() {
             sleep 2
             echo
         fi
-    done;
+    done
     # Remove spaces.
     PROJECT_NAME=$(echo "$PROJECT_NAME" | sed 's/[[:space:]]/-/g')
 
     ensure_envvar_present PROJECT_NAME $PROJECT_NAME
 
-    echo -e "${BBlack}What is the local development domain?${Color_Off}"
-    echo " Do not add protocol, but just the domain name. For clarity it is recommended to use specified domains locally."
-    read -p "Domain [$PROJECT_NAME.ld] " LOCAL_DOMAIN
-    case "$LOCAL_DOMAIN" in
-        '') LOCAL_DOMAIN="$PROJECT_NAME.ld"
-    esac
+    VALID=0
+    while [ "$VALID" -eq "0" ]; do
+      echo -e "${BBlack}What is the local development domain?${Color_Off}"
+      echo " Do not add protocol, but just the domain name. For clarity it is recommended to use specified domains locally."
+      LOCAL_DOMAIN=${LOCAL_DOMAIN:-${$PROJECT_NAME}.ld}
+      read -p "Domain [$PROJECT_NAME.ld] " ANSWER
+      TEST=$(echo $ANSWER | egrep -e '^[a-z0-9\-]([a-z0-9\-])*(\.[a-z]{2,}$)')
+      if [ -z "$ANSWER" ]; then
+          VALID=1
+      elif [ "${#TEST}" -gt 0 ]; then
+          PROJECT_NAME=$ANSWER
+          VALID=1
+      else
+          echo -e "${Red}ERROR: Domain name can contain only alphabetic characters (a-z), numbers (0-9), hyphens (-) and dots (.).${Color_Off}"
+          echo -e "${Red}ERROR: Also the domain name must not start or end with underscore, hyphen or dot.${Color_Off}"
+          sleep 2
+          echo
+      fi
+    done
     # Remove spaces.
     LOCAL_DOMAIN=$(echo "$LOCAL_DOMAIN" | sed 's/[[:space:]]/./g')
     ensure_envvar_present LOCAL_DOMAIN $LOCAL_DOMAIN
@@ -62,10 +76,12 @@ function ld_command_init_exec() {
     fi
 
     echo "Setting up docker-compose and docker-sync files for project type '$TYPE'."
-    yml_move $TYPE
 
     # Skeleton uses different folder as the main location for app code.
     [[ "$TYPE" == "skeleton" ]] &&  APP_ROOT='drupal'
+    [[ "$TYPE" == "ddev" ]] &&  APP_ROOT='.' && TYPE="common"
+
+    yml_move $TYPE
 
     APP_ROOT=${APP_ROOT:-app}
     ensure_envvar_present APP_ROOT $APP_ROOT

@@ -8,7 +8,7 @@ find_container() {
         echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
         return 1
     fi
-    TMP_NAME=$DOCKER_PROJECT"_"$1
+    TMP_NAME=$PROJECT_NAME"_"$1
     FOUND_NAME=$(docker ps  | grep "$TMP_NAME" | sed 's/.*\ //' )
     if [ ! -z "$FOUND_NAME" ]; then
         echo $FOUND_NAME;

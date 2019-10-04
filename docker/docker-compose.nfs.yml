@@ -62,9 +62,9 @@ services:
     # Available builds: https://hub.docker.com/r/xoxoxo/php-container/tags
     # Custom build contains sendmail_path -fix for Mailhog and OPTION to add
     # overrides (per project) to other PHP config.
-    build: ./docker/build/php/${PROJECT_PHP_VERSION}
+    build: ./docker/build/php/${PROJECT_PHP_VERSION:-7.2}
+    container_name: "${PROJECT_NAME}_php"
     volumes:
-      # :nocopy must be used with docker-sync
       - nfsmount_app:/var/www:nocopy
     env_file:
       - .env
@@ -73,8 +73,9 @@ services:
     working_dir: /var/www
 
   composer:
-    # Run `composer install` during startup.
-    build: ./docker/build/php/${PROJECT_PHP_VERSION}
+    # Runs `composer install` during startup.
+    build: ./docker/build/php/${PROJECT_PHP_VERSION:-7.2}
+    container_name: "${PROJECT_NAME}_composer"
     volumes:
       - nfsmount_app:/var/www:nocopy
     env_file:
@@ -85,6 +86,7 @@ services:
   db:
     # mysql:8.0.11 keeps restarting.
     image: mysql:5.7.26
+    container_name: "${PROJECT_NAME}_db"
     ports:
       - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_DB:-3306}:3306"
     volumes:
@@ -97,14 +99,6 @@ services:
     # values override earlier ones
     env_file:
       - .env
-    # Variable substitution. values in .env -file.
-    # environment overrides values from.env_file(s):
-    # environment:
-    #   MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-    #  # These is used to create a database.
-    #   MYSQL_DATABASE: ${DB_DATABASE}
-    #   MYSQL_USER: ${DB_USER}
-    #   MYSQL_PASSWORD: ${DB_PASSWORD}
     working_dir: /var
     restart: always
     # Set max_allowed_packet to 256M (or any other value)
@@ -117,24 +111,28 @@ services:
   #     - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_VARNISH:-8017}:80"
 
   adminer:
-    image: adminer
+    image: adminer:4.7.3
+    container_name: "${PROJECT_NAME}_adminer"
     restart: always
-    ports:
-      - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_ADMINER:-8080}:8080"
+    labels:
+      - "traefik.http.routers.web-ui-db-client.rule=Host(`adminer.${LOCAL_DOMAIN}`)"
 
   # PHP container needs some Mailhog -configuration.
   mailhog:
     image: mailhog/mailhog:v1.0.0
+    container_name: "${PROJECT_NAME}_mailhog"
     restart: always
-    ports:
-      - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_MAILHOG:-8025}:8025"
+    labels:
+      - "traefik.http.routers.web-ui-mail.rule=Host(`mailhog.${LOCAL_DOMAIN}`)"
+    restart: always
 
-  # Replcase MYTHEME with your theme name. If you have multiple the
+  # Replace MYTHEME with your theme name. If you have multiple the
   # clone the noodejs -section and rename the containers to something like
   # - nodejs_mytheme and
   # - nodejs_my_other_theme.
   nodejs:
     image: wodby/drupal-node:1.0-1.0.0
+    container_name: "${PROJECT_NAME}_nodejs"
     working_dir: /var/www
     volumes:
       - webroot-sync-core-delegated:/var/www:nocopy

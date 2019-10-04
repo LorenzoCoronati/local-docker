@@ -4,6 +4,35 @@ version: '3.3'
 
 services:
 
+  # @see https://github.com/containous/blog-posts/blob/master/2019_09_10-101_docker/docker-compose-09.yml
+  traefik:
+    image: "traefik:v2.0.0"
+    container_name: "${PROJECT_NAME}_traefik"
+    command:
+      # NOTE: entrypoints.XX.address MUST NOT contain IP, but only port.
+      - "--entrypoints.web.address=:${CONTAINER_PORT_WEB}"
+      - --providers.docker
+      - --api
+      - --api.insecure=true
+      - --api.debug=true
+    ports:
+      - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_WEB}:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    labels:
+      # Dashboard
+      - "traefik.http.routers.web-ui-traefik.rule=Host(`traefik.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.web-ui-traefik.service=api@internal"
+      - "traefik.http.routers.web-ui-traefik.entrypoints=web"
+    env_file:
+      - .env
+
+  whoami:
+    image: containous/whoami:v1.3.0
+    container_name: "${PROJECT_NAME}_whoami"
+    labels:
+      - "traefik.http.routers.web-ui-whoami.rule=Host(`whoami.${LOCAL_DOMAIN}`)"
+
   nginx:
     build: ./docker/build/nginx
     ports:

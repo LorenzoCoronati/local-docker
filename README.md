@@ -4,14 +4,13 @@
 
 This is a template for local development, mainly targeted for Drupal.
 
-In short: Drupal's all PHP lives in `./app` -folder, and index.php - the
-docroot - is in `./app/web/index.php` -folder. Composer, Drush and
-Drupal console should be used within `php` -container:
+In short: Drupal's all PHP lives in `./app` -folder, and `index.php` -
+the docroot - is in `./app/web` -folder. All containers are properly
+versioned, and none of the containers are updated automatically for
+projects local environment's long term consistency.
 
-    # on host
-    $ docker-compose exec php bash
-    # inside php container get status of site in `web/sites/default`
-    /var/www # drush status 
+Everything happens in containers, and command `./ld` is the main tool
+for configuring local, booting it up and so on.
 
 ## Requirements
 
@@ -28,32 +27,6 @@ this on you host (in any directory):
 
 You may have the Docker already installed, in which case
 [Homebrew](https://brew.sh/) will tell you.
-
-## What's in the package?
-
-Behind scenes `local-docker` uses Docker. Recipe of what is launched is
-in `docker-compose.yml` (or for the DEVELOPMENT server
-`docker-compose.dev-vm.yml`).
-
-To overcome the known technical limitations (ie. nerve wrecking local
-drupal site slowness) `docker-sync` is being used. It sets up
-[intermediate containers and hides the OSX filesystem incompatibility](https://docker-sync.readthedocs.io/en/latest/advanced/how-it-works.html)
-there. 
-
-### Pros and cons
-
-**Con** is that the initial sync after launching the local takes a bit
-of time (up to a few minutes). Once that is done local is ... ready.
-Files syncing between host and docker containers may take a few seconds,
-but running `docker-sync logs -f` on a terminal will expose what and
-when is being synced. It is also the fastest tested flavor of various
-ways to share folders between host and containers (including NFS
-mounts).
-
-**Pros** No rotten local development environments ever again! At least
-for the handful of years a head of you. The trick is local environment
-is not **built** locally, but loaded from the Docker hub as-is (apart
-for some minor *config* adjustments).
 
 ## Usage
 
@@ -119,38 +92,64 @@ for a local development domain among ohter things, and `local-docker`
 will write a `/etc/hosts` -record for you and maintain localhost IP
 address aliases.
 
+Some development tools and other services are accessible via their own
+subdomains: 
+
+- main project - [http://example.com]() and [http://www.example.com]()
+- MySQL database - [mysql://$LOCAL_IP:3306](mysql://$LOCAL_IP:3306)
+  (`LOCAL_IP` address is defined in the `.env` file)
+- Adminer (Web UI for MySQL) -
+  [http://**adminer**.example.com](http://adminer.example.com)
+- Mailhog (catches **all** emails) -
+  [http://**mailhog**.example.com](http://mailhog.example.com)
+- Solr (search index web UI)) -
+  [http://**solr**.example.com](http://solr.example.com)
+- Traefik (Web UI for MySQL) -
+  [http://**traefik**.example.com](http://traefik.example.com)
+- Whoami (**only** request headers ) -
+  [http://**whoami**.example.com](http://whoami.example.com)
+
 #### Install Drupal
 
-After setting your domains point your browser to the correct domain. If
-all is well and Drupal is not yet installed you'll be redirected to
-`mylocal.example.com/core/install.php`.
+Once the local is up and running you can install Drupal.
 
-Install Drupal as usual. Be default database -container (`db`) has one
-database (`drupal`) and credentials for accessing (`drupal`/`drupal`).
-**Database hostname must be `db`** (database container name). Docker
-connects containers internally using container names.
+**Note:** MySQL is accessible in `db` instead of `localhost`.
 
-If you need more databases or need to manage anything inside Drupal's
-database, you can
-1) connect to `db` container either via shell
+1. Using Drush 
 
-        $ docker-compose exec db sh
+        $ ./ld drush si -y minimal --db-url=mysql://drupal:drupal@db/drupal
 
-2. or use Adminer with your browser (port is configured in
-   `docker-composer.yml`, see `adminer.ports`):
-   [http://mylocal.example.com:8080](http://mylocal.example.com:8080)
+2. Using browser: 
 
-3. or use your favourite SQL GUI app (SequelPro or similar), and connect
-   using IP (env variable `LOCAL_IP`), port (env variable
-   `CONTAINER_PORT_DB`), username `root` and password (env variable
-   `MYSQL_ROOT_PASSWORD`). Environment variables are defined in your
-   `.env`-file.
+    Drupal is not yet installed you'll be redirected to
+    `www.example.com/core/install.php`.
+    
+    Install Drupal as usual. Be default database -container (`db`) has one
+    database (`drupal`) and credentials for accessing (`drupal`/`drupal`).
+    **Database hostname must be `db`** (database container name). Docker
+    connects containers internally using container names.
+    
+    If you need more databases or need to manage anything inside
+    Drupal's database, you can 
+    
+    1. connect to `db` container either via shell
+    
+            $ docker-compose exec db sh
+    
+    2. or use Adminer with your browser:
+       [http://adminer.example.com](http://adminer.example.com)
+    
+    3. or use your favourite SQL GUI app (SequelPro or similar), and connect
+       using LOCAL_IP (see `.env` -file, `127.0.X.Y`), default port `3306`,
+       username `root` and password from your `.env`-file,
+       `MYSQL_ROOT_PASSWORD`.
  
 #### Skeleton
 
 If you are applying Local-docker on a Skeleton based project start by
 copying all things mentioned in "Start using local-docker" -section on
-top of your project repository. 
+top of your project repository and copy all environment variables from.
+`.env.example` to your own `.env` -file.
 
     $ ./ld init skeleton
 
@@ -199,22 +198,24 @@ and answer some question to set up things properly.
 
 #### Start local
 
-If containers are not pulles/built yet, this will do it for you. 
+Pulls, builds and starts all containers.
 
     $ ./ld up
 
 #### Stop local
 
-Put local to sleep:
+Put local to sleep (no DB dump created, but databases won't be
+immediately destroyed either).
 
     $ ./ld stop 
 
-Stop (ie. remove volumes unless they are persistent):
+Stops local, create DB dump.
 
     $ ./ld down
 
 Note that files sync must be started in order to start other containers,
-and it keeps 1-n pcs of containers running when it is started.
+and it keeps 1-n pcs of containers running when it is started. `./ld`
+commands take care of that, too.
 
 #### Watch filesync logs
 
@@ -233,7 +234,7 @@ This is done automatically when you stop or destroy your containers.
  Put a file in `db_dumps/` -folder and create a symlink pointing to it:
  
     $ ln -s MY_GZIPPED_MYSQLDUMP_FILE.sql.gz ./db_dumps/db-container-dump-LATEST.sql.gz
-    $ ./ld restore
+    $ ./ld restore [PATH-TO-THE-GZIP-DUMP]
 
 
 #### Composer, Drush, Drupal
@@ -254,7 +255,9 @@ These commands are funcionality-wise the same:
 
 You can also execute commands directly in the shell:
 
-    $ docker-compose exec php bash -c "drush status" # OR $ ./ld drush status
+    $ docker-compose exec php bash -c "drush status"
+    # OR
+    $ ./ld drush status
 
 #### Compile CSS
 
@@ -268,29 +271,33 @@ You can expose nodejs container logs with:
 
 #### Xdebug
 
-`php` container has Xdebug installed. It is turned on by default, and 
-controlled by varialble `PHP_XDEBUG_REMOTE_ENABLE` in `.env` file. 
+`php` -container has Xdebug up and running, but not turned on by
+default. You can read Xdebug value, and toggle it on/off with this
+command:
 
-Get or set status with this command:
+    $ ./ld xdebug [1|0]
 
-    $ ./ld xdebug ['on'|1|'off'|0]
+When you load your PHP application, or run Drush / Drupal console
+commands `php` container tries to connect to your IDE:
 
-`php` tries to connect to IDE's Xdebug server on port `9010` when any
-PHP is executed. Port, xdebug log location and remote host values are
-controlled by variables in `.env` file.
+    xdebug.remote_port = 9010
+    ; Docker for Desktop (on OSX at least) maps host.docker.internal to
+    ; host machine. 
+    xdebug.remote_host = host.docker.internal
 
 This Xdebug configuration is initially set in the base image this
 project is using (`xoxoxo/php-container`). However this can be
 overridden for example in
 [95-drupal-development.ini -file (PHP 7.2)](./docker/build/php7.2//conf.d/95-drupal-development.ini)
-, and Xdebug's active config can be checked either from Drupal
+, and Xdebug's full config can be checked either from Drupal
 (`admin/reports/status/php`) or with command
 
     $ docker-compose exec php sh -c 'exec /usr/local/bin/php -i |grep xdebug'
 
 **Note:** You should set your IDE to use port `9010` for Xdebug in order
 for IDE to setup a Xdebug listener to the port Xdebug is trying to
-connect to on your host. 
+connect to on your host. Port `9010` is being used to avoid collision
+with possible running `php-fpm` on the host machine port `9000`.
 
 #### Convenience "alias" for ./ld.sh
 
@@ -302,50 +309,23 @@ alias to your shell startup files. In order to not interfere with `/usr/bin/ld`,
 
 Then, you can use `lld` instead of `./ld` or `./ld.sh`
 
-## Projects in parallel?
+## Projects in parallel
 
-Docker volumes are using volume names from `docker-composer.yml` (see
-root-level key `volumes`). If you collapse with other projects: 
+`local-docker` isolates local projects behind IP aliases and therefore
+running projects in parallel s possible.
 
-1. stop file sync and local (`./ld down`) if needed
-2. clean up your volumes `./ld nuke-volumes` if needed
-3. rename all `webroot-sync-*` -named volumes in `docker-compose.yml` and
-  `docker-sync.yml` -files
-4. start your local again `./ld up` and optionally restore database
-   `./ld restore`
-   
-Another thing that may be needed is changing exposed ports. As an
-example `nginx` exposes port 80 and only one project can use the port at
-a time in the same IP address. Separating IP addresses per project
-should be enough, but in case you bump into weird issues you can always 
-change exposed ports in `.env` file, look for variable names starting
-`CONTAINER_PORT_`.
+In case there are port collisions first thing to check is you have
+`.env` file with `LOCAL_IP` set to something other than `127.0.0.1`.
+`./ld init` sets up a random IP address from range `127.0.0.0/16`.
+
+You can change IP address by putting your local down (`./ld down`),
+changing the IP address value, and starting your local again.
 
 ### Local ports
 
-Docker exposes services to host using ports configured in
-[`.env -file`](./.env) file. Access to these ports is by default limited
-to the host machine loopback interface (`127.0.0.1`) for security
-(configurable). Currently the default exposed services and ports are:
-
--   **Nginx** ports 80, 443
--   **Adminer** port 8080 - manage databases via UI, host: `db`, user `root`, password `root_password`
--   **MySQL** port 3306 - use this with - say - SequelPro
--   **Mailhog** port 8025 - catches all emails sent by PHP
-
-Ports can be configured in [`.env -file`](./.env) file. It is a good
-practise to share the `.env` file when bringing new developers into the
-project. However, `.env` file should not be committed to project
-repository, but non-secure information can be shared via project
-repository's `REAMDE.md` -file.
-
-Note that all containers can access other containers services using
-Docker's internal networking. Containers connect between each other by
-IP addresses, which are automatically resolved using container names.
-
-**NOTE:** Port binds for **local development** must be defined with the
-localhost IP address to restrict access to your host machine (restricted
-from current network - ie. everybody else in the same wi-fi).
+Docker exposes services to host using ports `:80` and `:3306`. Exposed
+ports are bind to `LOCAL_IP` to restrict outside access (from your
+current network) and to make parallel running of your projects possible.
 
 ## Customize ld -script variables
 
@@ -355,9 +335,36 @@ values.
 
 File should contain key=value -pairs, such as
 
-    # Comment starts with hash.
+    # Comments start with a hash.
     MYSQL_ROOT_PASSWORD=some_password
     ANOTHER_KEY=the-value
+
+
+## What's in the package?
+
+Behind scenes `local-docker` uses Docker. Recipe of what is launched is
+in `docker-compose.yml` (or for the DEVELOPMENT server
+`docker-compose.dev-vm.yml`).
+
+To overcome the known technical limitations (ie. nerve wrecking local
+drupal site slowness) `docker-sync` is being used. It sets up
+[intermediate containers and hides the OSX filesystem incompatibility](https://docker-sync.readthedocs.io/en/latest/advanced/how-it-works.html)
+there. 
+
+### Pros and cons
+
+**Con** is that the initial sync after launching the local takes a bit
+of time (up to a few minutes). Once that is done local is ... ready.
+Files syncing between host and docker containers may take a few seconds,
+but running `docker-sync logs -f` on a terminal will expose what and
+when is being synced. It is also the fastest tested flavor of various
+ways to share folders between host and containers (including NFS
+mounts).
+
+**Pros** No rotten local development environments ever again! At least
+for the handful of years a head of you. The trick is local environment
+is not **built** locally, but loaded from the Docker hub as-is (apart
+for some minor *config* adjustments).
 
 ## ISSUES 
 

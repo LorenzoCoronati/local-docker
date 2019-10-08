@@ -30,9 +30,9 @@ function ld_command_self-update_exec() {
     cp -r local-docker-${TAG}/.gitignore.example ../
     cd ..
     rm -rf ld-tmp
-    echo -e "${Green}Project updated to version ${BGreen}$TAG.${Color_Off}"
-    echo -e "${Green}Review and commit chages to ./docker, ld.sh, .env.example and .gitignore.example.${Color_Off}"
-    echo -e "${Green}Review updates to .env.example and optionally update yoru local .env file, too.${Color_Off}"
+    echo -e "${Green}Project updated to version {BGreen}${TAG}${Green}.${Color_Off}"
+    echo -e "${Yellow}Review and commit changes to ./docker, ld.sh, .env.example and .gitignore.example.${Color_Off}"
+    echo -e "${Yellow}Review updates in .env.example and optionally update your own .env file, too.${Color_Off}"
 }
 
 function ld_command_self-update_help() {

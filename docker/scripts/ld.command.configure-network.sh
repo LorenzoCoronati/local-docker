@@ -27,14 +27,15 @@ function ld_command_configure-network_exec() {
     DOMAIN_SET=$(egrep -e $LOCAL_IP'\s*([a-z0-9\.-]*\s?\s*)*('$LOCAL_DOMAIN')' /etc/hosts)
     if [ "$LOCAL_DOMAIN" != "localhost" ]; then
         if [ -z "$DOMAIN_SET" ]; then
-            echo -e "${Yellow}Adding domain $LOCAL_DOMAIN to your hosts file to poin to $LOCAL_IP.${Color_Off}"
+            SUBDOMAINS=$(grep '=Host' docker-compose.yml | cut -d'`' -f2 | cut -d'.' -f1 | grep -v '\$' | xargs -I % echo %.${LOCAL_DOMAIN} | xargs)
+            echo -e "${Yellow}Adding domain $LOCAL_DOMAIN with subdomains to your hosts file to poin to $LOCAL_IP:${Color_Off}"
             echo -e "${BYellow}NOTE: This DNS record is not removed automatically.${Color_Off}"
             if [ -z "$SUDO_REQUESTED" ]; then
                 echo -e "${Yellow}Configuring networking may require your password. Your password is not stored anywhere by local-docker.${Color_Off}"
                 echo
             fi
             sudo bash -c "echo && echo '############  Project (local-docker): $PROJECT_NAME   ##############' >> /etc/hosts"
-            sudo bash -c "echo '$LOCAL_IP      $LOCAL_DOMAIN' >> /etc/hosts"
+            sudo bash -c "echo '$LOCAL_IP      $LOCAL_DOMAIN $SUBDOMAINS' >> /etc/hosts"
         else
             echo -e "${Green}Domain $LOCAL_DOMAIN is already configured.${Color_Off}"
         fi

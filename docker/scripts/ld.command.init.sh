@@ -51,6 +51,7 @@ function ld_command_init_exec() {
     # Remove spaces.
     LOCAL_DOMAIN=$(echo "$LOCAL_DOMAIN" | sed 's/[[:space:]]/./g')
     ensure_envvar_present LOCAL_DOMAIN $LOCAL_DOMAIN
+    ensure_envvar_present DRUSH_OPTIONS_URI "http://www."$LOCAL_DOMAIN
 
     echo -e "${BBlack}What is the local development IP address?${Color_Off}"
     echo "Random 127.0.0.0./16 will be generated for you if you so wish?"

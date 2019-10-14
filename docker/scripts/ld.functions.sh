@@ -132,3 +132,14 @@ function ensure_envvar_present() {
     # Re-import all vars to take effect in host and container shell, too.
     import_root_env
 }
+
+function osx_version() {
+  VERSION_LONG=$(defaults read loginwindow SystemVersionStampAsString)
+  VERION_SHORT=$(echo $VERSION_LONG | cut -d'.' -f1 -f2)
+  if [ ! -z "$VERION_SHORT" ]; then
+    echo $VERION_SHORT;
+    return;
+  fi
+
+  return 1;
+}

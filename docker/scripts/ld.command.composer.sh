@@ -7,11 +7,11 @@ function ld_command_composer_exec() {
     CONT_ID=$(find_container ${CONTAINER_PHP:-php})
     if [ "$?" -eq "1" ]; then
       echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
-      exit 1
+      return 1
     fi
     if [ -z "$CONT_ID" ]; then
-        echo -e "${Red}ERROR: PHP container ('${CONTAINER_PHP:-php}')is not up.${Color_Off}"
-        exit 2
+      echo -e "${Red}ERROR: PHP container ('${CONTAINER_PHP:-php}')is not up.${Color_Off}"
+      return 2
     fi
     COMM="docker-compose exec ${CONTAINER_PHP:-php} /usr/local/bin/composer -vv $@"
     echo -e "${Cyan}Next: $COMM${Color_Off}"

@@ -31,6 +31,7 @@ for FILE in $(ls ./docker/scripts/ld.command.*.sh ); do
     COMMAND=$(cut -d'.' -f3 <<<"$FILE")
     COMMANDS="$COMMANDS $COMMAND"
 done
+
 # Use fixed name, since docker-sync is supposed to be locally only.
 DOCKERSYNC_FILE=docker-sync.yml
 DOCKER_COMPOSE_FILE=docker-compose.yml
@@ -38,7 +39,12 @@ DOCKER_YML_STORAGE=./docker
 DOCKER_PROJECT=$(basename $PROJECT_ROOT)
 
 import_root_env
-ENV_IMPORT_FAILED=$?
+if [[ "$?" -ne "0" ]] && [ ! -f "./.env.example" ]; then
+  echo "Files .env.example are .env are missing. Please add either one to project root."
+  echo "Then start over."
+  cd $CWD
+  exit 1
+fi
 
 DATE=$(date +%Y-%m-%d--%H-%I-%S)
 RESTORE_INFO="mysql --host "$CONTAINER_DB" -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
@@ -46,30 +52,9 @@ USERS="mysql --host "$CONTAINER_DB" -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e
 
 # Read (and create if necessary) the .env file, allowing overrides to any of our config values.
 if [[ "$ACTION" != 'help' ]]; then
-    if [[ "$ENV_IMPORT_FAILED" -ne "0" ]]; then
-        if [ ! -f "./.env.example" ]; then
-            echo "Files .env.example are .env are missing. Please add either one to project root."
-            echo "Then start over."
-            cd $CWD
-            exit 1
-        fi
-        sleep 2
-        echo "Copying .env.example -file => .env. "
-        sleep 2
-        cp -f ./.env.example ./.env
-        echo "Please review your .env file:"
-        echo
-        echo -e "${BIWhite}========  START OF .env =========${Color_Off}"
-        sleep 1
-        cat ./.env
-        echo -e "${BIWhite}========  END OF .env =========${Color_Off}"
-        echo
-        read -p "Does this look okay? [Y/n] " CHOICE
-        case "$CHOICE" in
-            ''|y|Y|'yes'|'YES' ) import_root_env && echo "Cool, let's continue!" & echo ;;
-            n|N|'no'|'NO' ) echo -e "Ok, we'll stop here. ${BYellow}Please edit .env file manually, and then continue.${Color_Off}" && exit 1 ;;
-            * ) echo -e "${BRed}ERROR: Unclear answer, exiting.${Color_Off}" && cd $CWD && exit 2;;
-        esac
+    import_root_env
+    if [[ "$?" -ne "0" ]]; then
+      create_root_env
     fi
 fi
 
@@ -84,7 +69,7 @@ fi
 
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
     if [[ "$ACTION" != 'init' ]] && [[ "$ACTION" != 'help' ]] && [[ "$ACTION" != 'self-update' ]]; then
-        echo "Starting to initialise local-docker, please wait..."
+        echo -e "${BYellow}Local-docker not yet initialized. Starting init now, please wait...${Color_Off}"
         $SCRIPT_NAME init
     fi
 fi

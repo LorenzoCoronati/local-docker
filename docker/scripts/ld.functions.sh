@@ -143,3 +143,25 @@ function osx_version() {
 
   return 1;
 }
+
+# Check base requirements to run local-docker.
+# Some shells have built-in "which" (zsh), some use the BSD which (bash, sh)
+# and they behave differently. Trying to catch all the flavors and behaviours here.
+function required_binaries_check() {
+
+  if [ ! -z "$(which docker | grep 'not found')" ] ||
+      [ "$(which -s docker && echo $?)" -ne "0" ] ; then
+    exit 1
+  fi
+
+  if [ ! -z "$(which docker-compose | grep 'not found')" ] ||
+      [ "$(which -s docker-compose && echo $?)" -ne "0" ] ; then
+    exit 2
+  fi
+
+  if [ ! -z "$(which git | grep 'not found')" ] ||
+      [ "$(which -s git && echo $?)" -ne "0" ] ; then
+    exit 3
+  fi
+
+}

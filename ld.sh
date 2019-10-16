@@ -15,6 +15,13 @@ cd $PROJECT_ROOT
 # Get functions.
 . ./docker/scripts/ld.functions.sh
 
+required_binaries_check
+case "$?" in
+  1|"1") cd $CWD && echo -e "${Red}Docker is not running. Docker is required to use local-docker.${Color_Off}" && exit 1 ;;
+  2|"2") cd $CWD && echo -e "${Red}Docker Compose was not found. It is required to use local-docker.${Color_Off}" && exit 1 ;;
+  3|"3") cd $CWD && echo -e "${Red}Git was not found. It is required to use local-docker.${Color_Off}" && exit 1 ;;
+esac
+
 # 1st param, The Command.
 ACTION=${1-'help'}
 
@@ -80,12 +87,6 @@ if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
         echo "Starting to initialise local-docker, please wait..."
         $SCRIPT_NAME init
     fi
-fi
-
-if [ -z "$(which docker)" ]; then
-  echo -e "${Red}Docker is not running. Docker is required to use local-docker.${Color_Off}"
-  cd $CWD
-  exit 1
 fi
 
 case "$ACTION" in

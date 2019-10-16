@@ -40,16 +40,16 @@ function ld_command_restore_exec() {
 
     echo
     echo -e "${Yellow}Databases before the restore:${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$RESTORE_INFO 2>/dev/null"
     echo
-    RESTORER="gunzip < /var/db_dumps/db-container-dump-LATEST.sql.gz | mysql --host "$CONTAINER_DB" -uroot -p"$MYSQL_ROOT_PASSWORD""
+    RESTORER="gunzip < /var/db_dumps/db-container-dump-LATEST.sql.gz | mysql --host "$${CONTAINER_DB:-db}" -uroot -p"$MYSQL_ROOT_PASSWORD""
     echo "Please wait..."
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORER 2>/dev/null"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$RESTORER 2>/dev/null"
     echo
     echo -e "${Yellow}Databases after the restore${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$RESTORE_INFO 2>/dev/null"
     echo -e "${Yellow}Users after the restore${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$USERS 2>/dev/null"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$USERS 2>/dev/null"
   }
 
 function ld_command_restore_help() {

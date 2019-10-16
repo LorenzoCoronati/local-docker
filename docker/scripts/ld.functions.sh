@@ -48,7 +48,7 @@ function yml_move() {
 }
 
 function db_connect() {
-    CONTAINER_DB_ID=$(find_container $CONTAINER_DB)
+    CONTAINER_DB_ID=$(find_container ${CONTAINER_DB:-db})
     RESPONSE=0
     ROUND=0
     ROUNDS_MAX=30

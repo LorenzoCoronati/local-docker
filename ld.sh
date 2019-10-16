@@ -47,8 +47,8 @@ if [[ "$?" -ne "0" ]] && [ ! -f "./.env.example" ]; then
 fi
 
 DATE=$(date +%Y-%m-%d--%H-%I-%S)
-RESTORE_INFO="mysql --host "$CONTAINER_DB" -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
-USERS="mysql --host "$CONTAINER_DB" -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e \"SELECT User, Host from mysql.user WHERE User NOT LIKE 'mysql%';\""
+RESTORE_INFO="mysql --host "$${CONTAINER_DB:-db}" -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
+USERS="mysql --host "$${CONTAINER_DB:-db}" -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e \"SELECT User, Host from mysql.user WHERE User NOT LIKE 'mysql%';\""
 
 # Read (and create if necessary) the .env file, allowing overrides to any of our config values.
 if [[ "$ACTION" != 'help' ]]; then

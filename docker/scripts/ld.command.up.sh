@@ -33,9 +33,9 @@ function ld_command_up_exec() {
 
     echo
     echo 'Current databases:'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$RESTORE_INFO 2>/dev/null"
     echo 'Current database users:'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$USERS 2>/dev/null"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$USERS 2>/dev/null"
     echo -e "${Yellow}NOTE: No database dump restored.${Color_Off}"
     echo 'In case you need to do that (Drupal DB is gone?),'
     echo '1) check your symlink target in db_dumps/db-container-dump-LATEST.sql.gz'

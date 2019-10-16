@@ -5,15 +5,15 @@
 
 function ld_command_dump_exec() {
     db_connect
-    CONN=$?
-    if [ "$CONN" -ne "0" ]; then
-        cd $CWD
-        exit 1
-    fi
+    case "$?" in
+      1|"1") echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}" && return 1 ;;
+      2|"2") echo -e "${Red}ERROR: DB container not running (or not yet created).${Color_Off}" && return 2 ;;
+      2|"2") echo -e "${Red}ERROR: Some other and undetected issue when connecting DB container.${Color_Off}" && return 3 ;;
+    esac
 
     echo -e "${Yellow}Using datestamp: $DATE${Color_Off}"
-    DUMPER="mysqldump --host "$CONTAINER_DB" -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --dump-date --tz-utc --verbose"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$DUMPER  2>/dev/null | gzip --fast -f > /var/db_dumps/db-container-dump-$DATE.sql.gz"
+    DUMPER="mysqldump --host "$${CONTAINER_DB:-db}" -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --dump-date --tz-utc --verbose"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$DUMPER  2>/dev/null | gzip --fast -f > /var/db_dumps/db-container-dump-$DATE.sql.gz"
     cd $PROJECT_ROOT/$DATABASE_DUMP_STORAGE
     ln -sf db-container-dump-$DATE.sql.gz db-container-dump-LATEST.sql.gz
     cd $PROJECT_ROOT

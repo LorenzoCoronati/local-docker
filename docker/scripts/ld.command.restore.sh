@@ -27,29 +27,27 @@ function ld_command_restore_exec() {
     fi
 
     db_connect
-    CONN=$?
-
-    if [ "$CONN" -ne 0 ]; then
-        echo -e "${Red}ERROR: DB container is not up, even after a few retries.${Color_Off}."
-        cd $CWD
-        exit 2
-    fi
+    case "$?" in
+      1|"1") echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}" && return 1 ;;
+      2|"2") echo -e "${Red}ERROR: DB container not running (or not yet created).${Color_Off}" && return 2 ;;
+      2|"2") echo -e "${Red}ERROR: Some other and undetected issue when connecting DB container.${Color_Off}" && return 3 ;;
+    esac
 
     echo -e "${Yellow}Restoring db from:\n $DATABASE_DUMP_STORAGE/$TARGET_FILE_NAME${Color_Off}"
     echo "This may take some time."
 
     echo
     echo -e "${Yellow}Databases before the restore:${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$RESTORE_INFO 2>/dev/null"
     echo
-    RESTORER="gunzip < /var/db_dumps/db-container-dump-LATEST.sql.gz | mysql --host "$CONTAINER_DB" -uroot -p"$MYSQL_ROOT_PASSWORD""
+    RESTORER="gunzip < /var/db_dumps/db-container-dump-LATEST.sql.gz | mysql --host "$${CONTAINER_DB:-db}" -uroot -p"$MYSQL_ROOT_PASSWORD""
     echo "Please wait..."
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORER 2>/dev/null"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$RESTORER 2>/dev/null"
     echo
     echo -e "${Yellow}Databases after the restore${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$RESTORE_INFO 2>/dev/null"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$RESTORE_INFO 2>/dev/null"
     echo -e "${Yellow}Users after the restore${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec $CONTAINER_DB sh -c "$USERS 2>/dev/null"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$USERS 2>/dev/null"
   }
 
 function ld_command_restore_help() {

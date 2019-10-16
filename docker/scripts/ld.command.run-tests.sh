@@ -4,20 +4,19 @@
 # This file contains run-tests -command for local-docker script ld.sh.
 
 function ld_command_run-tests_exec() {
-    if [ -z "$CONTAINER_PHP" ]; then
-        echo -e "${Red}ERROR: PHP container name is missing.${Color_Off}"
-        echo -e "${Red}Ensure you have variable 'CONTAINER_PHP' set in configuration.${Color_Off}"
-        exit 1
+    CONT_ID=$(find_container ${CONTAINER_PHP:-php})
+    if [ "$?" -eq "1" ]; then
+      echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
+      return 1
     fi
-    CONT_ID=$(find_container $CONTAINER_PHP)
     if [ -z "$CONT_ID" ]; then
-        echo -e "${Red}ERROR: PHP container ('$CONTAINER_PHP')is not up.${Color_Off}"
-        exit 1
+      echo -e "${Red}ERROR: PHP container ('${CONTAINER_PHP:-php}')is not up.${Color_Off}"
+      return 2
     fi
     TESTS=${@}
     SUB_COMM="/bin/su -s /bin/bash www-data -c 'test -f  web/core/scripts/run-tests.sh && php web/core/scripts/run-tests.sh --verbose --non-html --url http://${CONTAINER_NGINX:-nginx} --color ${TESTS} '"
-    echo -e "${Cyan}Next: docker-compose exec ${CONTAINER_PHP} bash -c \"${SUB_COMM}\"${Color_Off}"
-    docker-compose exec ${CONTAINER_PHP} bash -c "${SUB_COMM}"
+    echo -e "${Cyan}Next: docker-compose exec ${CONTAINER_PHP:-php} bash -c \"${SUB_COMM}\"${Color_Off}"
+    docker-compose exec ${CONTAINER_PHP:-php} bash -c "${SUB_COMM}"
 }
 
 function ld_command_run-tests_help() {

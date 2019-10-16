@@ -5,7 +5,6 @@
 
 function find_container() {
     if [ -z "$1" ]; then
-        echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
         return 1
     fi
     TMP_NAME=$PROJECT_NAME"_"$1
@@ -27,36 +26,37 @@ function is_dockersync() {
 #   yml_move template-name
 function yml_move() {
     MODE=$1
-    if [ -z "$MODE" ]; then
-       echo -e "${Red}Trying to use yml files without project type.${Color_Off}"
-       exit 1
+    if [ -z "$1" ]; then
+       return 1
     fi
 
     if [ -f "$DOCKER_YML_STORAGE/docker-compose.$MODE.yml" ]; then
-        echo "Using $DOCKER_YML_STORAGE/docker-compose.$MODE.yml as the docker-compose recipe."
+        echo -e "${Yellow}Using $DOCKER_YML_STORAGE/docker-compose.$MODE.yml as the docker-compose recipe.${Color_Off}"
         cp $DOCKER_YML_STORAGE/docker-compose.$MODE.yml ./$DOCKER_COMPOSE_FILE
     else
         echo -e "${Red} Docker-compose template file missing: $DOCKER_YML_STORAGE/docker-compose.$MODE.yml"
     fi
     # NFS template does not have docker-sync -flavor, as it uses nfs mounts for folder sharing.
     if [ "$MODE" != "nfs" ] && [ -f "$DOCKER_YML_STORAGE/docker-sync.$MODE.yml" ]; then
-        echo "Using $DOCKER_YML_STORAGE/docker-sync.$MODE.yml as the docker-sync recipe."
+        echo -e "${Yellow}Using $DOCKER_YML_STORAGE/docker-sync.$MODE.yml as the docker-sync recipe.${Color_Off}"
         cp $DOCKER_YML_STORAGE/docker-sync.$MODE.yml ./$DOCKERSYNC_FILE
     else
-        echo -e "${Red} Docker-sync template file missing: $DOCKER_YML_STORAGE/docker-sync.$MODE.yml"
+        echo -e "${Red} Docker-sync template file missing: $DOCKER_YML_STORAGE/docker-sync.$MODE.yml.${Color_Off}"
     fi
 }
 
 function db_connect() {
-    CONTAINER_DB_ID=$(find_container $CONTAINER_DB)
+    CONTAINER_DB_ID=$(find_container ${CONTAINER_DB:-db})
+    if [ "$?" -eq "1" ]; then
+      return 1
+    fi
     RESPONSE=0
     ROUND=0
     ROUNDS_MAX=30
     if [ -z "$CONTAINER_DB_ID" ]; then
-        echo -e "${Red}DB container not running (or not yet created).${Color_Off}"
-        exit 1
+      return 2
     else
-        echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
+      echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
     fi
 
     while [ -z "$RESPONSE" ] || [ "$RESPONSE" -eq "0" ]; do
@@ -79,7 +79,7 @@ function db_connect() {
         fi
     done
 
-    return 1
+    return 3
 }
 
 # Cross-OS way to do in-place find-and-replace with sed.
@@ -118,8 +118,8 @@ function create_root_env() {
   read -p "Does this look okay? [Y/n] " CHOICE
   case "$CHOICE" in
     ''|y|Y|'yes'|'YES' ) import_root_env && echo -e "${Green}Cool, let's continue!${Color_Off}" & echo ;;
-    n|N|'no'|'NO' ) echo -e "Ok, we'll stop here. ${BYellow}Please edit .env file manually, and then start over.${Color_Off}" && exit 1 ;;
-    * ) echo -e "${BRed}ERROR: Unclear answer, exiting.${Color_Off}" && cd $CWD && exit 2;;
+    n|N|'no'|'NO' ) echo -e "Ok, we'll stop here. ${BYellow}Please edit .env file manually, and then start over.${Color_Off}" && return 1 ;;
+    * ) echo -e "${BRed}ERROR: Unclear answer, exiting.${Color_Off}" && cd $CWD && return 2;;
   esac
 }
 
@@ -141,7 +141,7 @@ function ensure_envvar_present() {
     VAL=$2
     if [ ! -e ".env" ]; then
         echo -e "${Red}ERROR: File .env not present while trying to store a value into it.${Color_Off}";
-        exit;
+        return 1;
     fi
     EXISTS=$(grep $NAME .env | wc -l)
     if [ "$EXISTS" -gt "0" ]; then
@@ -156,9 +156,9 @@ function ensure_envvar_present() {
 
 function osx_version() {
   VERSION_LONG=$(defaults read loginwindow SystemVersionStampAsString)
-  VERION_SHORT=$(echo $VERSION_LONG | cut -d'.' -f1 -f2)
-  if [ ! -z "$VERION_SHORT" ]; then
-    echo $VERION_SHORT;
+  VERSION_SHORT=$(echo $VERSION_LONG | cut -d'.' -f1 -f2)
+  if [ ! -z "$VERSION_SHORT" ]; then
+    echo $VERSION_SHORT;
     return;
   fi
 
@@ -172,17 +172,17 @@ function required_binaries_check() {
 
   if [ ! -z "$(which docker | grep 'not found')" ] ||
       [ "$(which -s docker && echo $?)" -ne "0" ] ; then
-    exit 1
+    return 1
   fi
 
   if [ ! -z "$(which docker-compose | grep 'not found')" ] ||
       [ "$(which -s docker-compose && echo $?)" -ne "0" ] ; then
-    exit 2
+    return 2
   fi
 
   if [ ! -z "$(which git | grep 'not found')" ] ||
       [ "$(which -s git && echo $?)" -ne "0" ] ; then
-    exit 3
+    return 3
   fi
 
 }

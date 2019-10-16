@@ -83,6 +83,10 @@ function ld_command_init_exec() {
     [[ "$TYPE" == "ddev" ]] &&  APP_ROOT='.' && TYPE="common"
 
     yml_move $TYPE
+    if [ "$?" -eq "1" ]; then
+      echo -e "${Red}Trying to use yml files without project type.${Color_Off}"
+      return 1
+    fi
 
     APP_ROOT=${APP_ROOT:-app}
     ensure_envvar_present APP_ROOT $APP_ROOT

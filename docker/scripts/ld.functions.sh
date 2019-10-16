@@ -3,7 +3,7 @@
 #
 # This file contains functions for local-docker script ld.sh.
 
-find_container() {
+function find_container() {
     if [ -z "$1" ]; then
         echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
         return 1
@@ -15,7 +15,7 @@ find_container() {
     fi
 }
 
-is_dockersync() {
+function is_dockersync() {
     [ ! -z "$(which docker-sync)" ] && [ -f "$PROJECT_ROOT/$DOCKERSYNC_FILE" ]
 }
 
@@ -25,7 +25,7 @@ is_dockersync() {
 # usually: docker/docker-compose.TPL-NAME.yml
 # Usage
 #   yml_move template-name
-yml_move() {
+function yml_move() {
     MODE=$1
     if [ -z "$MODE" ]; then
        echo -e "${Red}Trying to use yml files without project type.${Color_Off}"
@@ -47,7 +47,7 @@ yml_move() {
     fi
 }
 
-db_connect() {
+function db_connect() {
     CONTAINER_DB_ID=$(find_container $CONTAINER_DB)
     RESPONSE=0
     ROUND=0
@@ -84,13 +84,13 @@ db_connect() {
 
 # Cross-OS way to do in-place find-and-replace with sed.
 # Use: replace_in_file PATTERN FILENAME
-replace_in_file () {
+function replace_in_file () {
     sed --version >/dev/null 2>&1 && sed -i -- "$@" || sed -i "" "$@"
 }
 
 # Import all environment variables from .env -file.
 # This should be done every time after vars are updated.
-import_root_env() {
+function import_root_env() {
     ENV_FILE="$PROJECT_ROOT/.env"
 
     if [ -f "$ENV_FILE" ]; then

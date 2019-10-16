@@ -5,9 +5,13 @@
 
 function ld_command_drupal-structure-fix_exec() {
     CONT_ID=$(find_container ${CONTAINER_PHP:-php})
+    if [ "$?" -eq "1" ]; then
+      echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
+      exit 1
+    fi
     if [ -z "$CONT_ID" ]; then
         echo -e "${Red}ERROR: PHP container ('${CONTAINER_PHP:-php}')is not up.${Color_Off}"
-        exit 1
+        exit 2
     fi
     echo "Creating some folders to project below /var/www"
     docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_PHP:-php} bash -c '[[ ! -d "config/sync" ]] &&  mkdir -vp config/sync'

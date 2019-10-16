@@ -5,9 +5,13 @@
 
 function ld_command_drush_exec() {
     CONT_ID=$(find_container ${CONTAINER_PHP:-php})
-    if [ -z "$CONT_ID" ];then
+    if [ "$?" -eq "1" ]; then
+      echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
+      exit 1
+    fi
+    if [ -z "$CONT_ID" ]; then
         echo -e "${Red}ERROR: PHP container ('${CONTAINER_PHP:-php}')is not up.${Color_Off}"
-        exit 1
+        exit 2
     fi
     COMM="docker-compose exec ${CONTAINER_PHP:-php} /var/www/vendor/drush/drush/drush $@"
     echo -e "${Cyan}Next: $COMM${Color_Off}"

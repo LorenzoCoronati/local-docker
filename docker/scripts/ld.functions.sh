@@ -5,7 +5,6 @@
 
 function find_container() {
     if [ -z "$1" ]; then
-        echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
         return 1
     fi
     TMP_NAME=$PROJECT_NAME"_"$1
@@ -49,12 +48,16 @@ function yml_move() {
 
 function db_connect() {
     CONTAINER_DB_ID=$(find_container ${CONTAINER_DB:-db})
+    if [ "$?" -eq "1" ]; then
+      echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
+      exit 1
+    fi
     RESPONSE=0
     ROUND=0
     ROUNDS_MAX=30
     if [ -z "$CONTAINER_DB_ID" ]; then
         echo -e "${Red}DB container not running (or not yet created).${Color_Off}"
-        exit 1
+        exit 2
     else
         echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
     fi

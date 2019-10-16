@@ -5,9 +5,13 @@
 
 function ld_command_run-tests_exec() {
     CONT_ID=$(find_container ${CONTAINER_PHP:-php})
+    if [ "$?" -eq "1" ]; then
+      echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
+      exit 1
+    fi
     if [ -z "$CONT_ID" ]; then
         echo -e "${Red}ERROR: PHP container ('${CONTAINER_PHP:-php}')is not up.${Color_Off}"
-        exit 1
+        exit 2
     fi
     TESTS=${@}
     SUB_COMM="/bin/su -s /bin/bash www-data -c 'test -f  web/core/scripts/run-tests.sh && php web/core/scripts/run-tests.sh --verbose --non-html --url http://${CONTAINER_NGINX:-nginx} --color ${TESTS} '"

@@ -31,34 +31,32 @@ function yml_move() {
     fi
 
     if [ -f "$DOCKER_YML_STORAGE/docker-compose.$MODE.yml" ]; then
-        echo "Using $DOCKER_YML_STORAGE/docker-compose.$MODE.yml as the docker-compose recipe."
+        echo -e "${Yellow}Using $DOCKER_YML_STORAGE/docker-compose.$MODE.yml as the docker-compose recipe.${Color_Off}"
         cp $DOCKER_YML_STORAGE/docker-compose.$MODE.yml ./$DOCKER_COMPOSE_FILE
     else
         echo -e "${Red} Docker-compose template file missing: $DOCKER_YML_STORAGE/docker-compose.$MODE.yml"
     fi
     # NFS template does not have docker-sync -flavor, as it uses nfs mounts for folder sharing.
     if [ "$MODE" != "nfs" ] && [ -f "$DOCKER_YML_STORAGE/docker-sync.$MODE.yml" ]; then
-        echo "Using $DOCKER_YML_STORAGE/docker-sync.$MODE.yml as the docker-sync recipe."
+        echo -e "${Yellow}Using $DOCKER_YML_STORAGE/docker-sync.$MODE.yml as the docker-sync recipe.${Color_Off}"
         cp $DOCKER_YML_STORAGE/docker-sync.$MODE.yml ./$DOCKERSYNC_FILE
     else
-        echo -e "${Red} Docker-sync template file missing: $DOCKER_YML_STORAGE/docker-sync.$MODE.yml"
+        echo -e "${Red} Docker-sync template file missing: $DOCKER_YML_STORAGE/docker-sync.$MODE.yml.${Color_Off}"
     fi
 }
 
 function db_connect() {
     CONTAINER_DB_ID=$(find_container ${CONTAINER_DB:-db})
     if [ "$?" -eq "1" ]; then
-      echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
       return 1
     fi
     RESPONSE=0
     ROUND=0
     ROUNDS_MAX=30
     if [ -z "$CONTAINER_DB_ID" ]; then
-        echo -e "${Red}DB container not running (or not yet created).${Color_Off}"
-        return 2
+      return 2
     else
-        echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
+      echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
     fi
 
     while [ -z "$RESPONSE" ] || [ "$RESPONSE" -eq "0" ]; do
@@ -81,7 +79,7 @@ function db_connect() {
         fi
     done
 
-    return 1
+    return 3
 }
 
 # Cross-OS way to do in-place find-and-replace with sed.

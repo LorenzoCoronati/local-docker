@@ -23,13 +23,12 @@ function ld_command_up_exec() {
     fi
 
     db_connect
-    CONN=$?
-
-    if [ "$CONN" -ne 0 ]; then
-        echo -e "${Red}Oww... DB container is not up, even after a few retries.${Color_Off}"
-        cd $CWD
-        exit 1
-    fi
+    db_connect
+    case "$?" in
+      1|"1") echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}" && return 1 ;;
+      2|"2") echo -e "${Red}ERROR: DB container not running (or not yet created).${Color_Off}" && return 2 ;;
+      2|"2") echo -e "${Red}ERROR: Some other and undetected issue when connecting DB container.${Color_Off}" && return 3 ;;
+    esac
 
     echo
     echo 'Current databases:'

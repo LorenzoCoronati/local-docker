@@ -156,9 +156,9 @@ function ensure_envvar_present() {
 
 function osx_version() {
   VERSION_LONG=$(defaults read loginwindow SystemVersionStampAsString)
-  VERION_SHORT=$(echo $VERSION_LONG | cut -d'.' -f1 -f2)
-  if [ ! -z "$VERION_SHORT" ]; then
-    echo $VERION_SHORT;
+  VERSION_SHORT=$(echo $VERSION_LONG | cut -d'.' -f1 -f2)
+  if [ ! -z "$VERSION_SHORT" ]; then
+    echo $VERSION_SHORT;
     return;
   fi
 

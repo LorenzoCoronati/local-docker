@@ -21,9 +21,9 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     labels:
       # Dashboard
-      - "traefik.http.routers.web-ui-traefik.rule=Host(`traefik.${LOCAL_DOMAIN}`)"
-      - "traefik.http.routers.web-ui-traefik.service=api@internal"
-      - "traefik.http.routers.web-ui-traefik.entrypoints=web"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.rule=Host(`traefik.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.service=api@internal"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.entrypoints=web"
     env_file:
       - .env
 
@@ -31,14 +31,14 @@ services:
     image: containous/whoami:v1.3.0
     container_name: "${PROJECT_NAME}_whoami"
     labels:
-      - "traefik.http.routers.web-ui-whoami.rule=Host(`whoami.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-whoami.rule=Host(`whoami.${LOCAL_DOMAIN}`)"
 
   nginx:
     build: ./docker/build/nginx
     container_name: "${PROJECT_NAME}_nginx"
     labels:
-      - "traefik.http.routers.web-ui.rule=Host(`${LOCAL_DOMAIN}`)"
-      - "traefik.http.routers.web-ui.rule=Host(`www.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui.rule=Host(`${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui.rule=Host(`www.${LOCAL_DOMAIN}`)"
     volumes:
       # :nocopy must be used with docker-sync
       # See bottom of this file, and ./docker-sync.yml
@@ -118,7 +118,7 @@ services:
       - solr-precreate
       - gettingstarted
     labels:
-      - "traefik.http.routers.web-ui-solr.rule=Host(`solr.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-solr.rule=Host(`solr.${LOCAL_DOMAIN}`)"
     env_file:
       - .env
     volumes:
@@ -129,7 +129,7 @@ services:
     container_name: "${PROJECT_NAME}_adminer"
     restart: always
     labels:
-      - "traefik.http.routers.web-ui-db-client.rule=Host(`adminer.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-db-client.rule=Host(`adminer.${LOCAL_DOMAIN}`)"
 
   # PHP container needs some Mailhog -configuration.
   mailhog:
@@ -137,7 +137,7 @@ services:
     container_name: "${PROJECT_NAME}_mailhog"
     restart: always
     labels:
-      - "traefik.http.routers.web-ui-mail.rule=Host(`mailhog.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-mail.rule=Host(`mailhog.${LOCAL_DOMAIN}`)"
     restart: always
 
   # Replace MYTHEME with your theme name. If you have multiple the

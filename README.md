@@ -104,7 +104,7 @@ subdomains:
   [http://**mailhog**.example.com](http://mailhog.example.com)
 - Solr (search index web UI)) -
   [http://**solr**.example.com](http://solr.example.com)
-- Traefik (Web UI for MySQL) -
+- Traefik (Reverse proxy for handling HTTP traffic) -
   [http://**traefik**.example.com](http://traefik.example.com)
 - Whoami (**only** request headers ) -
   [http://**whoami**.example.com](http://whoami.example.com)

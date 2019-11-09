@@ -8,13 +8,12 @@ function ld_command_init_exec() {
     VALID=0
     while [ "$VALID" -eq "0" ]; do
         echo  -e "${BBlack}What is the project name?${Color_Off}"
-        echo  "Provide a string without spaces and use chars a-z and 0-9."
+        echo  "Provide a string without spaces and use chars a-z and 0-9, - and _ (no dots)."
         PROJECT_NAME=${PROJECT_NAME:-$(basename $PROJECT_ROOT)}
         read -p "Project name ['$PROJECT_NAME']: " ANSWER
         if [ -z "$ANSWER" ]; then
             VALID=1
-        elif [[ "" =~ ^[a-z0-9]([a-z0-9_-]*[a-z0-9])?$ ]]; then
-#        elif [[ "$ANSWER" =~ ^[a-z0-9]([a-z0-9_-]*[a-z0-9])?$ ]]; then
+        elif [[ "$ANSWER" =~  ^(([a-zA-Z0-9])([a-zA-Z0-9]*))?([a-zA-Z0-9])$ ]]; then
             PROJECT_NAME=$ANSWER
             VALID=1
         else
@@ -31,18 +30,18 @@ function ld_command_init_exec() {
 
     VALID=0
     while [ "$VALID" -eq "0" ]; do
-      echo -e "${BBlack}What is the local development domain?${Color_Off}"
-      echo " Do not add protocol, but just the domain name. For clarity it is recommended to use specified domains locally."
+      echo -e "${BBlack}What is the local development base domain?${Color_Off}"
+      echo " Do not add protocol nor www -part but just the domain name. For clarity it is recommended to use top level domain .ld."
       LOCAL_DOMAIN=${LOCAL_DOMAIN:-${$PROJECT_NAME}.ld}
-      read -p "Domain [$PROJECT_NAME.ld] " ANSWER
-      TEST=$(echo $ANSWER | egrep -e '^[a-z0-9\-]([a-z0-9\-])*(\.[a-z]{2,}$)')
+      read -p "Domain [$LOCAL_DOMAIN] " ANSWER
+      TEST=$(echo $ANSWER | egrep -e '^(([a-zA-Z0-9])([a-zA-Z0-9\.]*))?([a-zA-Z0-9])$')
       if [ -z "$ANSWER" ]; then
           VALID=1
       elif [ "${#TEST}" -gt 0 ]; then
-          PROJECT_NAME=$ANSWER
+          LOCAL_DOMAIN=$ANSWER
           VALID=1
       else
-          echo -e "${Red}ERROR: Domain name can contain only alphabetic characters (a-z), numbers (0-9), hyphens (-) and dots (.).${Color_Off}"
+          echo -e "${Red}ERROR: Domain name can contain only alphabetic characters (a-z), numbers (0-9), hyphens (-), underscoreds (_) and dots (.).${Color_Off}"
           echo -e "${Red}ERROR: Also the domain name must not start or end with underscore, hyphen or dot.${Color_Off}"
           sleep 2
           echo

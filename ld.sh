@@ -51,15 +51,15 @@ RESTORE_INFO="mysql --host "$${CONTAINER_DB:-db}" -uroot  -p"$MYSQL_ROOT_PASSWOR
 USERS="mysql --host "$${CONTAINER_DB:-db}" -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e \"SELECT User, Host from mysql.user WHERE User NOT LIKE 'mysql%';\""
 
 # Read (and create if necessary) the .env file, allowing overrides to any of our config values.
-if [[ "$ACTION" != 'help' ]]; then
+if [[ "$ACTION" != 'help' ]] && [[ "$ACTION" != 'self-update' ]]; then
     import_root_env
     if [[ "$?" -ne "0" ]]; then
-      create_root_env
-      import_root_env
-      if [ "$?" -ne "0" ]; then
-        echo -e "${Red}ERROR: File ./.env could not be read nor created. Exiting.${Color_Off}."
-        exit 1
-      fi
+        create_root_env
+        import_root_env
+        if [ "$?" -ne "0" ]; then
+            echo -e "${Red}ERROR: File ./.env could not be read nor created. Exiting.${Color_Off}."
+            exit 1
+        fi
     fi
 fi
 

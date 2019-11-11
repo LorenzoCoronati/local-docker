@@ -4,10 +4,6 @@
 # This file contains rename-volumes -command for local-docker script ld.sh.
 
 function ld_command_rename-volumes_exec() {
-    if is_dockersync; then
-        echo 'Turning off docker-sync, please wait...'
-        docker-sync clean
-    fi
     VOL_BASE_NAME=$1
     VALID=0
     while [ "$VALID" -eq "0" ]; do
@@ -25,6 +21,11 @@ function ld_command_rename-volumes_exec() {
             echo
         fi
     done;
+
+    if is_dockersync; then
+        echo 'Turning off docker-sync, please wait...'
+        docker-sync clean
+    fi
 
      echo "Renaming volumes to '$VOL_BASE_NAME' for docker-sync, please wait..."
      replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKERSYNC_FILE

@@ -73,11 +73,12 @@ function db_connect() {
         else
             echo -e " ${BRed}failed!${Color_Off}"
             echo -e "${BRed}DB container did not respond in due time.${Color_Off}"
+            return 3
             break;
         fi
     done
 
-    return 3
+    return 0
 }
 
 # Cross-OS way to do in-place find-and-replace with sed.

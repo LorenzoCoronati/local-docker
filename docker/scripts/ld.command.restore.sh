@@ -25,16 +25,28 @@ function ld_command_restore_exec() {
     fi
     INFO=$(file -b $TARGET_FILE_NAME | cut -d' ' -f1)
     if [ "$INFO" != "gzip" ]; then
-        echo -e "${Red}ERROR: File $DATABASE_DUMP_STORAGE/$TARGET_FILE_NAME type is not gzip${Color_Off}"
+        echo -e "${Red}ERROR: File $TARGET_FILE_NAME type is not gzip${Color_Off}"
         cd $CWD
         exit 3
     fi
 
     db_connect
-    case "$?" in
-      1|"1") echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}" && return 1 ;;
-      2|"2") echo -e "${Red}ERROR: DB container not running (or not yet created).${Color_Off}" && return 2 ;;
-      2|"2") echo -e "${Red}ERROR: Some other and undetected issue when connecting DB container.${Color_Off}" && return 3 ;;
+    RET="$?"
+    case "$RET" in
+      1|"1")
+        echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
+        return $RET
+        ;;
+
+      2|"2")
+        echo -e "${Red}ERROR: Some other and undetected issue when connecting DB container.${Color_Off}"
+        return $RET
+        ;;
+
+      3|"3")
+       echo -e "${Red}ERROR: DB container not running (or not yet created).${Color_Off}"
+       return $RET
+       ;;
     esac
 
     echo -e "${Yellow}Restoring db from:\n $TARGET_FILE_NAME${Color_Off}"

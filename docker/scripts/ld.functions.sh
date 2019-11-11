@@ -149,6 +149,7 @@ function ensure_envvar_present() {
     fi
     # Re-import all vars to take effect in host and container shell, too.
     import_root_env
+    return $?
 }
 
 function osx_version() {

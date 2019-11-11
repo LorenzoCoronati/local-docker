@@ -5,36 +5,67 @@
 
 function ld_command_self-update_exec() {
     TAG=${1}
-
-    if [ -z "$TAG" ]; then
-      echo -e "${Red}ERROR: You must provide a release tag to update to.${Color_Off}"
-      return 1
+    # CHeck the tag exists if one is provided.
+    if [ ! -z "$TAG" ]; then
+      echo "Verifying tag ${TAG} exists, read https://api.github.com/repos/Exove/local-docker/tags"
+      # GET /repos/:owner/:repo/releases/tags/:tag
+      EXISTS=$(curl -s https://api.github.com/repos/Exove/local-docker/tags | grep ${TAG} |wc -l)
+      if [ "$EXISTS" -eq "0" ]; then
+        echo -e "${Red}ERROR: Specifidd tag not found.${Color_Off}"
+        return 1;
+      fi
     fi
 
-    mkdir -v ld-tmp
-    curl -o ld-tmp/${TAG}.tar.gz https://codeload.github.com/Exove/local-docker/tar.gz/${TAG}
+    DIR=".ld-tmp-"$(date +%s)
+    mkdir $DIR
+    if [ -z "$TAG" ]; then
+      TAG='latest'
+      # Latest git tags is the first one in the file.
+      URL=$(curl -s https://api.github.com/repos/Exove/local-docker/tags | grep -A4 '"name"' | grep 'tarball_url' | head -1)
+      URL=$(echo $URL |cut -d'"' -f4)
+      # -L to follow redirects
+      curl -L -s -o $DIR/${TAG}.tar.gz $URL
+
+    else
+      URL="https://api.github.com/repos/Exove/local-docker/tarball/${TAG}"
+      # -L to follow redirects
+      curl -L -s -o $DIR/${TAG}.tar.gz $URL
+      ls -lah $DIR
+    fi
+
     # Curl creates an ASCII file out of 404 response. Let's see what we have in the file.
-    INFO=$(file -b ld-tmp/${TAG}.tar.gz | cut -d' ' -f1)
+    INFO=$(file -b $DIR/${TAG}.tar.gz | cut -d' ' -f1)
 
     if [ "$INFO" != "gzip" ]; then
       echo -e "${Red}ERROR: Specifidd tag not found.${Color_Off}"
-      rm -rf ld-tmp
+      rm -rf $DIR
       return 1
     fi
 
-    cd ld-tmp
+    cd $DIR
     tar xvzf ${TAG}.tar.gz
-    cp -r local-docker-${TAG}/docker ../
-    cp -r local-docker-${TAG}/ld.sh ../
-    cp -r local-docker-${TAG}/.env.example ../
-    cp -r local-docker-${TAG}/.gitignore.example ../
+    SUBDIR=$(ls |grep local-docker)
+    cp -r $SUBDIR/.editorconfig ../
+    cp -r $SUBDIR/.env.example ../
+    cp -r $SUBDIR/.gitignore.example ../
+    cp -r $SUBDIR/.github ../
+    cp -r $SUBDIR/docker ../
+    cp -r $SUBDIR/git-hooks ../
+    cp -r $SUBDIR/ld.sh ../
     cd ..
-    rm -rf ld-tmp
-    echo -e "${Green}Project updated to version {BGreen}${TAG}${Green}.${Color_Off}"
-    echo -e "${Yellow}Review and commit changes to ./docker, ld.sh, .env.example and .gitignore.example.${Color_Off}"
-    echo -e "${Yellow}Review updates in .env.example and optionally update your own .env file, too.${Color_Off}"
+    rm -rf $DIR
+    echo -e "${Green}Project updated to version ${BGreen}${TAG}${Green}.${Color_Off}"
+    echo -e "${Yellow}Review and commit changes to: "
+    echo " - .editorconfig"
+    echo " - .env.example"
+    echo " - .gitignore.example"
+    echo " - ./.github,"
+    echo " - ./docker,"
+    echo " - ./git-hooks and "
+    echo " - ld.sh${Color_Off}"
+    echo -e "${Yellow}Optionally update your own .env file, too.${Color_Off}"
 }
 
 function ld_command_self-update_help() {
-    echo "Updates local-docker to a specified version."
+    echo "Updates local-docker to a specified git tag, see https://github.com/Exove/local-docker/tags. Defaults to the latest tag for local-docker."
 }

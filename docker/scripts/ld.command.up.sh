@@ -7,6 +7,9 @@ function ld_command_up_exec() {
 
     $SCRIPT_NAME configure-network
 
+    COMMAND_SQL_DB_RESTORE_INFO="mysql --host "${CONTAINER_DB:-db}" -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
+    COMMAND_SQL_DB_USERS="mysql --host "${CONTAINER_DB:-db}" -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e \"SELECT User, Host from mysql.user WHERE User NOT LIKE 'mysql%';\""
+
     if is_dockersync; then
         docker-sync start
     fi
@@ -23,23 +26,32 @@ function ld_command_up_exec() {
     fi
 
     db_connect
-    db_connect
-    case "$?" in
-      1|"1") echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}" && return 1 ;;
-      2|"2") echo -e "${Red}ERROR: DB container not running (or not yet created).${Color_Off}" && return 2 ;;
-      2|"2") echo -e "${Red}ERROR: Some other and undetected issue when connecting DB container.${Color_Off}" && return 3 ;;
+    RET="$?"
+    case "$RET" in
+      1|"1")
+        echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
+        return $RET
+        ;;
+
+      2|"2")
+        echo -e "${Red}ERROR: Some other and undetected issue when connecting DB container.${Color_Off}"
+        return $RET
+        ;;
+
+      3|"3")
+       echo -e "${Red}ERROR: DB container not running (or not yet created).${Color_Off}"
+       return $RET
+       ;;
     esac
 
     echo
-    echo 'Current databases:'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$RESTORE_INFO 2>/dev/null"
-    echo 'Current database users:'
-    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$USERS 2>/dev/null"
+    echo -e "${Yellow}Current databases:${Color_Off}"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_RESTORE_INFO 2>/dev/null"
+    echo -e "${Yellow}Current database users:${Color_Off}"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_USERS 2>/dev/null"
     echo -e "${Yellow}NOTE: No database dump restored.${Color_Off}"
-    echo 'In case you need to do that (Drupal DB is gone?),'
-    echo '1) check your symlink target in db_dumps/db-container-dump-LATEST.sql.gz'
-    echo '2) execute the following command:'
-    echo $SCRIPT_NAME_SHORT restore
+    echo 'In case you need to do that (Drupal DB is gone?), run command'
+    echo '$ '$SCRIPT_NAME_SHORT restore [db_dumps/db-container-dump-LATEST.sql.gz]
 }
 
 function ld_command_up_help() {

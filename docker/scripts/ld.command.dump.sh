@@ -4,6 +4,10 @@
 # This file contains dump -command for local-docker script ld.sh.
 
 function ld_command_dump_exec() {
+
+    DATE=$(date +%Y-%m-%d--%H-%I-%S)
+    COMMAND_SQL_DB_DUMPER="mysqldump --host "$${CONTAINER_DB:-db}" -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --dump-date --tz-utc --verbose  2>/dev/null | gzip --fast -f > /var/db_dumps/db-container-dump-$DATE.sql.gz"
+
     db_connect
     case "$?" in
       1|"1") echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}" && return 1 ;;
@@ -12,13 +16,13 @@ function ld_command_dump_exec() {
     esac
 
     echo -e "${Yellow}Using datestamp: $DATE${Color_Off}"
-    DUMPER="mysqldump --host "$${CONTAINER_DB:-db}" -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --dump-date --tz-utc --verbose"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$DUMPER  2>/dev/null | gzip --fast -f > /var/db_dumps/db-container-dump-$DATE.sql.gz"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_DUMPER"
     cd $PROJECT_ROOT/$DATABASE_DUMP_STORAGE
     ln -sf db-container-dump-$DATE.sql.gz db-container-dump-LATEST.sql.gz
     cd $PROJECT_ROOT
     echo "DB backup in $DATABASE_DUMP_STORAGE/db-container-dump-$DATE.sql.gz"
     echo "DB backup symlink: $DATABASE_DUMP_STORAGE/db-container-dump-LATEST.sql.gz"
+
 }
 
 function ld_command_dump_help() {

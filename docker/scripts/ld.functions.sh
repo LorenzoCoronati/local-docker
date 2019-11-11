@@ -142,7 +142,7 @@ function ensure_envvar_present() {
     fi
     EXISTS=$(grep $NAME .env | wc -l)
     if [ "$EXISTS" -gt "0" ]; then
-        PATTERN="s/^$NAME=.*/$NAME=$VAL/"
+        PATTERN="s|^$NAME=.*|$NAME=$VAL|"
         replace_in_file $PATTERN .env
     else
         echo "${NAME}=${VAL}" >> $PROJECT_ROOT/.env

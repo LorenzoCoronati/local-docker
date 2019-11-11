@@ -7,6 +7,7 @@ function ld_command_self-update_exec() {
     TAG=${1}
     # CHeck the tag exists if one is provided.
     if [ ! -z "$TAG" ]; then
+      echo "checking tag: $TAG"
       # GET /repos/:owner/:repo/releases/tags/:tag
       EXISTS=$(curl -sI https://api.github.com/repos/Exove/local-docker/releases/tags/${TAG} | head -1 |grep '200 OK' |wc -l)
       if [ "$EXISTS" -eq "0" ]; then
@@ -19,7 +20,7 @@ function ld_command_self-update_exec() {
     mkdir $DIR
     if [ -z "$TAG" ]; then
       # GET /repos/:owner/:repo/releases/latest
-      curl -so $DIR/${TAG}.tar.gz https://codeload.github.com/Exove/local-docker/releases/latest
+      curl -so $DIR/latest.tar.gz https://codeload.github.com/Exove/local-docker/releases/latest
     else
       # GET /repos/:owner/:repo/releases/:release_id
       curl -so $DIR/${TAG}.tar.gz https://codeload.github.com/Exove/local-docker/tar.gz/${TAG}

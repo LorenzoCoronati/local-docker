@@ -55,6 +55,11 @@ if [[ "$ACTION" != 'help' ]]; then
     import_root_env
     if [[ "$?" -ne "0" ]]; then
       create_root_env
+      import_root_env
+      if [ "$?" -ne "0" ]; then
+        echo -e "${Red}ERROR: File ./.env could not be read nor created. Exiting.${Color_Off}."
+        exit 1
+      fi
     fi
 fi
 

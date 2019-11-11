@@ -7,7 +7,7 @@ function ld_command_init_exec() {
 
     VALID=0
     while [ "$VALID" -eq "0" ]; do
-        echo  -e "${BBlack}What is the project name?${Color_Off}"
+        echo  -e "${BBlack}== Project name == ${Color_Off}"
         echo  "Provide a string without spaces and use chars a-z and 0-9, - and _ (no dots)."
         PROJECT_NAME=${PROJECT_NAME:-$(basename $PROJECT_ROOT)}
         read -p "Project name ['$PROJECT_NAME']: " ANSWER
@@ -30,8 +30,8 @@ function ld_command_init_exec() {
 
     VALID=0
     while [ "$VALID" -eq "0" ]; do
-      echo -e "${BBlack}What is the local development base domain?${Color_Off}"
-      echo " Do not add protocol nor www -part but just the domain name. For clarity it is recommended to use top level domain .ld."
+      echo  -e "${BBlack}== Local development base domain == ${Color_Off}"
+      echo -e "Do not add protocol nor www -part but just the domain name. It is recommended to use domain ending with ${BBlack}.ld${Black}.${Color_Off}"
       LOCAL_DOMAIN=${LOCAL_DOMAIN:-${$PROJECT_NAME}.ld}
       read -p "Domain [$LOCAL_DOMAIN] " ANSWER
       TEST=$(echo $ANSWER | egrep -e '^(([a-zA-Z0-9])([a-zA-Z0-9\.]*))?([a-zA-Z0-9])$')
@@ -49,10 +49,12 @@ function ld_command_init_exec() {
     done
     # Remove spaces.
     LOCAL_DOMAIN=$(echo "$LOCAL_DOMAIN" | sed 's/[[:space:]]/./g')
+    echo "LOCAL_DOMAIN is '$LOCAL_DOMAIN' (${#LOCAL_DOMAIN})"
     ensure_envvar_present LOCAL_DOMAIN $LOCAL_DOMAIN
+    echo "Default URL for drush operations is http://www.$LOCAL_DOMAIN"
     ensure_envvar_present DRUSH_OPTIONS_URI "http://www."$LOCAL_DOMAIN
 
-    echo -e "${BBlack}What is the local development IP address?${Color_Off}"
+    echo -e "${BBlack}== Local development IP address ==${Color_Off}"
     echo "Random 127.0.0.0./16 will be generated for you if you so wish?"
     read -p "Use the random IP address 127.0.0.0./16 [Y/n]? " LOCAL_IP
     case "$LOCAL_IP" in
@@ -68,7 +70,7 @@ function ld_command_init_exec() {
     if [ -e "$DOCKERSYNC_FILE" ] || [ -e "$DOCKER_COMPOSE_FILE" ]; then
         echo -e "${BYellow}WARNING: There is docker-compose and/or docker-sync recipies in project root.${Color_Off}"
         echo -e "${BYellow}If you continue your containers with their volumes ${BRed}will be destroyed.${Color_Off}"
-        echo -e "However it this does not delete code from your application root directory."
+        echo -e "This does not delete your application root directory, but ${BYellow}database volumes will be destroyed.${Color_Off}"
         read -p "Continue? [y/N]" CHOICE
         case "$CHOICE" in
             n|N|'no'|'NO' ) echo "Cancelled." && exit;;
@@ -90,18 +92,14 @@ function ld_command_init_exec() {
     APP_ROOT=${APP_ROOT:-app}
     ensure_envvar_present APP_ROOT $APP_ROOT
     ensure_folders_present $APP_ROOT
-    echo -e "${Yellow}NOTE: Application root is in $APP_ROOT.${Color_Off}"
+    echo -e "${BYellow}Application root is in $APP_ROOT.${Color_Off}"
 
     DATABASE_DUMP_STORAGE=${DATABASE_DUMP_STORAGE:-db_dumps}
     ensure_envvar_present DATABASE_DUMP_STORAGE $DATABASE_DUMP_STORAGE
     ensure_folders_present $DATABASE_DUMP_STORAGE
-    echo -e "${Yellow}Database dumps will appear in $DATABASE_DUMP_STORAGE.${Color_Off}"
+    echo -e "${Yellow}Database dumps will be placed in $DATABASE_DUMP_STORAGE.${Color_Off}"
 
-    read -p "Use project-name based docker-sync -volumes ['${PROJECT_NAME}-*']? [Y/n]" CHOICE
-    case "$CHOICE" in
-        ''|y|Y|'yes'|'YES' ) $SCRIPT_NAME rename-volumes $PROJECT_NAME;;
-        *) echo "Volume names will start with 'webroot-'";;
-    esac
+    $SCRIPT_NAME rename-volumes $PROJECT_NAME
 
     if [[ "$(docker-compose -f $DOCKER_COMPOSE_FILE ps)" ]]; then
         echo "Turning off current container stack."

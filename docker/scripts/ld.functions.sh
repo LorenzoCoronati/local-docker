@@ -31,14 +31,12 @@ function yml_move() {
     fi
 
     if [ -f "$DOCKER_YML_STORAGE/docker-compose.$MODE.yml" ]; then
-        echo -e "${Yellow}Using $DOCKER_YML_STORAGE/docker-compose.$MODE.yml as the docker-compose recipe.${Color_Off}"
         cp $DOCKER_YML_STORAGE/docker-compose.$MODE.yml ./$DOCKER_COMPOSE_FILE
     else
         echo -e "${Red} Docker-compose template file missing: $DOCKER_YML_STORAGE/docker-compose.$MODE.yml"
     fi
     # NFS template does not have docker-sync -flavor, as it uses nfs mounts for folder sharing.
     if [ "$MODE" != "nfs" ] && [ -f "$DOCKER_YML_STORAGE/docker-sync.$MODE.yml" ]; then
-        echo -e "${Yellow}Using $DOCKER_YML_STORAGE/docker-sync.$MODE.yml as the docker-sync recipe.${Color_Off}"
         cp $DOCKER_YML_STORAGE/docker-sync.$MODE.yml ./$DOCKERSYNC_FILE
     else
         echo -e "${Red} Docker-sync template file missing: $DOCKER_YML_STORAGE/docker-sync.$MODE.yml.${Color_Off}"
@@ -105,22 +103,21 @@ function import_root_env() {
 # Copy .env.example to .env, display user the contents of it (to review).
 
 function create_root_env() {
-  echo -e "${Yellow}Copying .env.example -file => ${BYellow}.env${Yellow}. ${Color_Off}"
-  sleep 2
-  cp -f ./.env.example ./.env
-  echo  -e "${Yellow}Please review your ${BYellow}.env${Yellow} file: ${Color_Off}"
-  echo
-  echo -e "${BIWhite}========  START OF .env =========${Color_Off}"
-  sleep 1
-  cat ./.env
-  echo -e "${BIWhite}========  END OF .env =========${Color_Off}"
-  echo
-  read -p "Does this look okay? [Y/n] " CHOICE
-  case "$CHOICE" in
-    ''|y|Y|'yes'|'YES' ) import_root_env && echo -e "${Green}Cool, let's continue!${Color_Off}" & echo ;;
-    n|N|'no'|'NO' ) echo -e "Ok, we'll stop here. ${BYellow}Please edit .env file manually, and then start over.${Color_Off}" && return 1 ;;
-    * ) echo -e "${BRed}ERROR: Unclear answer, exiting.${Color_Off}" && cd $CWD && return 2;;
-  esac
+  if [ ! -f "./.env.example" ]; then
+    echo -e "${Red}ERROR: File ${BRed}.env.exmaple${Red} not present!.${Color_Off}";
+    return 5;
+  fi
+
+  if [ ! -f "./.env" ]; then
+    echo -e "${Green}Creating default ${BGreen}.env${Green}- file from template. ${Color_Off}"
+    cp -f ./.env.example ./.env
+  else
+    echo -e "${Yellow}Adding default values from .env.example -file to your ${BYellow}EXISTING${Yellow} ${BYellow}.env${Yellow} -file. ${Color_Off}"
+    cat ./.env.example >> ./.env
+  fi
+  echo -e "${Yellow}Your .env -file should not be committed to Git repository (and it is .gitignore'd by default).${Color_Off}"
+
+  return $?
 }
 
 function function_exists() {
@@ -145,13 +142,14 @@ function ensure_envvar_present() {
     fi
     EXISTS=$(grep $NAME .env | wc -l)
     if [ "$EXISTS" -gt "0" ]; then
-        PATTERN="s/^$NAME=.*/$NAME=$VAL/"
+        PATTERN="s|^$NAME=.*|$NAME=$VAL|"
         replace_in_file $PATTERN .env
     else
         echo "${NAME}=${VAL}" >> $PROJECT_ROOT/.env
     fi
     # Re-import all vars to take effect in host and container shell, too.
     import_root_env
+    return $?
 }
 
 function osx_version() {

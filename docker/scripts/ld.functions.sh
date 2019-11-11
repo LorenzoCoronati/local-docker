@@ -106,21 +106,9 @@ function import_root_env() {
 
 function create_root_env() {
   echo -e "${Yellow}Copying .env.example -file => ${BYellow}.env${Yellow}. ${Color_Off}"
-  sleep 2
-  cp -f ./.env.example ./.env
-  echo  -e "${Yellow}Please review your ${BYellow}.env${Yellow} file: ${Color_Off}"
-  echo
-  echo -e "${BIWhite}========  START OF .env =========${Color_Off}"
-  sleep 1
-  cat ./.env
-  echo -e "${BIWhite}========  END OF .env =========${Color_Off}"
-  echo
-  read -p "Does this look okay? [Y/n] " CHOICE
-  case "$CHOICE" in
-    ''|y|Y|'yes'|'YES' ) import_root_env && echo -e "${Green}Cool, let's continue!${Color_Off}" & echo ;;
-    n|N|'no'|'NO' ) echo -e "Ok, we'll stop here. ${BYellow}Please edit .env file manually, and then start over.${Color_Off}" && return 1 ;;
-    * ) echo -e "${BRed}ERROR: Unclear answer, exiting.${Color_Off}" && cd $CWD && return 2;;
-  esac
+  cat ./.env.example >> ./.env
+  import_root_env
+  return $?
 }
 
 function function_exists() {

@@ -8,7 +8,7 @@ function ld_command_self-update_exec() {
     # 'latest' is not a tag
     if [ "$TAG" != "latest" ]; then
       # GET /repos/:owner/:repo/releases/tags/:tag
-      EXISTS=$(curl -I https://api.github.com/repos/Exove/local-docker/releases/tags/${TAG} | head -1 |grep '200 OK' |wc -l)
+      EXISTS=$(curl -sI https://api.github.com/repos/Exove/local-docker/releases/tags/${TAG} | head -1 |grep '200 OK' |wc -l)
       if [ "$EXISTS" -eq "0" ]; then
         echo -e "${Red}ERROR: Specifidd tag not found.${Color_Off}"
         return 1;
@@ -17,7 +17,7 @@ function ld_command_self-update_exec() {
 
     DIR=".ld-tmp-" . $(date +%s)
     mkdir -v $DIR
-    curl -o $DIR/${TAG}.tar.gz https://codeload.github.com/Exove/local-docker/tar.gz/${TAG}
+    curl -so $DIR/${TAG}.tar.gz https://codeload.github.com/Exove/local-docker/tar.gz/${TAG}
     # Curl creates an ASCII file out of 404 response. Let's see what we have in the file.
     INFO=$(file -b $DIR/${TAG}.tar.gz | cut -d' ' -f1)
 

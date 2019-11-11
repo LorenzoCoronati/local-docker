@@ -44,10 +44,11 @@ function ld_command_self-update_exec() {
 
     cd $DIR
     tar xvzf ${TAG}.tar.gz
-    cp -r local-docker-${TAG}/docker ../
-    cp -r local-docker-${TAG}/ld.sh ../
-    cp -r local-docker-${TAG}/.env.example ../
-    cp -r local-docker-${TAG}/.gitignore.example ../
+    SUBDIR=$(ls |grep local-docker)
+    cp -r $SUBDIR/docker ../
+    cp -r $SUBDIR/ld.sh ../
+    cp -r $SUBDIR/.env.example ../
+    cp -r $SUBDIR/.gitignore.example ../
     cd ..
     rm -rf $DIR
     echo -e "${Green}Project updated to version ${BGreen}${TAG}${Green}.${Color_Off}"

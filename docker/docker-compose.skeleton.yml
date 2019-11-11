@@ -83,8 +83,7 @@ services:
     env_file:
       - .env
     working_dir: /var/www
-    #command: sh -c '[[ ! -e "/var/www/composer.lock" ]] && exit 0 || /usr/local/bin/composer install'
-    command: echo "Container 'composer' disabled."
+    command: sh -c '[[ "$CONTAINER_COMPOSER_START" -ne "1" ]] && echo "Container 'composer' disabled." && exit 0 ||  [[ ! -e "/var/www/composer.lock" ]] && echo "File /var/www/composer.lock not present, exiting." && exit 0 || /usr/local/bin/composer install'
 
   db:
     # mysql:8.0.11 keeps restarting.
@@ -156,7 +155,9 @@ services:
     working_dir: /var/www
     volumes:
       - webroot-sync-core-delegated:/var/www:nocopy
-    command: sh -c '[[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
+    command: sh -c '[[ "$CONTAINER_NODEJS_START" -ne "1" ]] && echo "Nodejs container disabled." && exit 0 || [[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
+    env_file:
+      - .env
 
 volumes:
   webroot-sync-core:

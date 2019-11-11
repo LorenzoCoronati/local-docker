@@ -10,7 +10,6 @@ function ld_command_dump_exec() {
 
     db_connect
     RET="$?"
-    echo "RET = $RET"
     case "$RET" in
       1|"1")
         echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"

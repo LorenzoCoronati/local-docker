@@ -45,24 +45,17 @@ function ld_command_self-update_exec() {
     cd $DIR
     tar xvzf ${TAG}.tar.gz
     SUBDIR=$(ls |grep local-docker)
-    cp -r $SUBDIR/.editorconfig ../
-    cp -r $SUBDIR/.env.example ../
-    cp -r $SUBDIR/.gitignore.example ../
-    cp -r $SUBDIR/.github ../
-    cp -r $SUBDIR/docker ../
-    cp -r $SUBDIR/git-hooks ../
-    cp -r $SUBDIR/ld.sh ../
+    LIST=" .editorconfig .env.example .gitignore.example ./.github ./docker ./git-hooks ld.sh"
+    for FILE in $LIST; do
+      cp -fvR $SUBDIR/$FILE ../ &>/dev/null 2>&1
+    done
     cd ..
     rm -rf $DIR
     echo -e "${Green}Project updated to version ${BGreen}${TAG}${Green}.${Color_Off}"
     echo -e "${Yellow}Review and commit changes to: "
-    echo " - .editorconfig"
-    echo " - .env.example"
-    echo " - .gitignore.example"
-    echo " - ./.github,"
-    echo " - ./docker,"
-    echo " - ./git-hooks and "
-    echo " - ld.sh${Color_Off}"
+    for FILE in $LIST; do
+      echo " - $FILE"
+    done
     echo -e "${Yellow}Optionally update your own .env file, too.${Color_Off}"
 }
 

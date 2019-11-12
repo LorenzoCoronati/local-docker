@@ -14,7 +14,7 @@ function ld_command_drush_exec() {
       return 2
     fi
     COMM="docker-compose exec ${CONTAINER_PHP:-php} /var/www/vendor/drush/drush/drush $@"
-    echo -e "${Cyan}Next: $COMM${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: $COMM${Color_Off}"
     $COMM
 }
 

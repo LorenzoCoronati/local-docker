@@ -50,19 +50,21 @@ function ld_command_restore_exec() {
     esac
 
     echo -e "${Yellow}Restoring db from:\n $TARGET_FILE_NAME${Color_Off}"
-    echo "This may take some time."
+    [ "$LD_VERBOSE" -ge "1" ] && echo "This may take some time."
 
     echo
-    echo -e "${Yellow}Databases before the restore:${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_RESTORE_INFO 2>/dev/null"
-    echo
-    echo "Please wait..."
-    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_RESTORER 2>/dev/null"
-    echo
-    echo -e "${Yellow}Databases after the restore${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_RESTORE_INFO 2>/dev/null"
-    echo -e "${Yellow}Users after the restore${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_USERS 2>/dev/null"
+    if [ "$LD_VERBOSE" -ge "1" ]; then
+        echo -e "${Yellow}Databases before the restore:${Color_Off}"
+        docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_RESTORE_INFO 2>/dev/null"
+        echo
+        echo "Please wait..."
+        docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_RESTORER 2>/dev/null"
+        echo
+        echo -e "${Yellow}Databases after the restore${Color_Off}"
+        docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_RESTORE_INFO 2>/dev/null"
+        echo -e "${Yellow}Users after the restore${Color_Off}"
+        docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_USERS 2>/dev/null"
+    fi
   }
 
 function ld_command_restore_help() {

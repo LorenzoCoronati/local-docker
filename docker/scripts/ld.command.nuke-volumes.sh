@@ -20,9 +20,10 @@ function ld_command_nuke-volumes_exec() {
     echo
     docker-compose -f $DOCKER_COMPOSE_FILE down
     if is_dockersync; then
+        [ "$LD_VERBOSE" -ge "1" ] && echo 'Turning off docker-sync (clean), please wait...'
         docker-sync clean
     fi
-    for VOL in $(docker volume ls --filter="name=localbase*" -q); do
+    for VOL in $(docker volume ls --filter="name=${VOL_BASE_NAME}*" -q); do
         echo "Handling volume: $VOL"
         for CONT in $(docker ps --filter volume=$VOL -q); do
             echo "Kill container : $CONT "

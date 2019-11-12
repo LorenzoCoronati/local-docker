@@ -16,7 +16,7 @@ function ld_command_drupal-files-folder-perms_exec() {
     # Can't figure out how to print msg. with quotes so that it also
     # works as a command string.
     COMM="docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_PHP:-php} bash -c 'chown -R www-data:root /var/www/web/sites'"
-    echo -e "${Cyan}Next: $COMM${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: $COMM${Color_Off}"
     docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_PHP:-php} bash -c "chown -R www-data:root /var/www/web/sites"
 }
 

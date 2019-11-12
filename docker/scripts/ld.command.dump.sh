@@ -11,20 +11,21 @@ function ld_command_dump_exec() {
     db_connect
     RET="$?"
     case "$RET" in
-      1|"1")
-        echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
-        return $RET
-        ;;
+        1|"1")
+          echo -e "${Red}ERROR: Trying to locate a container with empty name.${Color_Off}"
+          return $RET
+          ;;
 
-      2|"2")
-       echo -e "${Yellow}Starting DB container for backup purposes.${Color_Off}"
-       docker-compose -f $DOCKER_COMPOSE_FILE  up -d $CONTAINER_DB
-       STARTED=1
-       ;;
+        2|"2")
+          COMM="docker-compose -f $DOCKER_COMPOSE_FILE  up -d $CONTAINER_DB"
+          [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Yellow}Starting DB container for backup purposes.${Color_Off}"
+          $COMM
+          STARTED=1
+          ;;
 
-      3|"3")
-       echo -e "${Red}ERROR: DB container not running (or not yet created).${Color_Off}"
-       return $RET
+        3|"3")
+         echo -e "${Red}ERROR: DB container not running (or not yet created).${Color_Off}"
+         return $RET
        ;;
     esac
 

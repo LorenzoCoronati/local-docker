@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-LOCAL_DOCKER_VERSION=1.1
+LOCAL_DOCKER_VERSION=1.x
 
 CWD=$(pwd)
 

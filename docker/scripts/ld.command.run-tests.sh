@@ -15,7 +15,7 @@ function ld_command_run-tests_exec() {
     fi
     TESTS=${@}
     SUB_COMM="/bin/su -s /bin/bash www-data -c 'test -f  web/core/scripts/run-tests.sh && php web/core/scripts/run-tests.sh --verbose --non-html --url http://${CONTAINER_NGINX:-nginx} --color ${TESTS} '"
-    echo -e "${Cyan}Next: docker-compose exec ${CONTAINER_PHP:-php} bash -c \"${SUB_COMM}\"${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose exec ${CONTAINER_PHP:-php} bash -c \"${SUB_COMM}\"${Color_Off}"
     docker-compose exec ${CONTAINER_PHP:-php} bash -c "${SUB_COMM}"
 }
 

@@ -13,8 +13,9 @@ function ld_command_composer_exec() {
       echo -e "${Red}ERROR: PHP container ('${CONTAINER_PHP:-php}')is not up.${Color_Off}"
       return 2
     fi
+
     COMM="docker-compose exec ${CONTAINER_PHP:-php} /usr/local/bin/composer -vv $@"
-    echo -e "${Cyan}Next: $COMM${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: $COMM${Color_Off}"
     $COMM
 }
 

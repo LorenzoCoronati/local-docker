@@ -97,18 +97,23 @@ function ld_command_init_exec() {
     DATABASE_DUMP_STORAGE=${DATABASE_DUMP_STORAGE:-db_dumps}
     ensure_envvar_present DATABASE_DUMP_STORAGE $DATABASE_DUMP_STORAGE
     ensure_folders_present $DATABASE_DUMP_STORAGE
-    echo -e "${Yellow}Database dumps will be placed in $DATABASE_DUMP_STORAGE.${Color_Off}"
+    echo -e "${BYellow}Database dumps will be placed in $DATABASE_DUMP_STORAGE.${Color_Off}"
+    if [[ "$(docker-compose -f $DOCKER_COMPOSE_FILE ps -q)" ]]; then
+        echo "Turning off current container stack."
+        docker-compose -f $DOCKER_COMPOSE_FILE down 2> /dev/null
+    fi
+    if is_dockersync; then
+        [ "$LD_VERBOSE" -ge "1" ] && echo 'Turning off docker-sync (clean), please wait...'
+        docker-sync clean
+    fi
 
     $SCRIPT_NAME rename-volumes $PROJECT_NAME
 
-    if [[ "$(docker-compose -f $DOCKER_COMPOSE_FILE ps)" ]]; then
-        echo "Turning off current container stack."
-        docker-compose -f $DOCKER_COMPOSE_FILE down
-    fi
     if is_dockersync; then
-        docker-sync clean
+        [ "$LD_VERBOSE" -ge "1" ] && echo "Starting docker-sync, please wait..."
         docker-sync start
     fi
+
     echo 'Starting PHP container only, to use it to build the codebase.'
     docker-compose -f $DOCKER_COMPOSE_FILE up -d php
     echo 'PHP container: started.'
@@ -144,13 +149,13 @@ function ld_command_init_exec() {
     if [[ ! -z "$DELETE_ROOT" ]]; then
         echo "Clearing old things from the app root."
         CLEAN_ROOT="rm -rf /var/www/*"
-        echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$CLEAN_ROOT\"${Color_Off}"
+        [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$CLEAN_ROOT\"${Color_Off}"
         docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$CLEAN_ROOT"
     fi
 
     # Use verbose output on this composer command.
     COMPOSER_INIT="composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev"
-    echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$COMPOSER_INIT\"${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$COMPOSER_INIT\"${Color_Off}"
     docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$COMPOSER_INIT"
     OK=$?
     if [ "$OK" -ne "0" ]; then

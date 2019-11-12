@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 LOCAL_DOCKER_VERSION=1.x
+LD_VERBOSE=${LD_VERBOSE:-2}
 
 CWD=$(pwd)
 
@@ -71,7 +72,7 @@ fi
 
 if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
     if [[ "$ACTION" != 'init' ]] && [[ "$ACTION" != 'help' ]] && [[ "$ACTION" != 'self-update' ]]; then
-        echo -e "${BYellow}Local-docker not yet initialized. Starting init now, please wait...${Color_Off}"
+        [ "$LD_VERBOSE" -ge "1" ] && echo -e "${BYellow}Local-docker not yet initialized. Starting init now, please wait...${Color_Off}"
         $SCRIPT_NAME init
     fi
 fi

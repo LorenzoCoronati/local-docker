@@ -11,6 +11,7 @@ function ld_command_up_exec() {
     COMMAND_SQL_DB_USERS="mysql --host "${CONTAINER_DB:-db}" -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e \"SELECT User, Host from mysql.user WHERE User NOT LIKE 'mysql%';\""
 
     if is_dockersync; then
+        [ "$LD_VERBOSE" -ge "1" ] && echo "Starting docker-sync, please wait..."
         docker-sync start
     fi
     ensure_folders_present $DATABASE_DUMP_STORAGE
@@ -45,13 +46,15 @@ function ld_command_up_exec() {
     esac
 
     echo
-    echo -e "${Yellow}Current databases:${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_RESTORE_INFO 2>/dev/null"
-    echo -e "${Yellow}Current database users:${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_USERS 2>/dev/null"
-    echo -e "${Yellow}NOTE: No database dump restored.${Color_Off}"
-    echo 'In case you need to do that (Drupal DB is gone?), run command'
-    echo '$ '$SCRIPT_NAME_SHORT restore [db_dumps/db-container-dump-LATEST.sql.gz]
+    if [ "$LD_VERBOSE" -ge "1" ]; then
+        echo -e "${Yellow}Current databases:${Color_Off}"
+        docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_RESTORE_INFO 2>/dev/null"
+        echo -e "${Yellow}Current database users:${Color_Off}"
+        docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_USERS 2>/dev/null"
+        echo -e "${Yellow}NOTE: No database dump restored.${Color_Off}"
+        echo 'In case you need to do that (Drupal DB is gone?), run command'
+        echo '$ '$SCRIPT_NAME_SHORT restore [db_dumps/db-container-dump-LATEST.sql.gz]
+    fi
 }
 
 function ld_command_up_help() {

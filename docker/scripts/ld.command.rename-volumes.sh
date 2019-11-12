@@ -23,13 +23,15 @@ function ld_command_rename-volumes_exec() {
     done;
 
     if is_dockersync; then
-        echo 'Turning off docker-sync, please wait...'
+        [ "$LD_VERBOSE" -ge "1" ] && echo 'Turning off docker-sync (clean), please wait...'
         docker-sync clean
     fi
+    ensure_envvar_present VOL_BASE_NAME $VOL_BASE_NAME
+    import_root_env
 
-     echo "Renaming volumes to '$VOL_BASE_NAME' for docker-sync, please wait..."
-     replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKERSYNC_FILE
-     replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKER_COMPOSE_FILE
+    echo "Renaming volumes to '$VOL_BASE_NAME' for docker-sync, please wait..."
+    replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKERSYNC_FILE
+    replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKER_COMPOSE_FILE
 }
 
 #function ld_command_rename-volumes_help() {

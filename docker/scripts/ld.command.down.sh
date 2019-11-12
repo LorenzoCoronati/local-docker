@@ -10,8 +10,13 @@ function ld_command_down_exec() {
         cd $CWD
         exit 1
     fi
-    docker-compose -f $DOCKER_COMPOSE_FILE  down
+
+    COMM="docker-compose -f $DOCKER_COMPOSE_FILE down"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: $COMM${Color_Off}"
+    $COMM
+
     if is_dockersync; then
+        [ "$LD_VERBOSE" -ge "1" ] && echo 'Turning off docker-sync (clean), please wait...'
         docker-sync clean
     fi
     $SCRIPT_NAME configure-network-down

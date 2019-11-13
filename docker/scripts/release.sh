@@ -41,7 +41,7 @@ fi
 BRANCH=`git rev-parse --abbrev-ref HEAD`
 if [ "$BRANCH" != "master" ]; then
   echo "You are on a wrong branch: $BRANCH"
-  echo "Relases shall be done solely on master"
+  echo "Releases shall be done solely on master"
   exit 5
 fi
 
@@ -66,6 +66,6 @@ git add -p $MAIN_FILE
 git commit -m "Reverting version to $CURRENT"
 
 git log -q --graph --oneline -5
-echo 'Tag chagned back and fort in the main file.'
-echo 'Two commits and release tag created.'
+echo 'Tag changed back and forth in the main file.'
+echo 'Two commits and a release tag created.'
 echo 'If everything is fine push commits and tags to remote.'

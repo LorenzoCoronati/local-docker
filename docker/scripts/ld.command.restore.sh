@@ -13,12 +13,12 @@ function ld_command_restore_exec() {
         if [ -z "$1" ]; then
             echo -e "${Red}"
             echo "********************************************************************************************"
-            echo "** Dump file missing! Create a symlin to your DB backup file:                             **"
+            echo "** Dump file missing! Create a symlink to your DB backup file:                             **"
             echo "** ln -s PATH/TO/GZIPPED/MYSQLDUMP/FILE.sql.gz ./$TARGET_FILE_NAME **"
             echo "********************************************************************************************"
             echo -e "${Color_Off}"
         else
-            echo -e "${Red}ERROR: File $TARGET_FILE_NAME does not exists${Color_Off}"
+            echo -e "${Red}ERROR: File $TARGET_FILE_NAME does not exist${Color_Off}"
         fi
         cd $CWD
         exit 1

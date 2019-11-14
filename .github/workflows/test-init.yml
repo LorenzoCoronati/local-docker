@@ -1,0 +1,41 @@
+name: CI
+
+on: 
+  pull_request:
+    branches: 
+    - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run a one-line script
+      if: github.event_name == 'pull_request'
+      run: echo This event is a pull request. Test build ./ld init.
+    - name: Install docker-compose
+      run: |
+        sudo curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+        docker-compose --version
+    - name: Install docker-sync
+      run: |
+        sudo apt-get install build-essential ocaml
+        wget https://github.com/bcpierce00/unison/archive/v2.51.2.tar.gz
+        tar xvf v2.51.2.tar.gz
+        cd unison-2.51.2
+        make UISTYLE=text
+        sudo cp src/unison /usr/local/bin/unison
+        sudo cp src/unison-fsmonitor /usr/local/bin/unison-fsmonitor
+
+    - name: List what is in the project folder.
+      run: ls -lha
+
+    - name: Check the type of ld
+      run: file ld
+
+    - name: Run init and see where it gets us
+      run: ./ld init
+

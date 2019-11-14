@@ -170,17 +170,17 @@ function osx_version() {
 function required_binaries_check() {
 
   if [ ! -z "$(which docker | grep 'not found')" ] ||
-      [ "$(which docker >/dev/null 2>&1 && echo $?)" -ne "0" ] ; then
+      [ "$(which docker >/dev/null 2>&1 ; echo $?)" -ne "0" ] ; then
     return 1
   fi
 
   if [ ! -z "$(which docker-compose | grep 'not found')" ] ||
-      [ "$(which docker-compose >/dev/null 2>&1 && echo $?)" -ne "0" ] ; then
+      [ "$(which docker-compose >/dev/null 2>&1 ; echo $?)" -ne "0" ] ; then
     return 2
   fi
 
   if [ ! -z "$(which git | grep 'not found')" ] ||
-      [ "$(which git >/dev/null 2>&1 && echo $?)" -ne "0" ] ; then
+      [ "$(which git >/dev/null 2>&1 ; echo $?)" -ne "0" ] ; then
     return 3
   fi
 

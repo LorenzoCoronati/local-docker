@@ -1,6 +1,6 @@
 # File
 #
-# This file contains environment variables for local-docker containers and commands.
+# This file contains environment specific variables for local-docker containers and commands.
 
 ################
 # General setup

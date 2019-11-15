@@ -87,7 +87,7 @@ function replace_in_file () {
     sed --version >/dev/null 2>&1 && sed -i -- "$@" || sed -i "" "$@"
 }
 
-# Import all environment variables from .ld.config and .env -files.
+# Import all environment variables from .ld.config and .env files.
 # This should be done every time after vars are updated.
 function import_config() {
     CONFIG_FILE="$PROJECT_ROOT/.ld.config"
@@ -95,16 +95,16 @@ function import_config() {
     IMPORTED="0"
 
     if [ -f "$CONFIG_FILE" ]; then
-        # Read .ld.config -file variables. These override possible values defined
+        # Read .ld.config file variables. These override possible values defined
         # earlier in this script.
-        export $(grep -v '^#' $CONFIG_FILE | xargs) 2>&1 > /dev/null
+        export $(grep -v '^#' $CONFIG_FILE | xargs) > /dev/null 2>&1
         (( IMPORTED = IMPORTED + 1 ))
     fi
 
     if [ -f "$ENV_FILE" ]; then
-        # Read .env -file variables. These override possible values defined
+        # Read .env file variables. These override possible values defined
         # earlier in this script.
-        export $(grep -v '^#' $ENV_FILE | xargs) 2>&1 > /dev/null
+        export $(grep -v '^#' $ENV_FILE | xargs) > /dev/null 2>&1
         (( IMPORTED = IMPORTED + 1 ))
     fi
 
@@ -112,7 +112,7 @@ function import_config() {
 }
 
 # Copy .env.example to .env.
-# If file exists, append to the endo if it..
+# If file exists, append to the end of it.
 function create_root_env() {
   FILE="./.env"
   TEMPLATE="${FILE}.example"
@@ -122,13 +122,13 @@ function create_root_env() {
   fi
 
   if [ ! -f "$FILE" ]; then
-    echo -e "${Green}Creating default ${BGreen}${FILE}${Green}- file from the template. ${Color_Off}"
+    echo -e "${Green}Creating default ${BGreen}${FILE}${Green} file from the template. ${Color_Off}"
     cp -f ${TEMPLATE} ${FILE}
   else
-    echo -e "${Yellow}Adding default values from ${TEMPLATE} -file to your ${BYellow}EXISTING${Yellow} ${BYellow}${FILE}${Yellow} -file. ${Color_Off}"
+    echo -e "${Yellow}Adding default values from ${TEMPLATE} file to your ${BYellow}EXISTING${Yellow} ${BYellow}${FILE}${Yellow} file. ${Color_Off}"
     cat ${TEMPLATE} >> ${FILE}
   fi
-  echo -e "${Yellow}Your ${FILE} -file ${BYellow}should NOT be committed to Git repository${Yellow}  (and it is .gitignore'd by default).${Color_Off}"
+  echo -e "${Yellow}Your ${FILE} file ${BYellow}should NOT be committed to Git repository${Yellow}  (and it is .gitignore'd by default).${Color_Off}"
 
   return
 }
@@ -144,15 +144,14 @@ function create_project_config() {
   fi
 
   if [ ! -f "$FILE" ]; then
-    echo -e "${Green}Creating default ${BGreen}${FILE}${Green}- file from the template. ${Color_Off}"
+    echo -e "${Green}Creating default ${BGreen}${FILE}${Green} file from the template. ${Color_Off}"
     cp -f ${TEMPLATE} ${FILE}
   else
-    echo -e "${Yellow}Adding default values from ${TEMPLATE} -file to your ${BYellow}EXISTING${Yellow} ${BYellow}${FILE}${Yellow} -file. ${Color_Off}"
+    echo -e "${Yellow}Adding default values from ${TEMPLATE} file to your ${BYellow}EXISTING${Yellow} ${BYellow}${FILE}${Yellow} file. ${Color_Off}"
     cat ${TEMPLATE} >> ${FILE}
   fi
 
-  echo -e "${Yellow}Your ${FILE} -file ${BYellow}should be committed to Git repository${Yellow}.${Color_Off}"
-  return
+  echo -e "${Yellow}Your ${FILE} file ${BYellow}should be committed to Git repository${Yellow}.${Color_Off}"
 }
 
 function function_exists() {

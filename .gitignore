@@ -4,7 +4,7 @@
 # This is a common strategy to avoid accidentally including private information
 # in public repositories and patch files.
 
-# Also note that subdirectories may and do have their own .gitignore -files
+# Also note that subdirectories may and do have their own .gitignore files
 # affecting content in these directories and their subdirectories further down
 # in the tree hierarchy.
 

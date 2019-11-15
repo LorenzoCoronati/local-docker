@@ -141,16 +141,16 @@ Once the local is up and running you can install Drupal.
        [http://adminer.example.com](http://adminer.example.com)
     
    3.  or use your favourite SQL GUI app (SequelPro or similar), and
-       connect using LOCAL_IP (see `.ld.config` -file, `127.0.X.Y`),
+       connect using LOCAL_IP (see `.ld.config` file, `127.0.X.Y`),
        default port `3306`, username `root` and password from your
-       `.ld.config`-file, `MYSQL_ROOT_PASSWORD`.
+       `.ld.config` file, `MYSQL_ROOT_PASSWORD`.
  
 #### Skeleton
 
 If you are applying Local-docker on a Skeleton based project start by
 copying all things mentioned in "Start using local-docker" -section on
 top of your project repository and copy all environment variables from.
-`.ld.config.example` to your own `.ld.config` -file.
+`.ld.config.example` to your own `.ld.config` file.
 
     $ ./ld init skeleton
 
@@ -159,7 +159,7 @@ After some configuration your codebase is built, and Docker volumes
 structure.
 
 Drupal should also connect to correct database host. This is usually
-done via your site's `settings.php` -file. Where Skeleton may use
+done via your site's `settings.php` file. Where Skeleton may use
 `localhost` as the database host. `local-docker` uses `db` container,
 and by default credentials `drupal`/`drupal` with database named
 `drupal` (simple!). Example for Drupal 8:
@@ -289,7 +289,7 @@ commands `php` container tries to connect to your IDE:
 This Xdebug configuration is initially set in the base image this
 project is using (`xoxoxo/php-container`). However this can be
 overridden for example in
-[95-drupal-development.ini -file (PHP 7.2)](./docker/build/php7.2//conf.d/95-drupal-development.ini)
+[95-drupal-development.ini file (PHP 7.2)](./docker/build/php7.2//conf.d/95-drupal-development.ini)
 , and Xdebug's full config can be checked either from Drupal
 (`admin/reports/status/php`) or with command
 
@@ -334,11 +334,11 @@ current network) and to make parallel running of your projects possible.
 
 ## Customize ld -script variables
 
-Local-docker configuration is defined in `./ld.config` -file, which is
+Local-docker configuration is defined in `./ld.config`  file, which is
 created during `./ld init` process. The file should be committed to
 project repository and be shared among all developers. 
 
-Local overrides can be set via `.env` -file, for example to have
+Local overrides can be set via `.env`  file, for example to have
 different local development domain or IP address. This file should not
 be committed to project repository but be considered private.
 

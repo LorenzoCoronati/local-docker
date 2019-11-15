@@ -90,19 +90,25 @@ function replace_in_file () {
 # Import all environment variables from .ld.config and .env -files.
 # This should be done every time after vars are updated.
 function import_config() {
-    CONFIG_FILE="$PROJECT_ROOT/.env"
+    CONFIG_FILE="$PROJECT_ROOT/.ld.config"
     ENV_FILE="$PROJECT_ROOT/.env"
+    IMPORTED="0"
 
     if [ -f "$CONFIG_FILE" ]; then
         # Read .ld.config -file variables. These override possible values defined
         # earlier in this script.
         export $(grep -v '^#' $CONFIG_FILE | xargs)
+        IMPORTED=(( IMPORTED + 1 ))
+
     fi
     if [ -f "$ENV_FILE" ]; then
         # Read .env -file variables. These override possible values defined
         # earlier in this script.
         export $(grep -v '^#' $ENV_FILE | xargs)
+        IMPORTED=(( IMPORTED + 1 ))
     fi
+
+    [ "$IMPORTED" -eq "0" ] && return 1 || return 0
 }
 
 # Copy .env.example to .env.

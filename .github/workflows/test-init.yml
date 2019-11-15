@@ -21,9 +21,8 @@ jobs:
       run: |
         brew cask install docker
         brew install docker-compose
-        open --background -a Docker &&
-        while ! docker system info > /dev/null 2>&1; do echo 'Waiting Docker.app to start' && sleep 2; done
-        docker ps
+        open /Applications/Docker.app && while ! docker system info > /dev/null 2>&1; do echo 'Waiting Docker.app to start' && sleep 2; done
+        docker ps && docker system info
         docker-compose --version
 
     - name: Install docker-sync

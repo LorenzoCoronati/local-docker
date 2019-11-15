@@ -19,5 +19,5 @@ function ld_command_stop_exec() {
 }
 
 function ld_command_stop_help() {
-    echo "Generates a database backup and removes containers & networks (stops docker-sync)"
+    echo "Stops containers, leaving volumes and content intact. No DB dump will be generated."
 }

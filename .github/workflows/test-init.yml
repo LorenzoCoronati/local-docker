@@ -8,15 +8,15 @@ on:
 jobs:
   build:
 
-    runs-on: macOS-10.14
+    runs-on: macOS-latest
 
     steps:
     - uses: actions/checkout@v1
     - name: Run a one-line script
       if: github.event_name == 'pull_request'
       run: echo This event is a pull request. Test build ./ld init.
-    - name: Install homebrew
-      run: /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+#    - name: Install homebrew (installed on macOS-latest as per https://help.github.com/en/actions/automating-your-workflow-with-github-actions/software-installed-on-github-hosted-runners#macos-1015)
+#      run: /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     - name: Install Docker and docker-compose
       run: |
         brew cask install docker

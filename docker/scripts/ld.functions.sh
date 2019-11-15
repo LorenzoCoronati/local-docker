@@ -87,38 +87,66 @@ function replace_in_file () {
     sed --version >/dev/null 2>&1 && sed -i -- "$@" || sed -i "" "$@"
 }
 
-# Import all environment variables from .env -file.
+# Import all environment variables from .ld.config and .env -files.
 # This should be done every time after vars are updated.
-function import_root_env() {
+function import_config() {
+    CONFIG_FILE="$PROJECT_ROOT/.env"
     ENV_FILE="$PROJECT_ROOT/.env"
 
+    if [ -f "$CONFIG_FILE" ]; then
+        # Read .ld.config -file variables. These override possible values defined
+        # earlier in this script.
+        export $(grep -v '^#' $CONFIG_FILE | xargs)
+    fi
     if [ -f "$ENV_FILE" ]; then
         # Read .env -file variables. These override possible values defined
         # earlier in this script.
         export $(grep -v '^#' $ENV_FILE | xargs)
-        return 0
     fi
-    return 1
 }
 
-# Copy .env.example to .env, display user the contents of it (to review).
-
+# Copy .env.example to .env.
+# If file exists, append to the endo if it..
 function create_root_env() {
-  if [ ! -f "./.env.example" ]; then
-    echo -e "${Red}ERROR: File ${BRed}.env.exmaple${Red} not present!.${Color_Off}";
+  FILE="./.env"
+  TEMPLATE="${FILE}.example"
+  if [ ! -f "${TEMPLATE}" ]; then
+    echo -e "${Red}ERROR: File ${BRed}${TEMPLATE}${Red} does not exist!.${Color_Off}";
     return 5;
   fi
 
-  if [ ! -f "./.env" ]; then
-    echo -e "${Green}Creating default ${BGreen}.env${Green}- file from template. ${Color_Off}"
-    cp -f ./.env.example ./.env
+  if [ ! -f "$FILE" ]; then
+    echo -e "${Green}Creating default ${BGreen}${FILE}${Green}- file from the template. ${Color_Off}"
+    cp -f ${TEMPLATE} ${FILE}
   else
-    echo -e "${Yellow}Adding default values from .env.example -file to your ${BYellow}EXISTING${Yellow} ${BYellow}.env${Yellow} -file. ${Color_Off}"
-    cat ./.env.example >> ./.env
+    echo -e "${Yellow}Adding default values from ${TEMPLATE} -file to your ${BYellow}EXISTING${Yellow} ${BYellow}${FILE}${Yellow} -file. ${Color_Off}"
+    cat ${TEMPLATE} >> ${FILE}
   fi
-  echo -e "${Yellow}Your .env -file should not be committed to Git repository (and it is .gitignore'd by default).${Color_Off}"
+  echo -e "${Yellow}Your ${FILE} -file ${BYellow}should NOT be committed to Git repository${Yellow}  (and it is .gitignore'd by default).${Color_Off}"
 
-  return $?
+  return
+}
+
+# Copy .ld.config.example to .ld.config.
+# If file exists, append to the endo if it.
+function create_project_config() {
+  FILE="./.ld.config"
+  TEMPLATE="${FILE}.example"
+  if [ ! -f "${TEMPLATE}" ]; then
+    echo -e "${Red}ERROR: File ${BRed}${TEMPLATE}${Red} does not exist!.${Color_Off}";
+    return 5;
+  fi
+
+  if [ ! -f "$FILE" ]; then
+    echo -e "${Green}Creating default ${BGreen}${FILE}${Green}- file from the template. ${Color_Off}"
+    cp -f ${TEMPLATE} ${FILE}
+  else
+    echo -e "${Yellow}Adding default values from ${TEMPLATE} -file to your ${BYellow}EXISTING${Yellow} ${BYellow}${FILE}${Yellow} -file. ${Color_Off}"
+    cat ${TEMPLATE} >> ${FILE}
+  fi
+
+  echo -e "${Yellow}Your ${FILE} -file ${BYellow}should be committed to Git repository${Yellow}.${Color_Off}"
+  return
 }
 
 function function_exists() {
@@ -134,22 +162,24 @@ function ensure_folders_present() {
     done
 }
 
-function ensure_envvar_present() {
+function define_configuration_value() {
     NAME=$1
     VAL=$2
-    if [ ! -e ".env" ]; then
-        echo -e "${Red}ERROR: File .env not present while trying to store a value into it.${Color_Off}";
+    FILE="./.ld.config"
+
+    if [ ! -e "$FILE" ]; then
+        echo -e "${Red}ERROR: File $FILE not present while trying to store a value into it.${Color_Off}";
         return 1;
     fi
-    EXISTS=$(grep $NAME .env | wc -l)
+    EXISTS=$(grep $NAME $FILE | wc -l)
     if [ "$EXISTS" -gt "0" ]; then
         PATTERN="s|^$NAME=.*|$NAME=$VAL|"
-        replace_in_file $PATTERN .env
+        replace_in_file $PATTERN $FILE
     else
-        echo "${NAME}=${VAL}" >> $PROJECT_ROOT/.env
+        echo "${NAME}=${VAL}" >> $PROJECT_ROOT/$FILE
     fi
     # Re-import all vars to take effect in host and container shell, too.
-    import_root_env
+    import_config
     return $?
 }
 

@@ -1,4 +1,4 @@
-name: CI
+name: Test build and init with docker-sync
 
 on: 
   pull_request:
@@ -8,27 +8,23 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: macOS-10.14
 
     steps:
     - uses: actions/checkout@v1
     - name: Run a one-line script
       if: github.event_name == 'pull_request'
       run: echo This event is a pull request. Test build ./ld init.
+    - name: Install homebrew
+      run: /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     - name: Install docker-compose
       run: |
-        sudo curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        sudo chmod +x /usr/local/bin/docker-compose
+        brew install docker-compose
         docker-compose --version
     - name: Install docker-sync
       run: |
-        sudo apt-get install build-essential ocaml
-        wget https://github.com/bcpierce00/unison/archive/v2.51.2.tar.gz
-        tar xvf v2.51.2.tar.gz
-        cd unison-2.51.2
-        make UISTYLE=text
-        sudo cp src/unison /usr/local/bin/unison
-        sudo cp src/unison-fsmonitor /usr/local/bin/unison-fsmonitor
+        gem install docker-sync
+        docker-sync
 
     - name: List what is in the project folder.
       run: ls -lha

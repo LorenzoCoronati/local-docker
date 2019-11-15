@@ -26,7 +26,7 @@ function ld_command_init_exec() {
     # Remove spaces.
     PROJECT_NAME=$(echo "$PROJECT_NAME" | sed 's/[[:space:]]/-/g')
 
-    ensure_envvar_present PROJECT_NAME $PROJECT_NAME
+    define_configuration_value PROJECT_NAME $PROJECT_NAME
 
     VALID=0
     while [ "$VALID" -eq "0" ]; do
@@ -50,9 +50,9 @@ function ld_command_init_exec() {
     # Remove spaces.
     LOCAL_DOMAIN=$(echo "$LOCAL_DOMAIN" | sed 's/[[:space:]]/./g')
     echo "LOCAL_DOMAIN is '$LOCAL_DOMAIN' (${#LOCAL_DOMAIN})"
-    ensure_envvar_present LOCAL_DOMAIN $LOCAL_DOMAIN
+    define_configuration_value LOCAL_DOMAIN $LOCAL_DOMAIN
     echo "Default URL for drush operations is http://www.$LOCAL_DOMAIN"
-    ensure_envvar_present DRUSH_OPTIONS_URI "http://www."$LOCAL_DOMAIN
+    define_configuration_value DRUSH_OPTIONS_URI "http://www."$LOCAL_DOMAIN
 
     echo -e "${BBlack}== Local development IP address ==${Color_Off}"
     echo "Random 127.0.0.0./16 will be generated for you if you so wish?"
@@ -62,7 +62,7 @@ function ld_command_init_exec() {
         *) LAST=$((RANDOM % 240 + 3 )) && LOCAL_IP=$( printf "127.0.%d.%d\n" "$((RANDOM % 256))" "$LAST");;
     esac
     echo -e "${Yellow}Using IP address $LOCAL_IP.${Color_Off}"
-    ensure_envvar_present LOCAL_IP $LOCAL_IP
+    define_configuration_value LOCAL_IP $LOCAL_IP
 
     # 2nd param, project type.
     TYPE=${1-'common'}
@@ -90,12 +90,12 @@ function ld_command_init_exec() {
     fi
 
     APP_ROOT=${APP_ROOT:-app}
-    ensure_envvar_present APP_ROOT $APP_ROOT
+    define_configuration_value APP_ROOT $APP_ROOT
     ensure_folders_present $APP_ROOT
     echo -e "${BYellow}Application root is in $APP_ROOT.${Color_Off}"
 
     DATABASE_DUMP_STORAGE=${DATABASE_DUMP_STORAGE:-db_dumps}
-    ensure_envvar_present DATABASE_DUMP_STORAGE $DATABASE_DUMP_STORAGE
+    define_configuration_value DATABASE_DUMP_STORAGE $DATABASE_DUMP_STORAGE
     ensure_folders_present $DATABASE_DUMP_STORAGE
     echo -e "${BYellow}Database dumps will be placed in $DATABASE_DUMP_STORAGE.${Color_Off}"
     if [[ "$(docker-compose -f $DOCKER_COMPOSE_FILE ps -q)" ]]; then

@@ -68,6 +68,7 @@ Copy all of this repository on top of your current project.
 
     db_dumps/
     docker/
+    .ld.config.example 
     .env.example 
     .gitignore.example # (or copy rules to your existing .gitignore)
     ld.sh 
@@ -97,7 +98,7 @@ subdomains:
 
 - main project - [http://example.com]() and [http://www.example.com]()
 - MySQL database - [mysql://$LOCAL_IP:3306](mysql://$LOCAL_IP:3306)
-  (`LOCAL_IP` address is defined in the `.env` file)
+  (`LOCAL_IP` address is defined in the `.ld.config` file)
 - Adminer (Web UI for MySQL) -
   [http://**adminer**.example.com](http://adminer.example.com)
 - Mailhog (catches **all** emails) -
@@ -139,17 +140,17 @@ Once the local is up and running you can install Drupal.
     2. or use Adminer with your browser:
        [http://adminer.example.com](http://adminer.example.com)
     
-    3. or use your favourite SQL GUI app (SequelPro or similar), and connect
-       using LOCAL_IP (see `.env` -file, `127.0.X.Y`), default port `3306`,
-       username `root` and password from your `.env`-file,
-       `MYSQL_ROOT_PASSWORD`.
+   3.  or use your favourite SQL GUI app (SequelPro or similar), and
+       connect using LOCAL_IP (see `.ld.config` file, `127.0.X.Y`),
+       default port `3306`, username `root` and password from your
+       `.ld.config` file, `MYSQL_ROOT_PASSWORD`.
  
 #### Skeleton
 
 If you are applying Local-docker on a Skeleton based project start by
 copying all things mentioned in "Start using local-docker" -section on
 top of your project repository and copy all environment variables from.
-`.env.example` to your own `.env` -file.
+`.ld.config.example` to your own `.ld.config` file.
 
     $ ./ld init skeleton
 
@@ -158,7 +159,7 @@ After some configuration your codebase is built, and Docker volumes
 structure.
 
 Drupal should also connect to correct database host. This is usually
-done via your site's `settings.php` -file. Where Skeleton may use
+done via your site's `settings.php` file. Where Skeleton may use
 `localhost` as the database host. `local-docker` uses `db` container,
 and by default credentials `drupal`/`drupal` with database named
 `drupal` (simple!). Example for Drupal 8:
@@ -288,7 +289,7 @@ commands `php` container tries to connect to your IDE:
 This Xdebug configuration is initially set in the base image this
 project is using (`xoxoxo/php-container`). However this can be
 overridden for example in
-[95-drupal-development.ini -file (PHP 7.2)](./docker/build/php7.2//conf.d/95-drupal-development.ini)
+[95-drupal-development.ini file (PHP 7.2)](./docker/build/php7.2//conf.d/95-drupal-development.ini)
 , and Xdebug's full config can be checked either from Drupal
 (`admin/reports/status/php`) or with command
 
@@ -311,15 +312,19 @@ Then, you can use `lld` instead of `./ld` or `./ld.sh`
 
 ## Projects in parallel
 
-`local-docker` isolates local projects behind IP aliases and therefore
-running projects in parallel s possible.
+`local-docker` isolates local projects behind IP aliases (alias to the 
+loopback interface) and therefore running projects in parallel s
+possible.
 
 In case there are port collisions first thing to check is you have
-`.env` file with `LOCAL_IP` set to something other than `127.0.0.1`.
+`.ld.config` file with `LOCAL_IP` set to something other than `127.0.0.1`.
 `./ld init` sets up a random IP address from range `127.0.0.0/16`.
 
 You can change IP address by putting your local down (`./ld down`),
 changing the IP address value, and starting your local again.
+
+You can check currently set aliases using command:  
+` ifconfig lo0 | grep netmask | grep -v '127.0.0.1'`
 
 ### Local ports
 
@@ -329,11 +334,18 @@ current network) and to make parallel running of your projects possible.
 
 ## Customize ld -script variables
 
-Main script supports `.env` -file overrides. You can override any
-configs found in the upper part of `ld.sh` -file by changing variable
-values.
+Local-docker configuration is defined in `./ld.config`  file, which is
+created during `./ld init` process. The file should be committed to
+project repository and be shared among all developers. 
 
-File should contain key=value -pairs, such as
+Local overrides can be set via `.env`  file, for example to have
+different local development domain or IP address. This file should not
+be committed to project repository but be considered private.
+
+Variables present in the `.env` file will override project level
+configurations from `.ld.config`.
+
+These file should contain key=value -pairs, such as
 
     # Comments start with a hash.
     MYSQL_ROOT_PASSWORD=some_password

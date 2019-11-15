@@ -52,7 +52,7 @@ fi
 cd $DIR
 tar xvzf ${TAG}.tar.gz
 SUBDIR=$(ls |grep local-docker)
-LIST=" .editorconfig .env.example .gitignore.example ./.github ./docker ./git-hooks ld.sh"
+LIST=" .editorconfig .ld.config.example .env.example .gitignore.example ./.github ./docker ./git-hooks ld.sh"
 for FILE in $LIST; do
   cp -fvR $SUBDIR/$FILE ../ &>/dev/null 2>&1
 done

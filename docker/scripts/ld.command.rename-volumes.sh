@@ -26,8 +26,8 @@ function ld_command_rename-volumes_exec() {
         [ "$LD_VERBOSE" -ge "1" ] && echo 'Turning off docker-sync (clean), please wait...'
         docker-sync clean
     fi
-    ensure_envvar_present VOL_BASE_NAME $VOL_BASE_NAME
-    import_root_env
+    define_configuration_value VOL_BASE_NAME $VOL_BASE_NAME
+    import_config
 
     echo "Renaming volumes to '$VOL_BASE_NAME' for docker-sync, please wait..."
     replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKERSYNC_FILE

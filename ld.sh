@@ -26,7 +26,7 @@ esac
 # 1st param, The Command.
 ACTION=${1-'help'}
 
-# Collect all available commands.
+# Find all available commands.
 for FILE in $(ls ./docker/scripts/ld.command.*.sh ); do
     FILE=$(basename $FILE)
     COMMAND=$(cut -d'.' -f3 <<<"$FILE")
@@ -39,23 +39,17 @@ DOCKER_COMPOSE_FILE=docker-compose.yml
 DOCKER_YML_STORAGE=./docker
 DOCKER_PROJECT=$(basename $PROJECT_ROOT)
 
-import_root_env
-if [[ "$?" -ne "0" ]] && [ ! -f "./.env.example" ]; then
-  echo "Files .env.example are .env are missing. Please add either one to project root."
-  echo "Then start over."
-  cd $CWD
-  exit 1
-fi
 
 
 # Read (and create if necessary) the .env file, allowing overrides to any of our config values.
-if [[ "$ACTION" != 'help' ]] && [[ "$ACTION" != 'self-update' ]]; then
-    import_root_env
+if [[ "$ACTION" != 'help' ]]; then
+    import_config
     if [[ "$?" -ne "0" ]]; then
+        create_project_config
         create_root_env
-        import_root_env
+        import_config
         if [ "$?" -ne "0" ]; then
-            echo -e "${Red}ERROR: File ./.env could not be read nor created. Exiting.${Color_Off}."
+            echo -e "${Red}ERROR: Configuration files are not present nor could not be created. Exiting.${Color_Off}."
             exit 1
         fi
     fi

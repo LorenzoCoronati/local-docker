@@ -21,7 +21,8 @@ jobs:
       run: |
         brew cask install docker
         brew install docker-compose
-        open /Applications/Docker.app && while ! docker system info > /dev/null 2>&1; do echo 'Waiting Docker.app to start' && sleep 2; done
+        open --background -a Docker
+        while ! docker system info > /dev/null 2>&1; do echo "Waiting Docker.app to start, round ${ROUND}" && sleep 2 && (( ROUND + 1 )) ; done
         docker ps && docker system info
         docker-compose --version
 

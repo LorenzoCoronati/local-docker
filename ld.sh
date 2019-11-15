@@ -45,8 +45,8 @@ DOCKER_PROJECT=$(basename $PROJECT_ROOT)
 if [[ "$ACTION" != 'help' ]]; then
     import_config
     if [[ "$?" -ne "0" ]]; then
-        create_root_env
         create_project_config
+        create_root_env
         import_config
         if [ "$?" -ne "0" ]; then
             echo -e "${Red}ERROR: Configuration files are not present nor could not be created. Exiting.${Color_Off}."

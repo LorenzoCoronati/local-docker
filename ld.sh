@@ -39,7 +39,7 @@ DOCKER_COMPOSE_FILE=docker-compose.yml
 DOCKER_YML_STORAGE=./docker
 DOCKER_PROJECT=$(basename $PROJECT_ROOT)
 
-import_root_env
+import_config
 if [[ "$?" -ne "0" ]] && [ ! -f "./.env.example" ]; then
   echo "Files .env.example are .env are missing. Please add either one to project root."
   echo "Then start over."
@@ -50,10 +50,11 @@ fi
 
 # Read (and create if necessary) the .env file, allowing overrides to any of our config values.
 if [[ "$ACTION" != 'help' ]] && [[ "$ACTION" != 'self-update' ]]; then
-    import_root_env
+    import_config
     if [[ "$?" -ne "0" ]]; then
         create_root_env
-        import_root_env
+        create_project_config
+        import_config
         if [ "$?" -ne "0" ]; then
             echo -e "${Red}ERROR: File ./.env could not be read nor created. Exiting.${Color_Off}."
             exit 1

@@ -97,14 +97,14 @@ function import_config() {
     if [ -f "$CONFIG_FILE" ]; then
         # Read .ld.config -file variables. These override possible values defined
         # earlier in this script.
-        export $(grep -v '^#' $CONFIG_FILE | xargs)
+        export $(grep -v '^#' $CONFIG_FILE | xargs) 2>&1 > /dev/null
         (( IMPORTED = IMPORTED + 1 ))
-
     fi
+
     if [ -f "$ENV_FILE" ]; then
         # Read .env -file variables. These override possible values defined
         # earlier in this script.
-        export $(grep -v '^#' $ENV_FILE | xargs)
+        export $(grep -v '^#' $ENV_FILE | xargs) 2>&1 > /dev/null
         (( IMPORTED = IMPORTED + 1 ))
     fi
 

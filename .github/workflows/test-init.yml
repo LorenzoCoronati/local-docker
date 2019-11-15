@@ -17,10 +17,13 @@ jobs:
       run: echo This event is a pull request. Test build ./ld init.
     - name: Install homebrew
       run: /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    - name: Install docker-compose
+    - name: Install Docker and docker-compose
       run: |
         brew cask install docker
+        brew install docker-compose
+        docker ps
         docker-compose --version
+
     - name: Install docker-sync
       run: |
         gem install docker-sync

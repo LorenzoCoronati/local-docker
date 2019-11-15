@@ -19,7 +19,7 @@ jobs:
       run: /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     - name: Install docker-compose
       run: |
-        brew install docker-compose
+        brew cask install docker
         docker-compose --version
     - name: Install docker-sync
       run: |

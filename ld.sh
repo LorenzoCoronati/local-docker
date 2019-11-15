@@ -26,7 +26,7 @@ esac
 # 1st param, The Command.
 ACTION=${1-'help'}
 
-# Collect all available commands.
+# Find all available commands.
 for FILE in $(ls ./docker/scripts/ld.command.*.sh ); do
     FILE=$(basename $FILE)
     COMMAND=$(cut -d'.' -f3 <<<"$FILE")

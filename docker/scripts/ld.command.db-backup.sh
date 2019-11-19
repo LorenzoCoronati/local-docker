@@ -23,6 +23,11 @@ function ld_command_db-backup_exec() {
           ;;
 
         2|"2")
+          if ! is_dockersync && [ -f "${DOCKER_PROJECT}/${DOCKERSYNC_FILE}" ]; then
+            [ "$LD_VERBOSE" -ge "1" ] && echo 'Starting docker-sync, please wait...'
+            docker-sync start
+            DOCKER_SYNC_STARTED=1
+          fi
           COMM="docker-compose -f $DOCKER_COMPOSE_FILE  up -d $CONTAINER_DB"
           [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Yellow}Starting DB container for backup purposes.${Color_Off}"
           $COMM
@@ -43,6 +48,10 @@ function ld_command_db-backup_exec() {
     if [ "$STARTED" -eq "1" ]; then
        echo -e "${Yellow}Stopping DB container.${Color_Off}"
        docker-compose -f $DOCKER_COMPOSE_FILE stop $CONTAINER_DB
+    fi
+    if [ ! -z "$DOCKER_SYNC_STARTED" ]; then
+        [ "$LD_VERBOSE" -ge "1" ] && echo 'Turning off docker-sync (stop), please wait...'
+        docker-sync stop
     fi
     echo "DB backup of database ${DBNAME} in $DATABASE_DUMP_STORAGE/${FILENAME}"
     echo "DB backup of ${DBNAME} symlinked from: $DATABASE_DUMP_STORAGE/db-backup--${DBNAME}--LATEST.sql.gz"

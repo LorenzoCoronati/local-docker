@@ -33,8 +33,11 @@ services:
       - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.rule=Host(`traefik.${LOCAL_DOMAIN}`)"
       - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.service=api@internal"
       - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.entrypoints=web"
+    # In case of several env files later declared variable
+    # values override earlier ones
     env_file:
       - .env
+      - .env.local
 
     whoami:
       image: containous/whoami:v1.3.0
@@ -52,8 +55,11 @@ services:
         # :nocopy must be used with docker-sync
         # See bottom of this file, and ./docker-sync.yml
         - nfsmount_app:/var/www:nocopy
-      env_file:
-        - .env
+    # In case of several env files later declared variable
+    # values override earlier ones
+    env_file:
+      - .env
+      - .env.local
       depends_on: # This key affects the order of which containers get started.
         - php
       working_dir: /var/www/web
@@ -66,8 +72,11 @@ services:
     container_name: "${PROJECT_NAME}_php"
     volumes:
       - nfsmount_app:/var/www:nocopy
+    # In case of several env files later declared variable
+    # values override earlier ones
     env_file:
       - .env
+      - .env.local
     environment:
         XDEBUG_CONFIG: "remote_enable=${PHP_XDEBUG_REMOTE_ENABLE}"
     working_dir: /var/www
@@ -78,8 +87,11 @@ services:
     container_name: "${PROJECT_NAME}_composer"
     volumes:
       - nfsmount_app:/var/www:nocopy
+    # In case of several env files later declared variable
+    # values override earlier ones
     env_file:
       - .env
+      - .env.local
     working_dir: /var/www
     command: sh -c '[[ "$CONTAINER_COMPOSER_START" -ne "1" ]] && echo "Container 'composer' disabled." && exit 0 ||  [[ ! -e "/var/www/composer.lock" ]] && echo "File /var/www/composer.lock not present, exiting." && exit 0 || /usr/local/bin/composer install'
 
@@ -97,8 +109,11 @@ services:
       - db_data:/var/lib/mysql
     # In case of several env files later declared variable
     # values override earlier ones
+    # In case of several env files later declared variable
+    # values override earlier ones
     env_file:
       - .env
+      - .env.local
     working_dir: /var
     restart: always
     # Set max_allowed_packet to 256M (or any other value)
@@ -119,8 +134,11 @@ services:
       - gettingstarted
     labels:
       - "traefik.http.routers.${PROJECT_NAME}--web-ui-solr.rule=Host(`solr.${LOCAL_DOMAIN}`)"
+    # In case of several env files later declared variable
+    # values override earlier ones
     env_file:
       - .env
+      - .env.local
     volumes:
       - solr_data:/var/solr
 
@@ -151,8 +169,11 @@ services:
     volumes:
       - webroot-sync-core-delegated:/var/www:nocopy
     command: sh -c '[[ "$CONTAINER_NODEJS_START" -ne "1" ]] && echo "Nodejs container disabled." && exit 0 || [[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
+    # In case of several env files later declared variable
+    # values override earlier ones
     env_file:
       - .env
+      - .env.local
 
 volumes:
   nfsmount_app:

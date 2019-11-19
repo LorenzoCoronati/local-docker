@@ -52,7 +52,7 @@ fi
 cd $DIR
 tar xvzf ${TAG}.tar.gz
 SUBDIR=$(ls |grep local-docker)
-LIST=" .editorconfig .ld.config.example .env.example .gitignore.example ./.github ./docker ./git-hooks ld.sh"
+LIST=" .editorconfig .env.example .env.local.example .gitignore.example ./.github ./docker ./git-hooks ld.sh"
 for FILE in $LIST; do
   cp -fvR $SUBDIR/$FILE ../ &>/dev/null 2>&1
 done
@@ -63,4 +63,4 @@ echo -e "${Yellow}Review and commit changes to: "
 for FILE in $LIST; do
   echo " - $FILE"
 done
-echo -e "${Yellow}Optionally update your own .env file, too.${Color_Off}"
+echo -e "${Yellow}Optionally update your own .env.local file, too.${Color_Off}"

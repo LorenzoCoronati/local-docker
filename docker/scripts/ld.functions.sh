@@ -87,34 +87,32 @@ function replace_in_file () {
     sed --version >/dev/null 2>&1 && sed -i -- "$@" || sed -i "" "$@"
 }
 
-# Import all environment variables from .ld.config and .env files.
+# Import all environment variables from .env and .env.local files.
 # This should be done every time after vars are updated.
 function import_config() {
-    CONFIG_FILE="$PROJECT_ROOT/.ld.config"
-    ENV_FILE="$PROJECT_ROOT/.env"
+    PROJECT_CONFIG_FILE="$PROJECT_ROOT/.env"
+    PROJECT_CONFIG_OVERRIDES_FILE="$PROJECT_ROOT/.env.local"
     IMPORTED="0"
 
-    if [ -f "$CONFIG_FILE" ]; then
-        # Read .ld.config file variables. These override possible values defined
-        # earlier in this script.
-        export $(grep -v '^#' $CONFIG_FILE | xargs) > /dev/null 2>&1
+    if [ -f "$PROJECT_CONFIG_FILE" ]; thenThese override possible values defined
+        # Read config variables.
+        export $(grep -v '^#' $PROJECT_CONFIG_FILE | xargs) > /dev/null 2>&1
         (( IMPORTED = IMPORTED + 1 ))
     fi
 
-    if [ -f "$ENV_FILE" ]; then
-        # Read .env file variables. These override possible values defined
-        # earlier in this script.
-        export $(grep -v '^#' $ENV_FILE | xargs) > /dev/null 2>&1
+    if [ -f "$PROJECT_CONFIG_OVERRIDES_FILE" ]; then
+        # Read redefined variables.
+        export $(grep -v '^#' $PROJECT_CONFIG_OVERRIDES_FILE | xargs) > /dev/null 2>&1
         (( IMPORTED = IMPORTED + 1 ))
     fi
 
     [ "$IMPORTED" -eq "0" ] && return 1 || return 0
 }
 
-# Copy .env.example to .env.
+# Copy .env.local.example to .env.
 # If file exists, append to the end of it.
-function create_root_env() {
-  FILE="./.env"
+function create_project_config_override_file() {
+  FILE="./.env.local"
   TEMPLATE="${FILE}.example"
   if [ ! -f "${TEMPLATE}" ]; then
     echo -e "${Red}ERROR: File ${BRed}${TEMPLATE}${Red} does not exist!.${Color_Off}";
@@ -133,10 +131,10 @@ function create_root_env() {
   return
 }
 
-# Copy .ld.config.example to .ld.config.
-# If file exists, append to the endo if it.
-function create_project_config() {
-  FILE="./.ld.config"
+# Copy .env.local.example to .env
+# If file exists, append to the end of it.
+function create_project_config_file() {
+  FILE="./.env"
   TEMPLATE="${FILE}.example"
   if [ ! -f "${TEMPLATE}" ]; then
     echo -e "${Red}ERROR: File ${BRed}${TEMPLATE}${Red} does not exist!.${Color_Off}";
@@ -170,7 +168,7 @@ function ensure_folders_present() {
 function define_configuration_value() {
     NAME=$1
     VAL=$2
-    FILE="./.ld.config"
+    FILE="./.env"
 
     if [ ! -e "$FILE" ]; then
         echo -e "${Red}ERROR: File $FILE not present while trying to store a value into it.${Color_Off}";

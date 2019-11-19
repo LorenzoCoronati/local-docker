@@ -4,7 +4,7 @@
 # This file contains down -command for local-docker script ld.sh.
 
 function ld_command_down_exec() {
-    $SCRIPT_NAME dump
+    $SCRIPT_NAME db-dump
     CONN=$?
     if [ "$CONN" -ne "0" ]; then
         cd $CWD

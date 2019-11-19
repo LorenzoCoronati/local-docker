@@ -4,7 +4,7 @@
 # This file contains dump -command for local-docker script ld.sh.
 
 function ld_command_db-backup_exec() {
-    DBNAME=${1:$-${MYSQL_DATABASE}}
+    DBNAME=${1:-${MYSQL_DATABASE}}
     if [ -z "$DBNAME" ]; then
       echo -e "${Red}ERROR: No database name provided nor found.${Color_Off}"
       return 1

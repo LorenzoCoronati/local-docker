@@ -94,13 +94,22 @@ function import_config() {
     PROJECT_CONFIG_OVERRIDES_FILE="$PROJECT_ROOT/.env.local"
     IMPORTED="0"
 
+    if [ ! -f "$PROJECT_CONFIG_FILE" ]; then
+        create_project_config_file
+    fi
+
     if [ -f "$PROJECT_CONFIG_FILE" ]; then
         # Read config variables.
         export $(grep -v '^#' $PROJECT_CONFIG_FILE | xargs) > /dev/null 2>&1
         (( IMPORTED = IMPORTED + 1 ))
     fi
 
+    if [ ! -f "$PROJECT_CONFIG_OVERRIDES_FILE" ]; then
+        create_project_config_override_file
+    fi
+
     if [ -f "$PROJECT_CONFIG_OVERRIDES_FILE" ]; then
+
         # Read redefined variables.
         export $(grep -v '^#' $PROJECT_CONFIG_OVERRIDES_FILE | xargs) > /dev/null 2>&1
         (( IMPORTED = IMPORTED + 1 ))
@@ -112,7 +121,7 @@ function import_config() {
 # Copy .env.local.example to .env.
 # If file exists, append to the end of it.
 function create_project_config_override_file() {
-  FILE="./.env.local"
+  FILE="${PROJECT_ROOT}/.env.local"
   TEMPLATE="${FILE}.example"
   if [ ! -f "${TEMPLATE}" ]; then
     echo -e "${Red}ERROR: File ${BRed}${TEMPLATE}${Red} does not exist!.${Color_Off}";
@@ -134,13 +143,13 @@ function create_project_config_override_file() {
 # Copy .env.local.example to .env
 # If file exists, append to the end of it.
 function create_project_config_file() {
-  FILE="./.env"
+  FILE="${PROJECT_ROOT}/.env"
   TEMPLATE="${FILE}.example"
   if [ ! -f "${TEMPLATE}" ]; then
     echo -e "${Red}ERROR: File ${BRed}${TEMPLATE}${Red} does not exist!.${Color_Off}";
     return 5;
   fi
-
+  ls -lha $FILE
   if [ ! -f "$FILE" ]; then
     echo -e "${Green}Creating default ${BGreen}${FILE}${Green} file from the template. ${Color_Off}"
     cp -f ${TEMPLATE} ${FILE}

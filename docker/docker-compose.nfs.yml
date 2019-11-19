@@ -54,7 +54,7 @@ services:
       volumes:
         # :nocopy must be used with docker-sync
         # See bottom of this file, and ./docker-sync.yml
-        - nfsmount_app:/var/www:nocopy
+        - webroot-nfs-app:/var/www
     # In case of several env files later declared variable
     # values override earlier ones
     env_file:
@@ -71,7 +71,7 @@ services:
     build: ./docker/build/php/${PROJECT_PHP_VERSION:-7.2}
     container_name: "${PROJECT_NAME}_php"
     volumes:
-      - nfsmount_app:/var/www:nocopy
+      - webroot-nfs-app:/var/www
     # In case of several env files later declared variable
     # values override earlier ones
     env_file:
@@ -86,7 +86,7 @@ services:
     build: ./docker/build/php/${PROJECT_PHP_VERSION:-7.2}
     container_name: "${PROJECT_NAME}_composer"
     volumes:
-      - nfsmount_app:/var/www:nocopy
+      - webroot-nfs-app:/var/www
     # In case of several env files later declared variable
     # values override earlier ones
     env_file:
@@ -102,7 +102,7 @@ services:
     ports:
       - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_DB:-3306}:3306"
     volumes:
-      - nfsmount_db_dumps:/var/www:nocopy
+      - webroot-nfs-dbdumps:/var/db_dumps
       # Named volume for db table data. Docker keeps this volume around
       # unless stack is down'ed with "--volumes":
       # $ docker-compose down --volumes
@@ -167,7 +167,7 @@ services:
     container_name: "${PROJECT_NAME}_nodejs"
     working_dir: /var/www
     volumes:
-      - webroot-sync-core-delegated:/var/www:nocopy
+      - webroot-nfs-app:/var/www
     command: sh -c '[[ "$CONTAINER_NODEJS_START" -ne "1" ]] && echo "Nodejs container disabled." && exit 0 || [[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
     # In case of several env files later declared variable
     # values override earlier ones
@@ -176,13 +176,13 @@ services:
       - .env.local
 
 volumes:
-  nfsmount_app:
+  webroot-nfs-app:
     driver: local
     driver_opts:
       type: nfs
       o: addr=host.docker.internal,rw,nolock,nfsvers=3
       device: ":${PWD}/${APP_ROOT}"
-  nfsmount_db_dumps:
+  webroot-nfs-dbdumps:
     driver: local
     driver_opts:
       type: nfs

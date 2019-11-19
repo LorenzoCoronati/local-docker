@@ -44,15 +44,6 @@ DOCKER_PROJECT=$(basename $PROJECT_ROOT)
 # Read (and create if necessary) the .env.local file, allowing overrides to any of our config values.
 if [[ "$ACTION" != 'help' ]]; then
     import_config
-    if [[ "$?" -ne "0" ]]; then
-        create_project_config_file
-        create_project_config_override_file
-        import_config
-        if [ "$?" -ne "0" ]; then
-            echo -e "${Red}ERROR: Configuration files are not present nor could not be created. Exiting.${Color_Off}."
-            exit 1
-        fi
-    fi
 fi
 
 # Get current script name, and use a symlink if it exists.

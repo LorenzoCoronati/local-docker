@@ -32,7 +32,8 @@ function ld_command_init_exec() {
     while [ "$VALID" -eq "0" ]; do
       echo  -e "${BBlack}== Local development base domain == ${Color_Off}"
       echo -e "Do not add protocol nor www -part but just the domain name. It is recommended to use domain ending with ${BBlack}.ld${Black}.${Color_Off}"
-      LOCAL_DOMAIN=${LOCAL_DOMAIN:-${$PROJECT_NAME}.ld}
+      DEFAULT=${PROJECT_NAME}.ld
+      LOCAL_DOMAIN=${LOCAL_DOMAIN:-${DEFAULT}}
       read -p "Domain [$LOCAL_DOMAIN] " ANSWER
       TEST=$(echo $ANSWER | egrep -e '^(([a-zA-Z0-9])([a-zA-Z0-9\.]*))?([a-zA-Z0-9])$')
       if [ -z "$ANSWER" ]; then
@@ -101,10 +102,6 @@ function ld_command_init_exec() {
     if [[ "$(docker-compose -f $DOCKER_COMPOSE_FILE ps -q)" ]]; then
         echo "Turning off current container stack."
         docker-compose -f $DOCKER_COMPOSE_FILE down 2> /dev/null
-    fi
-    if is_dockersync; then
-        [ "$LD_VERBOSE" -ge "1" ] && echo 'Turning off docker-sync (clean), please wait...'
-        docker-sync clean
     fi
 
     $SCRIPT_NAME rename-volumes $PROJECT_NAME

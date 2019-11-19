@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-LOCAL_DOCKER_VERSION=1.2.8
+LOCAL_DOCKER_VERSION=1.x
 LD_VERBOSE=${LD_VERBOSE:-2}
 
 CWD=$(pwd)

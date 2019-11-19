@@ -94,7 +94,7 @@ function import_config() {
     PROJECT_CONFIG_OVERRIDES_FILE="$PROJECT_ROOT/.env.local"
     IMPORTED="0"
 
-    if [ -f "$PROJECT_CONFIG_FILE" ]; thenThese override possible values defined
+    if [ -f "$PROJECT_CONFIG_FILE" ]; then
         # Read config variables.
         export $(grep -v '^#' $PROJECT_CONFIG_FILE | xargs) > /dev/null 2>&1
         (( IMPORTED = IMPORTED + 1 ))

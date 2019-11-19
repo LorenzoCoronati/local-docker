@@ -382,18 +382,21 @@ for some minor *config* adjustments).
 
 #### Local-docker does not start
 
+
 1. `Bind for 0.0.0.0:80: unexpected error (Failure EADDRINUSE)`
   
+   There is some other application that reserves port :80 on your
+   localhost. Turn it off.
+
    Turn of yor local (on Mac) web server (Apache, Nginx, whatever):
-   
+
        $ sudo apachectl stop && sudo service nginx stop
 
     Turn off your local MySQL (on Mac):  
     > System preferences -> MySQL ->stop
     
-    Check also "Projects in parallel" -section. Other projects may have
-    acclaimed ports your project is trying to use.
- 
+    Check also "Projects in parallel" -section. Other projects or tools
+    may have acclaimed ports your project is trying to use.
 
 #### Local files not getting synced
 
@@ -402,7 +405,18 @@ and editing some files that should be synced:
 
     $ docker-sync logs -f
 
-If none of your edits in host or in container are being synced, clean up
+Docker-sync may get stuck on host or inside the container. Sometimes
+stuck can be 'released' nudging the sync container a bit:
+
+    $ docker-sync start 
+
+If this does not help (chekc `docker-sync logs -f`) try cleaning the
+syncs:
+
+    $ docker-sync stop && docker-sync clean && docker-sync start
+
+If even this does not solve the issue, *Docker* itself may be hanging. 
+none of your edits in host or in container are being synced, clean up
 and restart:
 
 1. stop file sync and local (`./ld down`) if needed
@@ -410,15 +424,14 @@ and restart:
 3. start your local again `./ld up` and optionally restore database
    `./ld restore`
 
-**If this did not solve the sync** you can wipe out all volumes in your
-system.
+Optionally restart Docker, or reboot your operating system. 
 
-**BE WARNED** This will delete ALL volumes in ALL Docker projects across
-your laptop.
+The last resort is to clean up everything Docker -related. **BE WARNED**
+This will delete ALL volumes in ALL Docker projects across your laptop.
  
-    $ docker kill $(docker ps -q) # Stop all containers.
-    $ docker container prune # Remove all stopped containers.
-    $ docker volume prune # Remove all unused local volumes.
+    $ docker kill $(docker ps -q) # Stop all containers
+    $ docker container prune # Remove all stopped containers
+    $ docker volume prune # Remove all unused local volumes
         
 If even that does not help, clean up EVERYTHING Docker -related
 (downloaded images, created volumes and containers).
@@ -427,7 +440,7 @@ If even that does not help, clean up EVERYTHING Docker -related
 containers in ALL Docker projects across your whole laptop. Sorts of
 resets everything else but Docker configuration.
 
-    $ docker system prune
+    $ docker system prune --volumes
 
 #### Docker-stack does not start
 
@@ -453,11 +466,42 @@ you should also reset the command line tools path with
  
     $ sudo xcode-select -r
 
+## NFS share does not work 
+
+When you start local-docker but an error like
+
+    ERROR: for YOUR-PROJECT_nodejs  Cannot create container for service nodejs: failed to mount local volume: mount :/Users/USERNAME/Projects/clients/YOUR-PROJECT/app:/var/lib/docker/volumes/YOUR-PROJECT_SYNCNAME/_data, data: addr=192.168.65.2,nolock,nfsvers=3: permission denied
+
+Host OS (macOS) is preventing NFS to share parts of your filesystem.
+MacOS updates tend to change the settings, and in Catalina the shareable
+parts of the filesystem are behind strict access control.
+
+Your MacOS should be set to allow sharing the folder(s) you are trying
+to share but only to localhost (mind the path). Check that user id (501)
+and group id (20) match your own, and also use the correct, full path to
+your projects folder (`/Users/perttuehn/Projects`):
+
+     $ id -u
+     501 
+     $ id -g
+     20
+     $ sudo -i
+     Password: [YOUR-PASSWORD]
+     root# echo '/Users/perttuehn/Projects -alldirs -mapall=501:20 localhost' >> /etc/exports
+     root# nfsd restart; exit
+
+NOTE: If your project is located under `~/Documents` you must also grant
+"Full Disk Access" to `/sbin/nfsd` in Settings > Security & Privacy >
+Privacy.
+
+![Granting a full disk access to /sbin/nfsd](./docker/media/macos-security-privacy-nfsd-access.png)
+"Granting a full disk access to /sbin/nfsd"
+
 ## Why my favourite feature is not there?
 
 This is the initial version of the local-docker. Redis, Solr and others
 are coming once the need arises.
 
-**Asking help from your colleagues is very recommended, and pull
-requests even more so!**
+**Asking for help is highly recommended, and pull requests even more
+so.**
 

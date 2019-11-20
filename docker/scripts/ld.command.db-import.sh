@@ -3,7 +3,8 @@
 #
 # This file contains restore -command for local-docker script ld.sh.
 
-function ld_command_restore_exec() {
+# Restore one database from backup.
+function ld_command_db-import_exec() {
     DBNAME=${1:$-${MYSQL_DATABASE}}
     if [ -z "$DBNAME" ]; then
       echo -e "${Red}ERROR: No database name provided nor found.${Color_Off}"
@@ -75,6 +76,6 @@ function ld_command_restore_exec() {
     fi
   }
 
-function ld_command_restore_help() {
+function ld_command_db-import_help() {
     echo "Import a single database from dumpfile. Optionally provide database name (default: ${MYSQL_DATABASE}) and dump file location (default: ${DATABASE_DUMP_STORAGE}/db-backup--${DBNAME}--LATEST.sql.gz). Dump file should be located in $DATABASE_DUMP_STORAGE -folder."
 }

@@ -8,7 +8,7 @@ function ld_command_db-dump_exec() {
 
     DATE=$(date +%Y-%m-%d--%H-%I-%S)
     FILENAME="db-container-db-dump-$DATE.sql.gz"
-    COMMAND_SQL_DB_DUMPER="mysqldb-dump --host "${CONTAINER_DB:-db}" -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --db-dump-date --tz-utc --verbose  2>/dev/null | gzip --fast -f > /var/db_db-dumps/${FILENAME}"
+    COMMAND_SQL_DB_DUMPER="mysqldb-dump --host "${CONTAINER_DB:-db}" -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --db-dump-date --tz-utc --verbose  2>/dev/null | gzip --fast -f > /var/db_dumps/${FILENAME}"
 
     db_connect
     RET="$?"
@@ -36,14 +36,18 @@ function ld_command_db-dump_exec() {
        ;;
     esac
 
-    echo -e "${Yellow}Using datestamp: $DATE${Color_Off}"
+    [ "$LD_VERBOSE" -ge "1" ] && echo -e "${Yellow}Using datestamp: $DATE${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}NEXT: docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c $COMMAND_SQL_DB_DUMPER${Color_Off}"
+
     docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_DUMPER"
     cd $PROJECT_ROOT/$DATABASE_DUMP_STORAGE
     ln -sf ${FILENAME} db-container-db-dump-LATEST.sql.gz
-    cd $PROJECT_ROOT
-    if [ "$STARTED" -eq "1" ]; then
-       echo -e "${Yellow}Stopping DB container.${Color_Off}"
-       docker-compose -f $DOCKER_COMPOSE_FILE stop $CONTAINER_DB
+
+    if [ ! -z "$STARTED" ]; then
+       [ "$LD_VERBOSE" -ge "1" ] && echo -e "${Yellow}Stopping DB container.${Color_Off}"
+       COMM="docker-compose -f $DOCKER_COMPOSE_FILE stop $CONTAINER_DB"
+        [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: $COMM${Color_Off}"
+       $COMM
     fi
     if [ ! -z "$DOCKER_SYNC_STARTED" ]; then
         [ "$LD_VERBOSE" -ge "1" ] && echo 'Turning off docker-sync (stop), please wait...'

@@ -111,9 +111,9 @@ function ld_command_init_exec() {
         docker-sync start
     fi
 
-    echo 'Starting PHP container only, to use it to build the codebase.'
+    echo -e "${BYellow}Starting PHP container only, to use it to build the codebase.${Color_Off}"
     docker-compose -f $DOCKER_COMPOSE_FILE up -d php
-    echo 'PHP container: started.'
+    echo -e "${Green}PHP container: started.${Color_Off}"
 
     DELETE_ROOT=
     if [ -e "${APP_ROOT}/composer.json" ]; then
@@ -126,7 +126,7 @@ function ld_command_init_exec() {
         mkdir $APP_ROOT;
     fi
     echo "Verify application root can be used to install codebase (must be empty)..."
-    APP_ROOT_FILES="ls -lha /var/www"
+    APP_ROOT_FILES="ls -lhA /var/www/"
     docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$APP_ROOT_FILES"
 
     if [ "$(ls -A $APP_ROOT)" ]; then
@@ -136,16 +136,19 @@ function ld_command_init_exec() {
         read -p "Type 'PLEASE-DELETE' to continue: " CHOICE
         case "$CHOICE" in
             'PLEASE-DELETE' ) rm -rf $APP_ROOT && mkdir $APP_ROOT && DELETE_ROOT=1;;
-            * ) echo -en "${Red}Clear the folder manually and start overm - or initialize codebase manually.${Color_Off}" && cd $CWD && exit;;
+            * ) echo -en "${Red}Clear the folder manually and start over - or initialize codebase manually.${Color_Off}"
+                cd $CWD
+                return 1;;
         esac
     fi
+
 
     echo
     echo 'Installing Drupal project, please wait...'
     echo
     if [[ ! -z "$DELETE_ROOT" ]]; then
         echo "Clearing old things from the app root."
-        CLEAN_ROOT="rm -rf /var/www/*"
+        CLEAN_ROOT="rm -rf /var/www/{,.[!.],..?}*"
         [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$CLEAN_ROOT\"${Color_Off}"
         docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$CLEAN_ROOT"
     fi

@@ -3,6 +3,7 @@
 #
 # This file contains db-restore -command for local-docker script ld.sh.
 
+# Restore all databases (including MySQL) from a backup.
 function ld_command_db-restore_exec() {
     TARGET_FILE_NAME=${1:-${DATABASE_DUMP_STORAGE}/db-container-dump-LATEST.sql.gz}
     COMMAND_SQL_DB_RESTORE_INFO="mysql --host "${CONTAINER_DB:-db}" -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"

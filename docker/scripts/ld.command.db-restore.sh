@@ -58,7 +58,7 @@ function ld_command_db-restore_exec() {
         docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_RESTORE_INFO 2>/dev/null"
         echo
         echo "Verifying database backup file is found in the container, please wait..."
-        docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "[ -e "/var/${TARGET_FILE_NAME}"] || echo 'File not found. Please place file inside db_dumps/ folder and provide full path (db_dumps/MY-FILE.tar.gz).'"
+        docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "[ -e "/var/${TARGET_FILE_NAME}" ] || echo 'File not found. Please place file inside db_dumps/ folder and provide full path (db_dumps/MY-FILE.tar.gz).'"
         echo "Please wait..."
         docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_RESTORER 2>/dev/null"
         echo

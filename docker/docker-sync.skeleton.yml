@@ -29,18 +29,6 @@ syncs:
     # be aware in case of unison this only gives you a notification on the initial sync, not the syncs after changes.
     notify_terminal: true
 
-  webroot-sync-core-delegated:
-    sync_strategy: 'native_osx'
-    src: './${APP_ROOT}/'
-    host_disk_mount_mode: 'delegated' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
-    sync_args:
-      - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
-      - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
-      - "-ignore='BelowPath node_modules'" # remove this if you need code completion
-      - "-ignore='Path node_modules/*'" # remove this if you need code completion
-      # - "-ignore='Path vendor/*'"     # we could ignore the composer vendor folder, but then you won't have code completion in your IDE
-    notify_terminal: true
-
   webroot-sync-src-config:
     sync_strategy: 'native_osx'
     src: './src/config/'
@@ -70,10 +58,4 @@ syncs:
       - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
       - "-ignore='BelowPath node_modules'" # remove this if you need code completion
       - "-ignore='Path node_modules/*'" # remove this if you need code completion
-    notify_terminal: true
-
-  webroot-sync-db-dumps:
-    sync_strategy: 'native_osx'
-    src: './${DATABASE_DUMP_STORAGE:-db_dumps}/'
-    host_disk_mount_mode: 'delegated' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
     notify_terminal: true

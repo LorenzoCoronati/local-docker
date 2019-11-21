@@ -167,7 +167,7 @@ function ld_command_init_exec() {
         echo " [no] - Skip this, I'll build my codebase via other means"
         read -p "select version [default: 1]? " VERSION
         case "$VERSION" in
-          '1'|1) COMPOSER_INIT='composer -vv create-project drupal/recommended-project:^8.8@dev /var/www --no-interaction --stability=dev';;
+          ''|'1'|1) COMPOSER_INIT='composer -vv create-project drupal/recommended-project:^8.8@dev /var/www --no-interaction --stability=dev';;
           '2'|2) COMPOSER_INIT='composer -vv create-project drupal/legacy-project:^8.8@dev /var/www --no-interaction --stability=dev';;
           '3'|3) COMPOSER_INIT='composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev';;
           *) PROJECT='';;

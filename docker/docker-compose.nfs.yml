@@ -187,6 +187,6 @@ volumes:
     driver_opts:
       type: nfs
       o: addr=host.docker.internal,rw,nolock,nfsvers=3
-      device: ":${PWD}/${DATABASE_DUMP_STORAGE}"
+      device: ":${PWD}/${DATABASE_DUMP_STORAGE:-db_dumps}"
   db_data: {}
   solr_data: {}

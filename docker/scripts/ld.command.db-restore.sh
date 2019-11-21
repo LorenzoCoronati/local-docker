@@ -5,7 +5,7 @@
 
 # Restore all databases (including MySQL) from a backup.
 function ld_command_db-restore_exec() {
-    TARGET_FILE_NAME=${1:-${DATABASE_DUMP_STORAGE}/db-container-dump-LATEST.sql.gz}
+    TARGET_FILE_NAME=${1:-${DATABASE_DUMP_STORAGE:-db_dumps}/db-container--FULL--LATEST.sql.gz}
     COMMAND_SQL_DB_RESTORE_INFO="mysql --host "${CONTAINER_DB:-db}" -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
     COMMAND_SQL_DB_RESTORER="gunzip < /var/${TARGET_FILE_NAME} | mysql --host "${CONTAINER_DB:-db}" -uroot -p"$MYSQL_ROOT_PASSWORD""
     COMMAND_SQL_DB_USERS="mysql --host "${CONTAINER_DB:-db}" -uroot  -p"$MYSQL_ROOT_PASSWORD" -D mysql -e \"SELECT User, Host from mysql.user WHERE User NOT LIKE 'mysql%';\""
@@ -70,5 +70,5 @@ function ld_command_db-restore_exec() {
   }
 
 function ld_command_db-restore_help() {
-    echo "Import the latest full database container backup. Optionally provide file name (default: ${DATABASE_DUMP_STORAGE}/db-container-dump-LATEST.sql.gz). Dump file should be located in $DATABASE_DUMP_STORAGE -folder."
+    echo "Import the latest full database container backup. Optionally provide file name (default: ${DATABASE_DUMP_STORAGE:-db_dumps}/db-container--FULL--LATEST.sql.gz). Dump file should be located in ${DATABASE_DUMP_STORAGE:-db_dumps} -folder."
 }

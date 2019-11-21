@@ -7,7 +7,7 @@
 function ld_command_db-dump_exec() {
 
     DATE=$(date +%Y-%m-%d--%H-%I-%S)
-    FILENAME="db-container-db-dump-$DATE.sql.gz"
+    FILENAME="db-container--FULL--$DATE.sql.gz"
     COMMAND_SQL_DB_DUMPER="mysqldb-dump --host "${CONTAINER_DB:-db}" -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --db-dump-date --tz-utc --verbose  2>/dev/null | gzip --fast -f > /var/db_dumps/${FILENAME}"
 
     db_connect
@@ -40,8 +40,8 @@ function ld_command_db-dump_exec() {
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}NEXT: docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c $COMMAND_SQL_DB_DUMPER${Color_Off}"
 
     docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_DUMPER"
-    cd $PROJECT_ROOT/$DATABASE_DUMP_STORAGE
-    ln -sf ${FILENAME} db-container-db-dump-LATEST.sql.gz
+    cd $PROJECT_ROOT/${DATABASE_DUMP_STORAGE:-db_dumps}
+    ln -sf ${FILENAME} db-container--FULL--LATEST.sql.gz
 
     if [ ! -z "$STARTED" ]; then
        [ "$LD_VERBOSE" -ge "1" ] && echo -e "${Yellow}Stopping DB container.${Color_Off}"
@@ -53,11 +53,11 @@ function ld_command_db-dump_exec() {
         [ "$LD_VERBOSE" -ge "1" ] && echo 'Turning off docker-sync (stop), please wait...'
         docker-sync stop
     fi
-    echo "DB container backup in $DATABASE_DUMP_STORAGE/${FILENAME}"
-    echo "DB container backup symlinked from $DATABASE_DUMP_STORAGE/db-container-db-dump-LATEST.sql.gz"
+    echo "DB container backup in ${DATABASE_DUMP_STORAGE:-db_dumps}/${FILENAME}"
+    echo "DB container backup symlinked from ${DATABASE_DUMP_STORAGE:-db_dumps}/db-container--FULL--LATEST.sql.gz"
 
 }
 
 function ld_command_db-dump_help() {
-    echo "Backup the DB container contents (all databases). Dump file will be place in $DATABASE_DUMP_STORAGE -folder."
+    echo "Backup the DB container contents (all databases). Dump file will be place in ${DATABASE_DUMP_STORAGE:-db_dumps} -folder."
 }

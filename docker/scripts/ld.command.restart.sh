@@ -13,7 +13,7 @@ function ld_command_restart_exec() {
         exit 1
     fi
     $SCRIPT_NAME up
-    $SCRIPT_NAME restore
+    $SCRIPT_NAME db-restore
 }
 
 function ld_command_restart_help() {

@@ -107,7 +107,7 @@ services:
       # This folder contains database dumps (mostly written by container).
       # :nocopy must be used with docker-sync
       # See bottom of this file, and ./docker-sync.yml
-      - webroot-nfs-dbdumps:/var/db_dumps:nocopy
+      - webroot-nfs-dbdumps:/var/db_dumps
       # Named volume for db table data. Docker keeps this volume around
       # unless stack is down'ed with "--volumes":
       # $ docker-compose down --volumes

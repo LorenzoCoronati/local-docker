@@ -122,62 +122,85 @@ function ld_command_init_exec() {
     docker-compose -f $DOCKER_COMPOSE_FILE up -d php
     echo -e "${Green}PHP container: started.${Color_Off}"
 
-    DELETE_ROOT=
     if [ -e "${APP_ROOT}/composer.json" ]; then
         echo -e "${Yellow}Looks like project is already created? File "$APP_ROOT"/composer.json exists.${Color_Off}"
         echo -e "${Yellow}Maybe you should install codebase using composer:${Color_Off}"
         echo -e "${Yellow}$SCRIPT_NAME_SHORT up && $SCRIPT_NAME_SHORT composer install${Color_Off}"
         cd $CWD
-        exit 1
+        return 1
     elif [ ! -d "$APP_ROOT" ]; then
         mkdir $APP_ROOT;
     fi
     echo "Verify application root can be used to install codebase (must be empty)..."
-    APP_ROOT_FILES="ls -lhA /var/www/"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$APP_ROOT_FILES"
 
-    if [ "$(ls -A $APP_ROOT)" ]; then
+    DELETION_ASKED=0
+    echo "File count in $APP_ROOT: "$(ls -A $APP_ROOT | wc -l | tr -d ' ')
+
+    if [ "$(ls -A $APP_ROOT | wc -l | tr -d ' ')" -ne "0" ]; then
         echo "Application root folder $APP_ROOT is not empty. Installation requires an empty folder. Currently there is: "
         ls -A $APP_ROOT
         echo -en "${Red}WARNING: If you continue all of these will be deleted. ${Color_Off}"
         read -p "Type 'PLEASE-DELETE' to continue: " CHOICE
         case "$CHOICE" in
-            'PLEASE-DELETE' ) rm -rf $APP_ROOT && mkdir $APP_ROOT && DELETE_ROOT=1;;
-            * ) echo -en "${Red}Clear the folder manually and start over - or initialize codebase manually.${Color_Off}"
-                cd $CWD
-                return 1;;
+            'PLEASE-DELETE' )
+              mkdir $APP_ROOT > /dev/null
+              echo "Clearing old things from the app root."
+              CLEAN_ROOT="rm -rf /var/www/{,.[!.],..?}*"
+              [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$CLEAN_ROOT\"${Color_Off}"
+              docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$CLEAN_ROOT"
+              ;;
+
         esac
     fi
 
 
-    echo
-    echo 'Installing Drupal project, please wait...'
-    echo
-    if [[ ! -z "$DELETE_ROOT" ]]; then
-        echo "Clearing old things from the app root."
-        CLEAN_ROOT="rm -rf /var/www/{,.[!.],..?}*"
-        [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$CLEAN_ROOT\"${Color_Off}"
-        docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$CLEAN_ROOT"
+    if [ "$(ls -A $APP_ROOT | wc -l | tr -d ' ')" -eq "0" ]; then
+
+        echo
+        echo -e "${BBlack}== Installing Drupal project ==${Color_Off}"
+        echo "Please select which version of drupal you wish to have."
+        echo "Alternatively you can install your codebase manually into $APP_ROOT."
+        echo "Options:"
+        echo " [1] - Drupal 8.8 recommended (drupal/recommended-project:^8.8@dev)"
+        echo " [2] - Drupal 8.8 legacy (drupal/legacy-project:^8.8@dev)"
+        echo " [3] - Drupal 8.7 using contrib template (drupal-composer/drupal-project:8.x-dev)"
+        echo " [no] - Skip this, I'll build my codebase via other means"
+        read -p "select version [default: 1]? " VERSION
+        case "$VERSION" in
+          '1'|1) COMPOSER_INIT='composer -vv create-project drupal/recommended-project:^8.8@dev /var/www --no-interaction --stability=dev';;
+          '2'|2) COMPOSER_INIT='composer -vv create-project drupal/legacy-project:^8.8@dev /var/www --no-interaction --stability=dev';;
+          '3'|3) COMPOSER_INIT='composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev';;
+          *) PROJECT='';;
+        esac
+
+        if [ ! -z "$COMPOSER_INIT" ]; then
+          # Use verbose output on this composer command.
+
+          [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$COMPOSER_INIT\"${Color_Off}"
+          docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$COMPOSER_INIT"
+          OK=$?
+          if [ "$OK" -ne "0" ]; then
+              echo -e "${Red}ERROR: Something went wrong when initializing the codebase.${Color_Off}"
+              echo -e "${Red}Check that required ports are not allocated (by other containers or programs) and re-configure them if needed.${Color_Off}"
+              cd $CWD
+              return 1
+          fi
+          echo
+          echo -e "${Green}Project created to ./$APP_ROOT folder (/var/www in containers).${Color_Off}"
+        else
+          echo -e "${Yellow}No codebase built, please take care!${Color_Off}"
+          echo -e "${Green}Projec root is set to ./$APP_ROOT folder (/var/www in containers).${Color_Off}"
+        fi
+
+        # This must be run after composer install.
+        $SCRIPT_NAME drupal-structure-fix
+        $SCRIPT_NAME drupal-files-folder-perms
+        echo
+    else
+      echo -en "${Red}Application root ./$APP_ROOT is not empty.${Color_Off}"
+      echo -e "${Green}No codebase built, please take care!${Color_Off}"
     fi
 
-    # Use verbose output on this composer command.
-    COMPOSER_INIT="composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev"
-    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$COMPOSER_INIT\"${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$COMPOSER_INIT"
-    OK=$?
-    if [ "$OK" -ne "0" ]; then
-        echo -e "${Red}ERROR: Something went wrong when initializing the codebase.${Color_Off}"
-        echo -e "${Red}Check that required ports are not allocated (by other containers or programs) and re-configure them if needed.${Color_Off}"
-        cd $CWD
-        exit 1
-    fi
-    echo
-    echo -e "${Green}Project created to ./$APP_ROOT -folder (/var/www in containers).${Color_Off}"
-    # This must be run after composer install.
-    $SCRIPT_NAME drupal-structure-fix
-    $SCRIPT_NAME drupal-files-folder-perms
-    echo -e "${Green}Drupal 8 codebase built. Drupal is in ./$APP_ROOT -folder, and public webroot in ./$APP_ROOT/web/index.php.${Color_Off}"
-    echo
     echo 'Bringing the containers up now... Please wait.'
     $SCRIPT_NAME up
     echo

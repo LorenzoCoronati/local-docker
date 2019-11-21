@@ -53,9 +53,9 @@ function db_connect() {
     ROUNDS_MAX=30
     if [ -z "$CONTAINER_DB_ID" ]; then
       return 2
-    else
-      echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
     fi
+
+    echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
 
     while [ -z "$RESPONSE" ] || [ "$RESPONSE" -eq "0" ]; do
         ROUND=$(( $ROUND + 1 ))
@@ -149,7 +149,7 @@ function create_project_config_file() {
     echo -e "${Red}ERROR: File ${BRed}${TEMPLATE}${Red} does not exist!.${Color_Off}";
     return 5;
   fi
-  ls -lha $FILE
+
   if [ ! -f "$FILE" ]; then
     echo -e "${Green}Creating default ${BGreen}${FILE}${Green} file from the template. ${Color_Off}"
     cp -f ${TEMPLATE} ${FILE}

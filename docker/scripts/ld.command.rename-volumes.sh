@@ -7,6 +7,7 @@ function ld_command_rename-volumes_exec() {
     VOL_BASE_NAME=$1
     VALID=0
     while [ "$VALID" -eq "0" ]; do
+        echo
         echo -e "${BBlack}==  Container volume base name ==${Color_Off}"
         if [[ -z "$VOL_BASE_NAME" ]] || [ ! -z "$VOL_BASE_NAME_DEFAULT_FAILED" ]; then
             read -p "Container volume base name ['$VOL_BASE_NAME']: " ANSWER
@@ -38,7 +39,7 @@ function ld_command_rename-volumes_exec() {
     echo "Renaming volumes to '$VOL_BASE_NAME' for docker-sync, please wait..."
     replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKERSYNC_FILE
     replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKER_COMPOSE_FILE
-    replace_in_file "s/webroot-nfs/${VOL_BASE_NAME}-sync/g" $DOCKER_COMPOSE_FILE
+    replace_in_file "s/webroot-nfs/${VOL_BASE_NAME}-nfs/g" $DOCKER_COMPOSE_FILE
 }
 
 #function ld_command_rename-volumes_help() {

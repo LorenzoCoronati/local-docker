@@ -7,6 +7,7 @@ function ld_command_rename-volumes_exec() {
     VOL_BASE_NAME=$1
     VALID=0
     while [ "$VALID" -eq "0" ]; do
+        echo
         echo -e "${BBlack}==  Container volume base name ==${Color_Off}"
         if [[ -z "$VOL_BASE_NAME" ]] || [ ! -z "$VOL_BASE_NAME_DEFAULT_FAILED" ]; then
             read -p "Container volume base name ['$VOL_BASE_NAME']: " ANSWER

@@ -7,6 +7,7 @@ function ld_command_init_exec() {
 
     VALID=0
     while [ "$VALID" -eq "0" ]; do
+        echo
         echo  -e "${BBlack}== Project name == ${Color_Off}"
         echo  "Provide a string without spaces and use chars a-z and 0-9, - and _ (no dots)."
         PROJECT_NAME=${PROJECT_NAME:-$(basename $PROJECT_ROOT)}
@@ -27,9 +28,11 @@ function ld_command_init_exec() {
     PROJECT_NAME=$(echo "$PROJECT_NAME" | sed 's/[[:space:]]/-/g')
 
     define_configuration_value PROJECT_NAME $PROJECT_NAME
+    echo -e "${BYellow}Project name is: $PROJECT_NAME.${Color_Off}"
 
     VALID=0
     while [ "$VALID" -eq "0" ]; do
+      echo
       echo  -e "${BBlack}== Local development base domain == ${Color_Off}"
       echo -e "Do not add protocol nor www -part but just the domain name. It is recommended to use domain ending with ${BBlack}.ld${Black}.${Color_Off}"
       DEFAULT=${PROJECT_NAME}.ld
@@ -50,11 +53,12 @@ function ld_command_init_exec() {
     done
     # Remove spaces.
     LOCAL_DOMAIN=$(echo "$LOCAL_DOMAIN" | sed 's/[[:space:]]/./g')
-    echo "LOCAL_DOMAIN is '$LOCAL_DOMAIN' (${#LOCAL_DOMAIN})"
     define_configuration_value LOCAL_DOMAIN $LOCAL_DOMAIN
-    echo "Default URL for drush operations is http://www.$LOCAL_DOMAIN"
+    echo -e "${BYellow}Local develoment domain is: $LOCAL_DOMAIN.${Color_Off}"
     define_configuration_value DRUSH_OPTIONS_URI "http://www."$LOCAL_DOMAIN
+    echo -e "${BYellow}Default URL for drush is: $DRUSH_OPTIONS_URI.${Color_Off}"
 
+    echo
     echo -e "${BBlack}== Local development IP address ==${Color_Off}"
     echo "Random 127.0.0.0./16 will be generated for you if you so wish?"
     read -p "Use the random IP address 127.0.0.0./16 [Y/n]? " LOCAL_IP
@@ -62,8 +66,8 @@ function ld_command_init_exec() {
         'n'|'N'|'no'|'NO') LOCAL_IP='127.0.0.1';;
         *) LAST=$((RANDOM % 240 + 3 )) && LOCAL_IP=$( printf "127.0.%d.%d\n" "$((RANDOM % 256))" "$LAST");;
     esac
-    echo -e "${Yellow}Using IP address $LOCAL_IP.${Color_Off}"
     define_configuration_value LOCAL_IP $LOCAL_IP
+    echo -e "${BYellow}IP address is: $LOCAL_IP.${Color_Off}"
 
     # 2nd param, project type.
     TYPE=${1-'common'}
@@ -74,11 +78,12 @@ function ld_command_init_exec() {
         echo -e "This does not delete your application root directory, but ${BYellow}database volumes will be destroyed.${Color_Off}"
         read -p "Continue? [y/N]" CHOICE
         case "$CHOICE" in
-            n|N|'no'|'NO' ) echo "Cancelled." && exit;;
+            n|N|'no'|'NO' ) echo "Cancelled." && return 1;;
         esac
     fi
 
-    echo "Setting up docker-compose and docker-sync files for project type '$TYPE'."
+    echo
+    [ "$LD_VERBOSE" -ge "2" ] && echo "Setting up docker-compose and docker-sync files for project type '$TYPE'."
 
     # Skeleton uses different folder as the main location for app code.
     [[ "$TYPE" == "skeleton" ]] &&  APP_ROOT='drupal'
@@ -89,6 +94,8 @@ function ld_command_init_exec() {
       echo -e "${Red}Trying to use yml files without project type.${Color_Off}"
       return 1
     fi
+
+    echo
 
     APP_ROOT=${APP_ROOT:-app}
     define_configuration_value APP_ROOT $APP_ROOT

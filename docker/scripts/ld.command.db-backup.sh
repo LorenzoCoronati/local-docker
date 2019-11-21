@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # File
 #
-# This file contains dump -command for local-docker script ld.sh.
+# This file contains db-backup -command for local-docker script ld.sh.
 
 # Create a backup of one database.
 function ld_command_db-backup_exec() {
-    DBNAME=${1:-${MYSQL_DATABASE}}
+    DBNAME=${1:-${MYSQL_DATABASE:-drupal}}
     if [ -z "$DBNAME" ]; then
       echo -e "${Red}ERROR: No database name provided nor found.${Color_Off}"
       return 1
@@ -45,7 +45,7 @@ function ld_command_db-backup_exec() {
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}NEXT: docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c $COMMAND_SQL_DB_DUMPER${Color_Off}"
 
     docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_DUMPER"
-    cd $PROJECT_ROOT/$DATABASE_DUMP_STORAGE
+    cd $PROJECT_ROOT/${DATABASE_DUMP_STORAGE:-db_dumps}
     ln -sf ${FILENAME} db-backup--${DBNAME}--LATEST.sql.gz
 
     if [ ! -z "$STARTED" ]; then
@@ -58,11 +58,11 @@ function ld_command_db-backup_exec() {
         [ "$LD_VERBOSE" -ge "1" ] && echo 'Turning off docker-sync (stop), please wait...'
         docker-sync stop
     fi
-    echo "DB backup of database ${DBNAME} in $DATABASE_DUMP_STORAGE/${FILENAME}"
-    echo "DB backup of ${DBNAME} symlinked from: $DATABASE_DUMP_STORAGE/db-backup--${DBNAME}--LATEST.sql.gz"
+    echo "DB backup of database ${DBNAME} in ${DATABASE_DUMP_STORAGE:-db_dumps}/${FILENAME}"
+    echo "DB backup of ${DBNAME} symlinked from: ${DATABASE_DUMP_STORAGE:-db_dumps}/db-backup--${DBNAME}--LATEST.sql.gz"
 
 }
 
 function ld_command_db-backup_help() {
-    echo "Backup a single database. Optionally provide database name (default: ${MYSQL_DATABASE}). Dump file will be place in $DATABASE_DUMP_STORAGE -folder."
+    echo "Backup a single database. Optionally provide database name (default: ${MYSQL_DATABASE:-drupal}). Dump file will be place in ${DATABASE_DUMP_STORAGE:-db_dumps} -folder."
 }

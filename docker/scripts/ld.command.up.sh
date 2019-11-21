@@ -14,7 +14,7 @@ function ld_command_up_exec() {
         [ "$LD_VERBOSE" -ge "1" ] && echo "Starting docker-sync, please wait..."
         docker-sync start
     fi
-    ensure_folders_present $DATABASE_DUMP_STORAGE
+    ensure_folders_present ${DATABASE_DUMP_STORAGE:-db_dumps}
     docker-compose -f $DOCKER_COMPOSE_FILE up -d
     $SCRIPT_NAME drupal-files-folder-perms
     OK=$?
@@ -53,7 +53,9 @@ function ld_command_up_exec() {
         docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_USERS 2>/dev/null"
         echo -e "${Yellow}NOTE: No database dump restored.${Color_Off}"
         echo 'In case you need to do that (Drupal DB is gone?), run command'
-        echo '$ '$SCRIPT_NAME_SHORT restore [db_dumps/db-container-dump-LATEST.sql.gz]
+        echo '$ '$SCRIPT_NAME_SHORT db-import [drupal]
+        echo 'Optionally you may also restore from full DB container backup using command'
+        echo '$ '$SCRIPT_NAME_SHORT db-restore [db_dumps/db-container--FULL--LATEST.sql.gz]
     fi
 }
 

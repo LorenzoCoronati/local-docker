@@ -234,7 +234,7 @@ This is done automatically when you stop or destroy your containers.
  
  Put a file in `db_dumps/` -folder and create a symlink pointing to it:
  
-    $ ln -s MY_GZIPPED_MYSQLDUMP_FILE.sql.gz ./db_dumps/db-container-dump-LATEST.sql.gz
+    $ ln -s MY_GZIPPED_MYSQLDUMP_FILE.sql.gz ./db_dumps/db-container--FULL---LATEST.sql.gz
     $ ./ld restore [PATH-TO-THE-GZIP-DUMP]
 
 

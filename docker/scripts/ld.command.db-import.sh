@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # File
 #
-# This file contains restore -command for local-docker script ld.sh.
+# This file contains db-import -command for local-docker script ld.sh.
 
 # Restore one database from backup.
 function ld_command_db-import_exec() {
-    DBNAME=${1:$-${MYSQL_DATABASE}}
+    DBNAME=${1:$-${MYSQL_DATABASE:-drupal}}
     if [ -z "$DBNAME" ]; then
       echo -e "${Red}ERROR: No database name provided nor found.${Color_Off}"
       return 1
     fi
 
-    TARGET_FILE_NAME=${2:-${DATABASE_DUMP_STORAGE}/db-backup--${DBNAME}--LATEST.sql.gz}
+    TARGET_FILE_NAME=${2:-${DATABASE_DUMP_STORAGE:-db_dumps}/db-backup--${DBNAME}--LATEST.sql.gz}
 
     COMMAND_SQL_DB_RESTORE_INFO="mysql --host "${CONTAINER_DB:-db}" -uroot  -p"$MYSQL_ROOT_PASSWORD" -e 'show databases'"
     COMMAND_SQL_DB_RESTORER="gunzip < /var/${TARGET_FILE_NAME} | mysql --host "${CONTAINER_DB:-db}" -uroot -p"$MYSQL_ROOT_PASSWORD" -D ${DBNAME}"
@@ -77,5 +77,5 @@ function ld_command_db-import_exec() {
   }
 
 function ld_command_db-import_help() {
-    echo "Import a single database from dumpfile. Optionally provide database name (default: ${MYSQL_DATABASE}) and dump file location (default: ${DATABASE_DUMP_STORAGE}/db-backup--${DBNAME}--LATEST.sql.gz). Dump file should be located in $DATABASE_DUMP_STORAGE -folder."
+    echo "Import a single database from dumpfile. Optionally provide database name (default: ${MYSQL_DATABASE:-drupal}) and dump file location (default: ${DATABASE_DUMP_STORAGE:-db_dumps}/db-backup--${MYSQL_DATABASE:-drupal}--LATEST.sql.gz). Dump file should be located in ${DATABASE_DUMP_STORAGE:-db_dumps} -folder."
 }

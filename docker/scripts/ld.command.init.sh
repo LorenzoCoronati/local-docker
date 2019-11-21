@@ -153,7 +153,7 @@ function ld_command_init_exec() {
         esac
     fi
 
-
+    COMPOSER_INIT=''
     if [ "$(ls -A $APP_ROOT | wc -l | tr -d ' ')" -eq "0" ]; then
 
         echo
@@ -181,7 +181,7 @@ function ld_command_init_exec() {
             ;;
           *)
             PROJECT=''
-            echo -e "${Yellow}Build phase skipped, no codebase built.${Color_Off}"
+            echo -e "${BYellow}Build phase skipped, no codebase built!${Color_Off}"
             ;;
         esac
 
@@ -197,32 +197,32 @@ function ld_command_init_exec() {
               cd $CWD
               return 1
           fi
+          # This must be run after composer install.
+          $SCRIPT_NAME drupal-structure-fix
+          $SCRIPT_NAME drupal-files-folder-perms
           echo
           echo -e "${Green}Project created to ./$APP_ROOT folder (/var/www in containers).${Color_Off}"
         else
-          echo -e "${Yellow}No codebase built, please take care!${Color_Off}"
           echo -e "${Green}Projec root is set to ./$APP_ROOT folder (/var/www in containers).${Color_Off}"
         fi
 
-        # This must be run after composer install.
-        $SCRIPT_NAME drupal-structure-fix
-        $SCRIPT_NAME drupal-files-folder-perms
         echo
     else
       echo -en "${Red}Application root ./$APP_ROOT is not empty.${Color_Off}"
-      echo -e "${Green}No codebase built, please take care!${Color_Off}"
     fi
-
+    echo
     echo 'Bringing the containers up now... Please wait.'
     $SCRIPT_NAME up
     echo
-    echo -e "${Green}Codebase ready!!${Color_Off}"
+    echo -e "${BGreen}Codebase ready!!${Color_Off}"
     echo
-    echo -e "${Yellow}NOTE: Once Drupal is installed, you should remove write perms in sites/default -folder:${Color_Off}"
-    echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0755 web/sites/default'"
-    echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
-    echo "With these changes you can edit settings.php from host, but Drupal is happy not to be allowed to write there."
-    echo
+    if [ -z "$COMPOSER_INIT" ]; then
+      echo -e "${Yellow}NOTE: Once Drupal is installed, you should remove write perms in sites/default -folder:${Color_Off}"
+      echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0755 web/sites/default'"
+      echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
+      echo "With these changes you can edit settings.php from host, but keep Drupal happy and allow it to write these files."
+      echo
+    fi
     echo -e "${BGreen}Happy coding!${Color_Off}"
 }
 

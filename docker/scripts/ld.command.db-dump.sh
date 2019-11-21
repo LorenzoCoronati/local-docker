@@ -8,7 +8,7 @@ function ld_command_db-dump_exec() {
 
     DATE=$(date +%Y-%m-%d--%H-%I-%S)
     FILENAME="db-container--FULL--$DATE.sql.gz"
-    COMMAND_SQL_DB_DUMPER="mysqldb-dump --host "${CONTAINER_DB:-db}" -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges  --db-dump-date --tz-utc --verbose  2>/dev/null | gzip --fast -f > /var/db_dumps/${FILENAME}"
+    COMMAND_SQL_DB_DUMPER="mysqldump --host "${CONTAINER_DB:-db}" -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --lock-all-tables --compress --flush-logs --flush-privileges --dump-date --tz-utc --verbose  2>/dev/null | gzip --fast -f > /var/db_dumps/${FILENAME}"
 
     db_connect
     RET="$?"

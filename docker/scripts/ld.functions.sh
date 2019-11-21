@@ -149,7 +149,7 @@ function create_project_config_file() {
     echo -e "${Red}ERROR: File ${BRed}${TEMPLATE}${Red} does not exist!.${Color_Off}";
     return 5;
   fi
-  ls -lha $FILE
+
   if [ ! -f "$FILE" ]; then
     echo -e "${Green}Creating default ${BGreen}${FILE}${Green} file from the template. ${Color_Off}"
     cp -f ${TEMPLATE} ${FILE}

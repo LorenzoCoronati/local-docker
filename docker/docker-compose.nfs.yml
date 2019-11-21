@@ -55,11 +55,11 @@ services:
         # :nocopy must be used with docker-sync
         # See bottom of this file, and ./docker-sync.yml
         - webroot-nfs-app:/var/www
-    # In case of several env files later declared variable
-    # values override earlier ones
-    env_file:
-      - .env
-      - .env.local
+      # In case of several env files later declared variable
+      # values override earlier ones
+      env_file:
+        - .env
+        - .env.local
       depends_on: # This key affects the order of which containers get started.
         - php
       working_dir: /var/www/web

@@ -167,10 +167,22 @@ function ld_command_init_exec() {
         echo " [no] - Skip this, I'll build my codebase via other means"
         read -p "select version [default: 1]? " VERSION
         case "$VERSION" in
-          ''|'1'|1) COMPOSER_INIT='composer -vv create-project drupal/recommended-project:^8.8@dev /var/www --no-interaction --stability=dev';;
-          '2'|2) COMPOSER_INIT='composer -vv create-project drupal/legacy-project:^8.8@dev /var/www --no-interaction --stability=dev';;
-          '3'|3) COMPOSER_INIT='composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev';;
-          *) PROJECT='';;
+          ''|'1'|1)
+            COMPOSER_INIT='composer -vv create-project drupal/recommended-project:^8.8@dev /var/www --no-interaction --stability=dev'
+            echo -e "${Green}Creating project using ${BGreen}Drupal 8.8${Green}, recommended structure (drupal/recommended-project:^8.8@dev).${Color_Off}"
+            ;;
+          '2'|2)
+            COMPOSER_INIT='composer -vv create-project drupal/legacy-project:^8.8@dev /var/www --no-interaction --stability=dev'
+            echo -e "${Green}Creating project using ${BGreen}Drupal 8.8${Green}, legacy structure (drupal/legacy-project:^8.8@dev).${Color_Off}"
+            ;;
+          '3'|3)
+            COMPOSER_INIT='composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev'
+            echo -e "${Green}Creating project using ${BGreen}Drupal 8.7${Green}, contrib template (drupal-composer/drupal-project:8.x-dev).${Color_Off}"
+            ;;
+          *)
+            PROJECT=''
+            echo -e "${Yellow}Build phase skipped, no codebase built.${Color_Off}"
+            ;;
         esac
 
         if [ ! -z "$COMPOSER_INIT" ]; then

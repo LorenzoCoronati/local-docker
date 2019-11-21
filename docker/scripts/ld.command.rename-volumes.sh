@@ -38,7 +38,7 @@ function ld_command_rename-volumes_exec() {
     echo "Renaming volumes to '$VOL_BASE_NAME' for docker-sync, please wait..."
     replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKERSYNC_FILE
     replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKER_COMPOSE_FILE
-    replace_in_file "s/webroot-nfs/${VOL_BASE_NAME}-sync/g" $DOCKER_COMPOSE_FILE
+    replace_in_file "s/webroot-nfs/${VOL_BASE_NAME}-nfs/g" $DOCKER_COMPOSE_FILE
 }
 
 #function ld_command_rename-volumes_help() {

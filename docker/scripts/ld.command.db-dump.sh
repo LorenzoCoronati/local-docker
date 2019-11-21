@@ -59,5 +59,5 @@ function ld_command_db-dump_exec() {
 }
 
 function ld_command_db-dump_help() {
-    echo "Backup the DB container contents (all databases). Dump file will be place in ${DATABASE_DUMP_STORAGE:-db_dumps} -folder."
+    echo "Backup the ${BBlack}DB container${Color_Off} (all databases). Dump file will be place in ${DATABASE_DUMP_STORAGE:-db_dumps} -folder."
 }

@@ -64,5 +64,5 @@ function ld_command_db-backup_exec() {
 }
 
 function ld_command_db-backup_help() {
-    echo "Backup a single database. Optionally provide database name (default: ${MYSQL_DATABASE:-drupal}). Dump file will be place in ${DATABASE_DUMP_STORAGE:-db_dumps} -folder."
+    echo -e "Backup a ${BBlack}single${Color_Off} database. Optionally provide database name (default: ${MYSQL_DATABASE:-drupal}). Dump file will be place in ${DATABASE_DUMP_STORAGE:-db_dumps} -folder."
 }

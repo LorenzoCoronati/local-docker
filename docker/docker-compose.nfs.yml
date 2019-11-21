@@ -156,7 +156,6 @@ services:
     restart: always
     labels:
       - "traefik.http.routers.${PROJECT_NAME}--web-ui-mail.rule=Host(`mailhog.${LOCAL_DOMAIN}`)"
-    restart: always
 
   # Replace MYTHEME with your theme name. If you have multiple the
   # clone the noodejs -section and rename the containers to something like

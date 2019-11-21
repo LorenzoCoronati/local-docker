@@ -19,11 +19,6 @@ function ld_command_db-dump_exec() {
           ;;
 
         2|"2")
-          if ! is_dockersync && [ -f "${DOCKER_PROJECT}/${DOCKERSYNC_FILE}" ]; then
-            [ "$LD_VERBOSE" -ge "1" ] && echo 'Starting docker-sync, please wait...'
-            docker-sync start
-            DOCKER_SYNC_STARTED=1
-          fi
           COMM="docker-compose -f $DOCKER_COMPOSE_FILE  up -d $CONTAINER_DB"
           [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Yellow}Starting DB container for backup purposes.${Color_Off}"
           $COMM

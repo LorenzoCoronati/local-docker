@@ -53,9 +53,9 @@ function db_connect() {
     ROUNDS_MAX=30
     if [ -z "$CONTAINER_DB_ID" ]; then
       return 2
-    else
-      echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
     fi
+
+    echo -n  "Connecting to DB container ($CONTAINER_DB_ID), please wait .."
 
     while [ -z "$RESPONSE" ] || [ "$RESPONSE" -eq "0" ]; do
         ROUND=$(( $ROUND + 1 ))

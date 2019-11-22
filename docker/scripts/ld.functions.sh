@@ -227,3 +227,34 @@ function required_binaries_check() {
   fi
 
 }
+
+# Checks if value is found in the array.
+# Usage:
+#   haystack=("item 1" "item 2")
+#   element_in "needle" "${haystack[@]}"
+#   [ "$?" -eq "0" ] &&  CONTAINS=1 || CONTAINS=0
+element_in () {
+  local e match="$1"
+  shift
+  for e; do [[ "$e" == "$match" ]] && return 0; done
+  return 1
+}
+
+
+# Checks if project is initialized.
+# Prints 1 for is-initialized, 0 for not-yet-initialized.
+# return values: 0 initialized, 1 non-initialized
+check_if_project_needs_initialization () {
+    FILES_MISSING=0
+    if [ ! -f ".env" ] ; then
+        FILES_MISSING=1
+    fi
+    if [ ! -f "$DOCKERSYNC_FILE" ] ; then
+        FILES_MISSING=1
+    fi
+    if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
+        FILES_MISSING=1
+    fi
+
+    return $FILES_MISSING
+ }

@@ -40,12 +40,6 @@ DOCKER_YML_STORAGE=./docker
 DOCKER_PROJECT=$(basename $PROJECT_ROOT)
 
 
-
-# Read (and create if necessary) the .env.local file, allowing overrides to any of our config values.
-if [[ "$ACTION" != 'help' ]]; then
-    import_config
-fi
-
 # Get current script name, and use a symlink if it exists.
 if [ ! -L "$( basename "$0" .sh)" ]; then
     SCRIPT_NAME=$PROJECT_ROOT/$( basename "$0")
@@ -55,11 +49,25 @@ else
     SCRIPT_NAME_SHORT=./$( basename "$0" .sh)
 fi
 
-if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
-    if [[ "$ACTION" != 'init' ]] && [[ "$ACTION" != 'help' ]] && [[ "$ACTION" != 'self-update' ]]; then
-        [ "$LD_VERBOSE" -ge "1" ] && echo -e "${BYellow}Local-docker not yet initialized. Starting init now, please wait...${Color_Off}"
-        $SCRIPT_NAME init
+IGNORE_INIT_STATE=
+WHITELIST_COMMANDS=("help" "self-update")
+element_in "$ACTION" "${WHITELIST_COMMANDS[@]}"
+if [ "$?" -eq "0" ]; then
+    IGNORE_INIT_STATE=1
+fi
+
+# Read (and create if necessary) the .env.local file, allowing overrides to any of our config values.
+if [ -z "$IGNORE_INIT_STATE" ] || [  "$IGNORE_INIT_STATE" -eq "0" ]; then
+    check_if_project_needs_initialization
+    NEEDS_INITIALIZATION=$?
+    if [ "${NEEDS_INITIALIZATION}" -eq "1" ] && [ "$ACTION" != "init" ]; then
+        echo -e "${BYellow}This project is not yet initialized. ${Color_Off}"
+        echo -e "${Yellow}Initialize the project with: ${Color_Off}"
+        echo -e "\$ ${SCRIPT_NAME_SHORT} init"
+        cd $CWD
+        exit 1;
     fi
+    import_config
 fi
 
 case "$ACTION" in

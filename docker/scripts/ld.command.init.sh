@@ -4,12 +4,29 @@
 # This file contains init -command for local-docker script ld.sh.
 
 function ld_command_init_exec() {
+    check_if_project_needs_initialization
+    NEEDS_INITIALIZATION=$?
+
+    if [ "${NEEDS_INITIALIZATION}" -eq "0" ]; then
+        echo -e "${BRed}This project is already initialized. ${Color_Off}"
+        echo -e "${Yellow}Are you really sure you want to re-initialize the project? ${Color_Off}"
+        read -p "[yes/NO] " ANSWER
+        case "$ANSWER" in
+            'y'|'yes')
+                echo -e "${Green}Sure, thanks for the confirmation.${Color_Off}"
+                ;;
+            *)
+              echo -e "${BRed}Initialization cancelled.${Color_Off}"
+              return;
+              ;;
+        esac
+    fi
 
     VALID=0
     while [ "$VALID" -eq "0" ]; do
         echo
         echo  -e "${BBlack}== Project name == ${Color_Off}"
-        echo  "Provide a string without spaces and use chars a-z and 0-9, - and _ (no dots)."
+        echo  "Provide a string without spaces and use chars a-z, 0-9, - and _ (no dots)."
         PROJECT_NAME=${PROJECT_NAME:-$(basename $PROJECT_ROOT)}
         read -p "Project name ['$PROJECT_NAME']: " ANSWER
         if [ -z "$ANSWER" ]; then
@@ -134,7 +151,7 @@ function ld_command_init_exec() {
     echo "Verify application root can be used to install codebase (must be empty)..."
 
     DELETION_ASKED=0
-    echo "File count in $APP_ROOT: "$(ls -A $APP_ROOT | wc -l | tr -d ' ')
+    echo "Files (count) in ./$APP_ROOT: "$(ls -A $APP_ROOT | wc -l | tr -d ' ')
 
     if [ "$(ls -A $APP_ROOT | wc -l | tr -d ' ')" -ne "0" ]; then
         echo "Application root folder $APP_ROOT is not empty. Installation requires an empty folder. Currently there is: "
@@ -143,7 +160,6 @@ function ld_command_init_exec() {
         read -p "Type 'PLEASE-DELETE' to continue: " CHOICE
         case "$CHOICE" in
             'PLEASE-DELETE' )
-              mkdir $APP_ROOT > /dev/null
               echo "Clearing old things from the app root."
               CLEAN_ROOT="rm -rf /var/www/{,.[!.],..?}*"
               [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$CLEAN_ROOT\"${Color_Off}"
@@ -223,7 +239,7 @@ function ld_command_init_exec() {
       echo "With these changes you can edit settings.php from host, but keep Drupal happy and allow it to write these files."
       echo
     fi
-    echo -e "${BGreen}Happy coding!${Color_Off}"
+    $SCRIPT_NAME info
 }
 
 function ld_command_init_help() {

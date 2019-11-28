@@ -15,3 +15,4 @@
 .idea
 .docker-sync
 .env.local
+app/xdebug.log

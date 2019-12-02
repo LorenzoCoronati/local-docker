@@ -310,11 +310,22 @@ alias to your shell startup files. In order to not interfere with `/usr/bin/ld`,
 
 Then, you can use `lld` instead of `./ld` or `./ld.sh`
 
+#### Update local-docker itself
+
+Since project repository is detached from the `local-docker` repository
+there is a script to get the new updates for the local-docker itself.
+
+    $ docker/scripts/self-update.sh [RELEASE]
+
+Script defaults to using the latest release. All available releases can
+be seen in
+[https://github.com/Exove/local-docker/releases](https://github.com/Exove/local-docker/releases).
+
 ## Projects in parallel
 
-`local-docker` isolates local projects behind IP aliases (alias to the 
-loopback interface) and therefore running projects in parallel s
-possible.
+`local-docker` isolates local projects behind IP aliases (alias to the
+loopback interface) and therefore you can run several projects in
+parallel.
 
 In case there are port collisions first thing to check is you have
 `.ld.config` file with `LOCAL_IP` set to something other than `127.0.0.1`.

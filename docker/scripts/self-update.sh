@@ -4,9 +4,9 @@
 # This file contains self-update -command for local-docker script ld.sh.
 # Get colors.
 if [ ! -f "./docker/scripts/ld.colors.sh" ]; then
-  echo "File ./docker/scripts/ld.colors.sh missing."
-  echo "You are currently in "$(pwd)
-  exit 1;
+    echo "File ./docker/scripts/ld.colors.sh missing."
+    echo "You are currently in "$(pwd)
+    exit 1;
 fi
 . ./docker/scripts/ld.colors.sh
 
@@ -51,9 +51,9 @@ fi
 # Curl creates an ASCII file out of 404 response. Let's see what we have in the file.
 INFO=$(file -b $DIR/$TEMP_FILENAME | cut -d' ' -f1)
 if [ "$INFO" != "gzip" ]; then
-  echo -e "${Red}ERROR: Specifidd tag not found.${Color_Off}"
-  rm -rf $DIR
-  return 1
+    echo -e "${Red}ERROR: Download the the requested release failed.${Color_Off}"
+    rm -rf $DIR
+    return 1
 fi
 
 tar xzf $DIR/$TEMP_FILENAME -C $DIR
@@ -64,9 +64,12 @@ for FILE in $LIST; do
 done
 
 rm -rf $DIR
-echo -e "${Green}Project updated to version ${BGreen}${TAG}${Green}.${Color_Off}"
+echo
+echo -e "${Green}Local-docker updated to version ${BGreen}${RELEASE_NAME}${Green}.${Color_Off}"
+echo
 echo -e "${Yellow}Review and commit changes to: "
 for FILE in $LIST; do
-  echo " - $FILE"
+    echo " - $FILE"
 done
+
 echo -e "${Yellow}Optionally update your own .env.local file, too.${Color_Off}"

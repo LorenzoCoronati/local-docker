@@ -70,5 +70,5 @@ function ld_command_db-restore_exec() {
   }
 
 function ld_command_db-restore_help() {
-    echo "Import the latest full database container backup. Optionally provide file name (default: ${DATABASE_DUMP_STORAGE:-db_dumps}/db-container--FULL--LATEST.sql.gz). Dump file should be located in ${DATABASE_DUMP_STORAGE:-db_dumps} -folder."
+    echo "Import the latest ${BBlack}full${Color_Off} database container backup. Optionally provide file name (default: ${DATABASE_DUMP_STORAGE:-db_dumps}/db-container--FULL--LATEST.sql.gz). Dump file should be located in ${DATABASE_DUMP_STORAGE:-db_dumps} -folder."
 }

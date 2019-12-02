@@ -77,5 +77,5 @@ function ld_command_db-import_exec() {
   }
 
 function ld_command_db-import_help() {
-    echo "Import a single database from dumpfile. Optionally provide database name (default: ${MYSQL_DATABASE:-drupal}) and dump file location (default: ${DATABASE_DUMP_STORAGE:-db_dumps}/db-backup--${MYSQL_DATABASE:-drupal}--LATEST.sql.gz). Dump file should be located in ${DATABASE_DUMP_STORAGE:-db_dumps} -folder."
+    echo "Import a ${BBlack}single${Color_Off} database from dumpfile. Optionally provide database name (default: ${MYSQL_DATABASE:-drupal}) and dump file location (default: ${DATABASE_DUMP_STORAGE:-db_dumps}/db-backup--${MYSQL_DATABASE:-drupal}--LATEST.sql.gz). Dump file should be located in ${DATABASE_DUMP_STORAGE:-db_dumps} -folder."
 }

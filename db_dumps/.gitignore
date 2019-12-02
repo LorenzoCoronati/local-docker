@@ -1,2 +1,5 @@
-db-container*.sql*
+# Full DB coantainer dumps.
+db-container--*.sql*
+# Single database dumps.
+db-backup--*.sql*
 

@@ -4,7 +4,7 @@
 # This file contains rebuild -command for local-docker script ld.sh.
 
 function ld_command_rebuild_exec() {
-    $SCRIPT_NAME down 2&>/dev/null
+    $SCRIPT_NAME down
     # Return value is not important here.
     [ "$LD_VERBOSE" -ge "1" ] && echo "(re)Building containers, please wait..."
     docker-compose -f $DOCKER_COMPOSE_FILE build

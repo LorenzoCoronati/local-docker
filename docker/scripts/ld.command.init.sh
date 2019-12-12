@@ -170,6 +170,7 @@ function ld_command_init_exec() {
     fi
 
     COMPOSER_INIT=''
+    POST_COMPOSER_INIT=
     if [ "$(ls -A $APP_ROOT | wc -l | tr -d ' ')" -eq "0" ]; then
 
         echo
@@ -185,10 +186,12 @@ function ld_command_init_exec() {
         case "$VERSION" in
           ''|'1'|1)
             COMPOSER_INIT='composer -vv create-project drupal/recommended-project:^8.8@dev /var/www --no-interaction --stability=dev'
+            POST_COMPOSER_INIT='composer -vv require drupal/console drush/drush'
             echo -e "${Green}Creating project using ${BGreen}Drupal 8.8${Green}, recommended structure (drupal/recommended-project:^8.8@dev).${Color_Off}"
             ;;
           '2'|2)
             COMPOSER_INIT='composer -vv create-project drupal/legacy-project:^8.8@dev /var/www --no-interaction --stability=dev'
+            POST_COMPOSER_INIT='composer -vv require drupal/console drush/drush'
             echo -e "${Green}Creating project using ${BGreen}Drupal 8.8${Green}, legacy structure (drupal/legacy-project:^8.8@dev).${Color_Off}"
             ;;
           '3'|3)
@@ -203,7 +206,6 @@ function ld_command_init_exec() {
 
         if [ ! -z "$COMPOSER_INIT" ]; then
           # Use verbose output on this composer command.
-
           [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$COMPOSER_INIT\"${Color_Off}"
           docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$COMPOSER_INIT"
           OK=$?
@@ -212,6 +214,11 @@ function ld_command_init_exec() {
               echo -e "${Red}Check that required ports are not allocated (by other containers or programs) and re-configure them if needed.${Color_Off}"
               cd $CWD
               return 1
+          fi
+          if [ -n "$POST_COMPOSER_INIT" ]; then
+              # Use verbose output on this composer command.
+              [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$POST_COMPOSER_INIT\"${Color_Off}"
+              docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$POST_COMPOSER_INIT"
           fi
           # This must be run after composer install.
           $SCRIPT_NAME drupal-structure-fix

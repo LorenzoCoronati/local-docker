@@ -178,21 +178,21 @@ function ld_command_init_exec() {
         echo "Please select which version of drupal you wish to have."
         echo "Alternatively you can install your codebase manually into $APP_ROOT."
         echo "Options:"
-        echo " [1] - Drupal 8.8 recommended (drupal/recommended-project:^8.8@dev)"
-        echo " [2] - Drupal 8.8 legacy (drupal/legacy-project:^8.8@dev)"
+        echo " [1] - Drupal 8.8 recommended (drupal/recommended-project:~8.8.0)"
+        echo " [2] - Drupal 8.8 legacy (drupal/legacy-project:~8.8.0)"
         echo " [3] - Drupal 8.7 using contrib template (drupal-composer/drupal-project:8.x-dev)"
         echo " [no] - Skip this, I'll build my codebase via other means"
         read -p "select version [default: 1]? " VERSION
         case "$VERSION" in
           ''|'1'|1)
-            COMPOSER_INIT='composer -vv create-project drupal/recommended-project:^8.8@dev /var/www --no-interaction --stability=dev'
-            POST_COMPOSER_INIT='composer -vv require drupal/console drush/drush'
-            echo -e "${Green}Creating project using ${BGreen}Drupal 8.8${Green}, recommended structure (drupal/recommended-project:^8.8@dev).${Color_Off}"
+            COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.8.0 /var/www --no-interaction --stability=dev'
+            POST_COMPOSER_INIT='composer -vv require drupal/console drush/drush:^9'
+            echo -e "${Green}Creating project using ${BGreen}Drupal 8.8+${Green}, recommended structure (${BGreen}drupal/recommended-project:~8.8.0${Green}).${Color_Off}"
             ;;
           '2'|2)
-            COMPOSER_INIT='composer -vv create-project drupal/legacy-project:^8.8@dev /var/www --no-interaction --stability=dev'
-            POST_COMPOSER_INIT='composer -vv require drupal/console drush/drush'
-            echo -e "${Green}Creating project using ${BGreen}Drupal 8.8${Green}, legacy structure (drupal/legacy-project:^8.8@dev).${Color_Off}"
+            COMPOSER_INIT='composer -vv create-project drupal/legacy-project:~8.8.0 /var/www --no-interaction --stability=dev'
+            POST_COMPOSER_INIT='composer -vv require drupal/console drush/drush:^9'
+            echo -e "${Green}Creating project using ${BGreen}Drupal 8.8+${Green}, legacy structure (${BGreen}drupal/legacy-project:~8.8.0${Green}).${Color_Off}"
             ;;
           '3'|3)
             COMPOSER_INIT='composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev'

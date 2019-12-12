@@ -186,12 +186,12 @@ function ld_command_init_exec() {
         case "$VERSION" in
           ''|'1'|1)
             COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.8.0 /var/www --no-interaction --stability=dev'
-            POST_COMPOSER_INIT='composer -vv require drupal/console drush/drush:^9'
+            POST_COMPOSER_INIT='composer -vv require drupal/console drush/drush:^9.7'
             echo -e "${Green}Creating project using ${BGreen}Drupal 8.8+${Green}, recommended structure (${BGreen}drupal/recommended-project:~8.8.0${Green}).${Color_Off}"
             ;;
           '2'|2)
             COMPOSER_INIT='composer -vv create-project drupal/legacy-project:~8.8.0 /var/www --no-interaction --stability=dev'
-            POST_COMPOSER_INIT='composer -vv require drupal/console drush/drush:^9'
+            POST_COMPOSER_INIT='composer -vv require drupal/console drush/drush:^9.7'
             echo -e "${Green}Creating project using ${BGreen}Drupal 8.8+${Green}, legacy structure (${BGreen}drupal/legacy-project:~8.8.0${Green}).${Color_Off}"
             ;;
           '3'|3)

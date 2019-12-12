@@ -86,6 +86,25 @@ function ld_command_init_exec() {
     define_configuration_value LOCAL_IP $LOCAL_IP
     echo -e "${BYellow}IP address is: $LOCAL_IP.${Color_Off}"
 
+    echo
+    echo -e "${BBlack}== PHP version ==${Color_Off}"
+    while [ -z "$PROJECT_PHP_VERSION" ]; do
+        echo "What is the PHP version to use?"
+        echo "Options:"
+        echo " [1] - PHP 7.1"
+        echo " [2] - PHP 7.2"
+        echo " [3] - PHP 7.3 (default)"
+        read -p "Selected version: " VERSION
+        case "$VERSION" in
+            ''|'3'|3) PROJECT_PHP_VERSION='7.3';;
+            '2'|2) PROJECT_PHP_VERSION='7.2';;
+            '1'|1) PROJECT_PHP_VERSION='7.1';;
+            *) echo -e "${Red}ERROR: PHP version selection failed. Please use the available options.${Color_Off}"
+        esac
+    done
+    define_configuration_value PROJECT_PHP_VERSION $PROJECT_PHP_VERSION
+    echo -e "${BYellow}Using PHP version: $PROJECT_PHP_VERSION.${Color_Off}"
+
     # 2nd param, project type.
     TYPE=${1-'common'}
     # Suggest Skeleton cleanup only when it is relevant.

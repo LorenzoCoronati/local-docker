@@ -54,7 +54,7 @@ and start the initialisation.
     # branch is not connected to the old repository branches.
     $ git checkout --orphan master-new
     # Commit clean project base to the new and still empty branch.
-    $ git commit -am'Initial commit for my-project from local-docker'
+    $ git commit -am 'Initial commit for my-project from local-docker'
     # Delete old master branch (with the full commit history), and
     # rename your temporary branch to master.
     $ git branch -D master
@@ -477,7 +477,7 @@ you should also reset the command line tools path with
  
     $ sudo xcode-select -r
 
-## NFS share does not work 
+### NFS share does not work 
 
 When you start local-docker but an error like
 
@@ -508,6 +508,16 @@ Privacy.
 ![Granting a full disk access to /sbin/nfsd](./docker/media/macos-security-privacy-nfsd-access.png)
 "Granting a full disk access to /sbin/nfsd"
 
+## Issues with installing gems / Unable to download data from https://rubygems.org/ [For Mac users]
+
+     $ sudo gem install docker-sync # docker-sync is just an example
+     ERROR:  Could not find a valid gem 'docker-sync' (>= 0), here is why:
+     Unable to download data from https://rubygems.org/ - SSL_connect returned=1 errno=0 state=SSLv2/v3 read server hello A: tlsv1 alert protocol version (https://api.rubygems.org/specs.4.8.gz)
+
+If you are encountering the error above when trying to install a gem, simple workaround is to explicitly set the installation path and source (with http protocol):
+
+     $ sudo gem install -n /usr/local/bin docker-sync --source http://rubygems.org
+
 ## Why my favourite feature is not there?
 
 This is the initial version of the local-docker. Redis, Solr and others
@@ -515,4 +525,3 @@ are coming once the need arises.
 
 **Asking for help is highly recommended, and pull requests even more
 so.**
-

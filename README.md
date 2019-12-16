@@ -345,7 +345,7 @@ current network) and to make parallel running of your projects possible.
 
 ## Customize ld -script variables
 
-Local-docker configuration is defined in `./ld.config`  file, which is
+Local-docker configuration is defined in `./.env`  file, which is
 created during `./ld init` process. The file should be committed to
 project repository and be shared among all developers. 
 

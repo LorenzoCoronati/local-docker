@@ -525,3 +525,5 @@ are coming once the need arises.
 
 **Asking for help is highly recommended, and pull requests even more
 so.**
+
+<!-- DO-NOT-REMOVE-THIS-LINE -->

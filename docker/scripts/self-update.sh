@@ -73,7 +73,7 @@ fi
 
 tar xzf "$DIR/$TEMP_FILENAME" -C "$DIR"
 SUBDIR=$(ls $DIR |grep local-docker)
-LIST=" .editorconfig .env.example .env.local.example .gitignore.example ./.github ./docker ./git-hooks ld.sh"
+LIST=" .editorconfig .env.example .env.local.example .gitignore.example ./docker ./git-hooks ld.sh"
 for FILE in $LIST; do
     cp -fr "$DIR/$SUBDIR/$FILE" .
 done

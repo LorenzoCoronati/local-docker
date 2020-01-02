@@ -20,7 +20,7 @@ as [Docker-sync](https://docker-sync.readthedocs.io). Install
 [Homebrew](https://brew.sh/) if you have not done it already, and run
 this on you host (in any directory):
 
-    $ brew install cask 
+    $ brew install cask
     $ brew cask install docker-edge # edge channel OR
     $ brew cask install docker # stable channel
     $ sudo gem install docker-sync
@@ -50,7 +50,7 @@ and start the initialisation.
     $ git remote set-url origin ssh://git.example.com/my-project.git
     # Verify you have correct remote url's.
     $ git remote -v
-    # Create a disconnected temporary branch w/ no commits. This new 
+    # Create a disconnected temporary branch w/ no commits. This new
     # branch is not connected to the old repository branches.
     $ git checkout --orphan master-new
     # Commit clean project base to the new and still empty branch.
@@ -63,15 +63,15 @@ and start the initialisation.
     $ ./ld init
 
 #### Existing project
- 
+
 Copy all of this repository on top of your current project.
 
     db_dumps/
     docker/
-    .env.example 
-    .env.local.example 
+    .env.example
+    .env.local.example
     .gitignore.example # (or copy rules to your existing .gitignore)
-    ld.sh 
+    ld.sh
     ld  # (ensure you have this symlinking to correct ld.sh)
 
 Open your favourite terminal, type `./ld` and hit \[ENTER]. If you get
@@ -79,7 +79,7 @@ an error, ensure `ld.sh` has execute permission:
 
     $ chmod 0744 ld.sh
 
-Initial setup asks if you some generic information. 
+Initial setup asks if you some generic information.
 
     $ ./ld init
 
@@ -94,7 +94,7 @@ will write a `/etc/hosts` -record for you and maintain localhost IP
 address aliases.
 
 Some development tools and other services are accessible via their own
-subdomains: 
+subdomains:
 
 - main project - [http://example.com]() and [http://www.example.com]()
 - MySQL database - [mysql://$LOCAL_IP:3306](mysql://$LOCAL_IP:3306)
@@ -116,35 +116,35 @@ Once the local is up and running you can install Drupal.
 
 **Note:** MySQL is accessible in `db` instead of `localhost`.
 
-1. Using Drush 
+1. Using Drush
 
         $ ./ld drush si -y minimal --db-url=mysql://drupal:drupal@db/drupal
 
-2. Using browser: 
+2. Using browser:
 
     Drupal is not yet installed you'll be redirected to
     `www.example.com/core/install.php`.
-    
+
     Install Drupal as usual. Be default database -container (`db`) has one
     database (`drupal`) and credentials for accessing (`drupal`/`drupal`).
     **Database hostname must be `db`** (database container name). Docker
     connects containers internally using container names.
-    
+
     If you need more databases or need to manage anything inside
-    Drupal's database, you can 
-    
+    Drupal's database, you can
+
     1. connect to `db` container either via shell
-    
+
             $ docker-compose exec db sh
-    
+
     2. or use Adminer with your browser:
        [http://adminer.example.com](http://adminer.example.com)
-    
+
    3.  or use your favourite SQL GUI app (SequelPro or similar), and
        connect using LOCAL_IP (see `.env` file, `127.0.X.Y`),
        default port `3306`, username `root` and password from your
        `.env` file, `MYSQL_ROOT_PASSWORD`.
- 
+
 #### Skeleton
 
 If you are applying Local-docker on a Skeleton based project start by
@@ -164,7 +164,7 @@ done via your site's `settings.php` file. Where Skeleton may use
 and by default credentials `drupal`/`drupal` with database named
 `drupal` (simple!). Example for Drupal 8:
 
-    <?php 
+    <?php
       $databases['default']['default'] = [
         'database' => 'drupal',
         'username' => 'drupal',
@@ -187,7 +187,7 @@ Behind the scenes script starts and stops files syncing and containers.
 
 More importantly using it helps you to not delete database by mistake,
 but executes (and restores) database backups in `db_dumps/` -folder,
-keeping most recent as the restorable dump. 
+keeping most recent as the restorable dump.
 
 #### Initial start
 
@@ -208,7 +208,7 @@ Pulls, builds and starts all containers.
 Put local to sleep (no DB dump created, but databases won't be
 immediately destroyed either).
 
-    $ ./ld stop 
+    $ ./ld stop
 
 Stops local, create DB dump.
 
@@ -221,7 +221,7 @@ commands take care of that, too.
 #### Watch filesync logs
 
 It may be helpful to keep eye on files sync logs.
- 
+
     $ docker-sync logs -f
 
 #### Create a snapshot/backup of database
@@ -231,9 +231,9 @@ This is done automatically when you stop or destroy your containers.
     $ ./ld dump
 
 #### Restore (old) db backup
- 
+
  Put a file in `db_dumps/` -folder and create a symlink pointing to it:
- 
+
     $ ln -s MY_GZIPPED_MYSQLDUMP_FILE.sql.gz ./db_dumps/db-container--FULL---LATEST.sql.gz
     $ ./ld restore [PATH-TO-THE-GZIP-DUMP]
 
@@ -283,7 +283,7 @@ commands `php` container tries to connect to your IDE:
 
     xdebug.remote_port = 9010
     ; Docker for Desktop (on OSX at least) maps host.docker.internal to
-    ; host machine. 
+    ; host machine.
     xdebug.remote_host = host.docker.internal
 
 This Xdebug configuration is initially set in the base image this
@@ -334,7 +334,7 @@ In case there are port collisions first thing to check is you have
 You can change IP address by putting your local down (`./ld down`),
 changing the IP address value, and starting your local again.
 
-You can check currently set aliases using command:  
+You can check currently set aliases using command:
 ` ifconfig lo0 | grep netmask | grep -v '127.0.0.1'`
 
 ### Local ports
@@ -347,7 +347,7 @@ current network) and to make parallel running of your projects possible.
 
 Local-docker configuration is defined in `./.env`  file, which is
 created during `./ld init` process. The file should be committed to
-project repository and be shared among all developers. 
+project repository and be shared among all developers.
 
 Local overrides can be set via `.env.local`  file, for example to have
 different local development domain or IP address. This file should not
@@ -372,7 +372,7 @@ in `docker-compose.yml` (or for the DEVELOPMENT server
 To overcome the known technical limitations (ie. nerve wrecking local
 drupal site slowness) `docker-sync` is being used. It sets up
 [intermediate containers and hides the OSX filesystem incompatibility](https://docker-sync.readthedocs.io/en/latest/advanced/how-it-works.html)
-there. 
+there.
 
 ### Pros and cons
 
@@ -389,13 +389,13 @@ for the handful of years a head of you. The trick is local environment
 is not **built** locally, but loaded from the Docker hub as-is (apart
 for some minor *config* adjustments).
 
-## ISSUES 
+## ISSUES
 
 #### Local-docker does not start
 
 
 1. `Bind for 0.0.0.0:80: unexpected error (Failure EADDRINUSE)`
-  
+
    There is some other application that reserves port :80 on your
    localhost. Turn it off.
 
@@ -403,9 +403,9 @@ for some minor *config* adjustments).
 
        $ sudo apachectl stop && sudo service nginx stop
 
-    Turn off your local MySQL (on Mac):  
+    Turn off your local MySQL (on Mac):
     > System preferences -> MySQL ->stop
-    
+
     Check also "Projects in parallel" -section. Other projects or tools
     may have acclaimed ports your project is trying to use.
 
@@ -419,14 +419,14 @@ and editing some files that should be synced:
 Docker-sync may get stuck on host or inside the container. Sometimes
 stuck can be 'released' nudging the sync container a bit:
 
-    $ docker-sync start 
+    $ docker-sync start
 
 If this does not help (chekc `docker-sync logs -f`) try cleaning the
 syncs:
 
     $ docker-sync stop && docker-sync clean && docker-sync start
 
-If even this does not solve the issue, *Docker* itself may be hanging. 
+If even this does not solve the issue, *Docker* itself may be hanging.
 none of your edits in host or in container are being synced, clean up
 and restart:
 
@@ -435,15 +435,15 @@ and restart:
 3. start your local again `./ld up` and optionally restore database
    `./ld restore`
 
-Optionally restart Docker, or reboot your operating system. 
+Optionally restart Docker, or reboot your operating system.
 
 The last resort is to clean up everything Docker -related. **BE WARNED**
 This will delete ALL volumes in ALL Docker projects across your laptop.
- 
+
     $ docker kill $(docker ps -q) # Stop all containers
     $ docker container prune # Remove all stopped containers
     $ docker volume prune # Remove all unused local volumes
-        
+
 If even that does not help, clean up EVERYTHING Docker -related
 (downloaded images, created volumes and containers).
 
@@ -474,10 +474,10 @@ If you get this error: `xcode-select: error: tool 'xcodebuild' requires
 Xcode, but active developer directory
 '/Library/Developer/CommandLineTools' is a command line tools instance`
 you should also reset the command line tools path with
- 
+
     $ sudo xcode-select -r
 
-### NFS share does not work 
+### NFS share does not work
 
 When you start local-docker but an error like
 
@@ -493,7 +493,7 @@ and group id (20) match your own, and also use the correct, full path to
 your projects folder (`/Users/perttuehn/Projects`):
 
      $ id -u
-     501 
+     501
      $ id -g
      20
      $ sudo -i
@@ -525,3 +525,5 @@ are coming once the need arises.
 
 **Asking for help is highly recommended, and pull requests even more
 so.**
+
+<!-- DO-NOT-REMOVE-THIS-LINE -->

@@ -73,13 +73,24 @@ fi
 
 tar xzf "$DIR/$TEMP_FILENAME" -C "$DIR"
 SUBDIR=$(ls $DIR |grep local-docker)
-LIST=" .editorconfig .env.example .env.local.example .gitignore.example ./.github ./docker ./git-hooks ld.sh"
+LIST=" .editorconfig .env.example .env.local.example .gitignore.example ./docker ./git-hooks ld.sh"
 for FILE in $LIST; do
     cp -fr "$DIR/$SUBDIR/$FILE" .
 done
+# Handle README.md separately since it can not override the existing project
+# README.md file.
+TAG_FOUND=$(grep -c 'DO-NOT-REMOVE-THIS-LINE' ./README.md)
+if [ "$TAG_FOUND" -ge "1" ]; then
+    LIST="README.md ${LIST}"
+    cp -f "$DIR/$SUBDIR/README.md"  README.md
+else
+    LIST="README.local-docker.md ${LIST}"
+    cp -f "$DIR/$SUBDIR/README.md" README.local-docker.md
+fi
 
 # Remove temp dir, but take precautions, the DIR value must not remove root (/).
 rm -rf "$(pwd)/$DIR"
+
 echo
 echo -e "${Green}Local-docker updated to version ${BGreen}${RELEASE_NAME}${Green}.${Color_Off}"
 echo

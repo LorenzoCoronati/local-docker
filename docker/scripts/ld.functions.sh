@@ -183,7 +183,7 @@ function define_configuration_value() {
         echo -e "${Red}ERROR: File $FILE not present while trying to store a value into it.${Color_Off}";
         return 1;
     fi
-    EXISTS=$(grep $NAME $FILE | wc -l)
+    EXISTS=$(grep -c $NAME $FILE)
     if [ "$EXISTS" -gt "0" ]; then
         PATTERN="s|^$NAME=.*|$NAME=$VAL|"
         replace_in_file $PATTERN $FILE

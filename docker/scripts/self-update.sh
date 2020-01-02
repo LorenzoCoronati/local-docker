@@ -79,19 +79,17 @@ for FILE in $LIST; do
 done
 # Handle README.md separately since it can not override the existing project
 # README.md file.
-TAG_FOUND=$(grep 'DO-NOT-REMOVE-THIS-LINE' ./README.md | wc -l | tr -d ' ')
-TARGET="README.local-docker.md"
+TAG_FOUND=$(grep -c 'DO-NOT-REMOVE-THIS-LINE' ./README.md)
 if [ "$TAG_FOUND" -ge "1" ]; then
-    TARGET="README.md"
+    LIST="README.md ${LIST}"
+    cp -f "$DIR/$SUBDIR/README.md"  README.md
+else
+    LIST="README.local-docker.md ${LIST}"
+    cp -f "$DIR/$SUBDIR/README.md" README.local-docker.md
 fi
-
-cp -f "$DIR/$SUBDIR/README.md" ${TARGET}
-# Add the README file to the list of updated files, too.
-LIST="${LIST} ${TARGET}"
 
 # Remove temp dir, but take precautions, the DIR value must not remove root (/).
 rm -rf "$(pwd)/$DIR"
-
 
 echo
 echo -e "${Green}Local-docker updated to version ${BGreen}${RELEASE_NAME}${Green}.${Color_Off}"

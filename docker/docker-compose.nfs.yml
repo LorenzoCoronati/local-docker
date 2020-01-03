@@ -17,6 +17,21 @@ services:
   traefik:
     image: "traefik:v2.0.0"
     container_name: "${PROJECT_NAME}_traefik"
+    ports:
+      - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_WEB}:80"
+    labels:
+      # Dashboard
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.rule=Host(`traefik.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.service=api@internal"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.entrypoints=web"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    # In case of several env files later declared variable
+    # values override earlier ones
+    env_file:
+      - .env
+      - .env.local
+    restart: on-failure
     command:
       # NOTE: entrypoints.XX.address MUST NOT contain IP, but only port.
       - "--entrypoints.web.address=:${CONTAINER_PORT_WEB}"
@@ -24,26 +39,13 @@ services:
       - --api
       - --api.insecure=true
       - --api.debug=true
-    ports:
-      - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_WEB}:80"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    labels:
-      # Dashboard
-      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.rule=Host(`traefik.${LOCAL_DOMAIN}`)"
-      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.service=api@internal"
-      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.entrypoints=web"
-    # In case of several env files later declared variable
-    # values override earlier ones
-    env_file:
-      - .env
-      - .env.local
 
     whoami:
       image: containous/whoami:v1.3.0
       container_name: "${PROJECT_NAME}_whoami"
       labels:
         - "traefik.http.routers.${PROJECT_NAME}--web-ui-whoami.rule=Host(`whoami.${LOCAL_DOMAIN}`)"
+    restart: on-failure
 
     nginx:
       build: ./docker/build/nginx
@@ -60,9 +62,12 @@ services:
       env_file:
         - .env
         - .env.local
-      depends_on: # This key affects the order of which containers get started.
+      # This key affects the order of which containers get started.
+      depends_on:
         - php
+      restart: on-failure
       working_dir: /var/www/web
+
 
   php:
     # Available builds: https://hub.docker.com/r/xoxoxo/php-container/tags
@@ -77,6 +82,7 @@ services:
     env_file:
       - .env
       - .env.local
+    restart: on-failure
     working_dir: /var/www
 
   composer:
@@ -90,6 +96,7 @@ services:
     env_file:
       - .env
       - .env.local
+    restart: on-failure
     working_dir: /var/www
     command: sh -c '[[ "$CONTAINER_COMPOSER_START" -ne "1" ]] && echo "Container 'composer' disabled." && exit 0 ||  [[ ! -e "/var/www/composer.lock" ]] && echo "File /var/www/composer.lock not present, exiting." && exit 0 || /usr/local/bin/composer install'
 
@@ -112,8 +119,8 @@ services:
     env_file:
       - .env
       - .env.local
+    restart: on-failure
     working_dir: /var
-    restart: always
     # Set max_allowed_packet to 256M (or any other value)
     command: --max_allowed_packet=268435456
 
@@ -126,34 +133,34 @@ services:
   solr:
     image: solr:8.2.0
     container_name: "${PROJECT_NAME}_solr"
-    restart: always
-    command:
-      - solr-precreate
-      - gettingstarted
     labels:
       - "traefik.http.routers.${PROJECT_NAME}--web-ui-solr.rule=Host(`solr.${LOCAL_DOMAIN}`)"
+    volumes:
+      - solr_data:/var/solr
     # In case of several env files later declared variable
     # values override earlier ones
     env_file:
       - .env
       - .env.local
-    volumes:
-      - solr_data:/var/solr
+    restart: on-failure
+    command:
+      - solr-precreate
+      - gettingstarted
 
   adminer:
     image: adminer:4.7.3
     container_name: "${PROJECT_NAME}_adminer"
-    restart: always
     labels:
       - "traefik.http.routers.${PROJECT_NAME}--web-ui-db-client.rule=Host(`adminer.${LOCAL_DOMAIN}`)"
+    restart: on-failure
 
   # PHP container needs some Mailhog -configuration.
   mailhog:
     image: mailhog/mailhog:v1.0.0
     container_name: "${PROJECT_NAME}_mailhog"
-    restart: always
     labels:
       - "traefik.http.routers.${PROJECT_NAME}--web-ui-mail.rule=Host(`mailhog.${LOCAL_DOMAIN}`)"
+    restart: on-failure
 
   # Replace MYTHEME with your theme name. If you have multiple the
   # clone the noodejs -section and rename the containers to something like
@@ -162,15 +169,16 @@ services:
   nodejs:
     image: wodby/drupal-node:1.0-1.0.0
     container_name: "${PROJECT_NAME}_nodejs"
-    working_dir: /var/www
     volumes:
       - webroot-nfs-app:/var/www
-    command: sh -c '[[ "$CONTAINER_NODEJS_START" -ne "1" ]] && echo "Nodejs container disabled." && exit 0 || [[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
     # In case of several env files later declared variable
     # values override earlier ones
     env_file:
       - .env
       - .env.local
+    restart: on-failure
+    working_dir: /var/www
+    command: sh -c '[[ "$CONTAINER_NODEJS_START" -ne "1" ]] && echo "Nodejs container disabled." && exit 0 || [[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
 
 volumes:
   webroot-nfs-app:

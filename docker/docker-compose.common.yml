@@ -155,6 +155,7 @@ services:
     container_name: "${PROJECT_NAME}_mailhog"
     labels:
       - "traefik.http.routers.${PROJECT_NAME}--web-ui-mail.rule=Host(`mailhog.${LOCAL_DOMAIN}`)"
+      - "traefik.http.services.${PROJECT_NAME}--mailhog.loadbalancer.server.port=8025"
     restart: on-failure
 
   # Replace MYTHEME with your theme name. If you have multiple the

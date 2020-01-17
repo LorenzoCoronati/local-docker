@@ -27,7 +27,7 @@ function ld_command_configure-network_exec() {
     DOMAIN_SET=$(egrep -e $LOCAL_IP'\s*([a-z0-9\.-]*\s?\s*)*('$LOCAL_DOMAIN')' /etc/hosts)
     if [ "$LOCAL_DOMAIN" != "localhost" ]; then
         if [ -z "$DOMAIN_SET" ]; then
-            SUBDOMAINS=$(grep '=Host' docker-compose.yml | cut -d'`' -f2 | cut -d'.' -f1 | grep -v '\$' | xargs -I % echo %.${LOCAL_DOMAIN} | xargs)
+            SUBDOMAINS=$(egrep 'traefik\.[a-z]*\.routers..*\.rule\=Host\(' docker-compose.yml | grep -o '[a-z0-9\.]*\${LOCAL_DOMAIN\}'  | cut -d'.' -f1 | grep -v '^\$' | xargs -I % echo %.${LOCAL_DOMAIN} | xargs)
             echo -e "${Yellow}Adding domain $LOCAL_DOMAIN with subdomains to your hosts file to poin to $LOCAL_IP.${Color_Off}"
             echo -e "${BYellow}NOTE: This DNS record is not removed automatically.${Color_Off}"
             if [ -z "$SUDO_REQUESTED" ]; then

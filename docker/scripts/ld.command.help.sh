@@ -50,11 +50,13 @@ function ld_command_extended_help_exec() {
 
         FUNCTION="ld_command_"$COMMAND"_extended_help"
         if function_exists $FUNCTION; then
-            STRINGS=$($FUNCTION)
-            #Set the field separator to new line
+            # Set the field separator to new line.
             local IFS=$'\n'
+            # Explode lines output by the extended_help function to an array.
+            STRINGS=( $($FUNCTION) )
 
-            for LINE in ${STRINGS[@]}; do
+            # To output the text with indentation, loop over the array.
+            for LINE in "${STRINGS[@]}"; do
                 echo "    $LINE"
             done
         else

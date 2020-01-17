@@ -26,4 +26,6 @@ function ld_command_phpcs_extended_help() {
     echo "Drupal and DrupalPractice coding standards will be supported as long as"
     echo "dealerdirect/phpcodesniffer-composer-installer package has been installed."
     echo "To target e.g. your custom modules, use /var/www/web/modules/custom as the argument."
+    echo
+    echo "Example: $SCRIPT_NAME_SHORT phpcs --standard=Drupal,DrupalPractice /var/www/web/modules/custom"
 }

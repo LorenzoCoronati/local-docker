@@ -42,8 +42,7 @@ services:
     build: ./docker/build/nginx
     container_name: "${PROJECT_NAME}_nginx"
     labels:
-      - "traefik.http.routers.${PROJECT_NAME}--web-ui.rule=Host(`${LOCAL_DOMAIN}`)"
-      - "traefik.http.routers.${PROJECT_NAME}--web-ui.rule=Host(`www.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui.rule=Host(`${LOCAL_DOMAIN}`, `www.${LOCAL_DOMAIN}`)"
     volumes:
       # :nocopy must be used with docker-sync
       # See bottom of this file, and ./docker-sync.yml

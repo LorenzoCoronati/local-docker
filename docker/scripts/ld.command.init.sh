@@ -4,6 +4,7 @@
 # This file contains init -command for local-docker script ld.sh.
 
 function ld_command_init_exec() {
+
     if ! project_config_file_check; then
         echo -e "${BRed}This project is already initialized. ${Color_Off}"
         echo -e "${Yellow}Are you really sure you want to re-initialize the project? ${Color_Off}"
@@ -18,6 +19,19 @@ function ld_command_init_exec() {
               ;;
         esac
     fi
+
+    # Project type, defaults to common.
+    TYPE=${1:-'common'}
+    # Read all template files available for whitelist
+    WHITELIST_TYPES=$(ls docker/docker-compose.*.yml | cut -d'.' -f2 |xargs)
+    if [[ " ${WHITELIST_TYPES[@]} " != *" $TYPE "* ]]; then
+        echo
+        echo -e "${Red}The requested template ${BRed}\"$TYPE\"${Red} is not available.. ${Color_Off}"
+        echo -e "${Yellow}Available templates include: ${WHITELIST_TYPES[@]}. ${Color_Off}"
+        echo
+        exit 1
+    fi
+
 
     VALID=0
     while [ "$VALID" -eq "0" ]; do
@@ -102,8 +116,6 @@ function ld_command_init_exec() {
     define_configuration_value PROJECT_PHP_VERSION $PROJECT_PHP_VERSION
     echo -e "${BYellow}Using PHP version: $PROJECT_PHP_VERSION.${Color_Off}"
 
-    # 2nd param, project type.
-    TYPE=${1:-'common'}
     # Suggest Skeleton cleanup only when it is relevant.
     if [ -e "$DOCKERSYNC_FILE" ] || [ -e "$DOCKER_COMPOSE_FILE" ]; then
         echo -e "${BYellow}WARNING: There is docker-compose and/or docker-sync recipies in project root.${Color_Off}"
@@ -120,7 +132,7 @@ function ld_command_init_exec() {
 
     # Skeleton uses different folder as the main location for app code.
     [[ "$TYPE" == "skeleton" ]] &&  APP_ROOT='drupal'
-    [[ "$TYPE" == "ddev" ]] &&  APP_ROOT='.' && TYPE="common"
+    [[ "$TYPE" == "ddev" ]] &&  APP_ROOT='.'
 
     yml_move $TYPE
     if [ "$?" -eq "1" ]; then

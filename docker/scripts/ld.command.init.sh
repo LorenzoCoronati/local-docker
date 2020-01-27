@@ -4,10 +4,7 @@
 # This file contains init -command for local-docker script ld.sh.
 
 function ld_command_init_exec() {
-    check_if_project_needs_initialization
-    NEEDS_INITIALIZATION=$?
-
-    if [ "${NEEDS_INITIALIZATION}" -eq "0" ]; then
+    if ! project_config_file_check; then
         echo -e "${BRed}This project is already initialized. ${Color_Off}"
         echo -e "${Yellow}Are you really sure you want to re-initialize the project? ${Color_Off}"
         read -p "[yes/NO] " ANSWER
@@ -106,7 +103,7 @@ function ld_command_init_exec() {
     echo -e "${BYellow}Using PHP version: $PROJECT_PHP_VERSION.${Color_Off}"
 
     # 2nd param, project type.
-    TYPE=${1-'common'}
+    TYPE=${1:-'common'}
     # Suggest Skeleton cleanup only when it is relevant.
     if [ -e "$DOCKERSYNC_FILE" ] || [ -e "$DOCKER_COMPOSE_FILE" ]; then
         echo -e "${BYellow}WARNING: There is docker-compose and/or docker-sync recipies in project root.${Color_Off}"

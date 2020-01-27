@@ -1,4 +1,8 @@
-# Template: docker-compose.common.yml
+# Template: docker-compose.ddev.yml
+#
+# This file sets up containers using docker-sync (intermediate sync containers)
+# for page load performance, but causes start up time delay up to a few minutes.
+# 1:1 clone from the common template.
 
 version: '3.3'
 

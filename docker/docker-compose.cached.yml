@@ -1,4 +1,7 @@
-# Template: docker-compose.common.yml
+# Template: docker-compose.cached.yml
+#
+# This file sets up containers using volumes with cached mounts. Page loads are a slower
+# but starting up a project is nearly instantaneous.
 
 version: '3.3'
 

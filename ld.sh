@@ -57,6 +57,10 @@ if [ "$?" -eq "0" ]; then
 fi
 
 # Read (and create if necessary) the .env.local file, allowing overrides to any of our config values.
+if [ "$ACTION" == "init" ]; then
+    import_config
+fi
+
 if [  "$IGNORE_INIT_STATE" -eq "0" ]; then
     if project_config_file_check; then
         echo -e "${BYellow}This project is not yet initialized. ${Color_Off}"

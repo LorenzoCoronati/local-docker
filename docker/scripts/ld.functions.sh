@@ -151,14 +151,11 @@ function create_project_config_file() {
   fi
 
   if [ ! -f "$FILE" ]; then
-    echo -e "${Green}Creating default ${BGreen}${FILE}${Green} file from the template. ${Color_Off}"
     cp -f ${TEMPLATE} ${FILE}
   else
     echo -e "${Yellow}Adding default values from ${TEMPLATE} file to your ${BYellow}EXISTING${Yellow} ${BYellow}${FILE}${Yellow} file. ${Color_Off}"
     cat ${TEMPLATE} >> ${FILE}
   fi
-
-  echo -e "${Yellow}Your ${FILE} file ${BYellow}should be committed to Git repository${Yellow}.${Color_Off}"
 }
 
 function function_exists() {

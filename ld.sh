@@ -70,51 +70,18 @@ if [ -z "$IGNORE_INIT_STATE" ] || [  "$IGNORE_INIT_STATE" -eq "0" ]; then
     import_config
 fi
 
-case "$ACTION" in
+FILE=./docker/scripts/ld.command.$ACTION.sh
 
-"help")
-
-    echo "Local-docker, version $LOCAL_DOCKER_VERSION"
-    echo
-    echo "This is a simple script, aimed to help in developer's daily use of local environment."
-    echo "While local-docker is mainly targeted for Drupal, it works with any Composer managed codebase."
-    echo "If you have docker-sync installed and configuration present (docker-sync.yml) it controls that too."
-    echo
-    echo 'Usage:'
-    echo "$SCRIPT_NAME_SHORT [command]"
-    echo
-    echo "Available commands:"
-
-    # Loop through all commands printing whatever they explain to be doing.
-    for COMMAND in ${COMMANDS[@]}; do
-      FILE=./docker/scripts/ld.command.$COMMAND.sh
-      if [[ -f "$FILE" ]]; then
-          . $FILE
-          FUNCTION="ld_command_"$COMMAND"_help"
-          function_exists $FUNCTION && echo -n "  - $COMMAND: $($FUNCTION)" && echo
-
-      fi
-    done
-    cd $CWD
-    exit 0
-    ;;
-
-*)
-    # Loop through all commands printing whatever they explain to be doing.
-    FILE=./docker/scripts/ld.command.$ACTION.sh
-
-    if [[ -f "$FILE" ]]; then
-        . $FILE
-        FUNCTION="ld_command_"$ACTION"_exec"
-        if function_exists $FUNCTION ; then
-            $FUNCTION ${@:2} || echo -e "${Red}ERROR: Command '${ACTION}' failed. Check its output for possible causes or suggestions on how to proceed or fix the issue."
-        else
-            echo -e "${Red}ERROR: Command not found (hook '$FUNCTION' missing for command $ACTION).${Color_Off}."
-        fi
+if [[ -f "$FILE" ]]; then
+    . $FILE
+    FUNCTION="ld_command_"$ACTION"_exec"
+    if function_exists $FUNCTION ; then
+        $FUNCTION ${@:2} || echo -e "${Red}ERROR: Command '${ACTION}' failed. Check its output for possible causes or suggestions on how to proceed or fix the issue."
     else
-        echo -e "${Red}ERROR: Command not found (hook file missing).${Color_Off}."
+        echo -e "${Red}ERROR: Command not found (hook '$FUNCTION' missing for command $ACTION).${Color_Off}."
     fi
-
-esac
+else
+    echo -e "${Red}ERROR: Command not found (hook file missing).${Color_Off}."
+fi
 
 cd $CWD

@@ -1,0 +1,181 @@
+# Template: docker-compose.common.yml
+
+version: '3.3'
+
+services:
+
+  # @see https://github.com/containous/blog-posts/blob/master/2019_09_10-101_docker/docker-compose-09.yml
+  traefik:
+    image: "traefik:v2.0.0"
+    container_name: "${PROJECT_NAME}_traefik"
+    ports:
+      - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_WEB}:80"
+    labels:
+      # Dashboard
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.rule=Host(`traefik.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.service=api@internal"
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.entrypoints=web"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    # In case of several env files later declared variable
+    # values override earlier ones
+    env_file:
+      - .env
+      - .env.local
+    restart: on-failure
+    command:
+      # NOTE: entrypoints.XX.address MUST NOT contain IP, but only port.
+      - "--entrypoints.web.address=:${CONTAINER_PORT_WEB}"
+      - --providers.docker
+      - --api
+      - --api.insecure=true
+      - --api.debug=true
+
+  whoami:
+    image: containous/whoami:v1.3.0
+    container_name: "${PROJECT_NAME}_whoami"
+    labels:
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-whoami.rule=Host(`whoami.${LOCAL_DOMAIN}`)"
+    restart: on-failure
+
+  nginx:
+    build: ./docker/build/nginx
+    container_name: "${PROJECT_NAME}_nginx"
+    labels:
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui.rule=Host(`${LOCAL_DOMAIN}`, `www.${LOCAL_DOMAIN}`)"
+    volumes:
+      # :cached must be used with docker-sync
+      # See bottom of this file, and ./docker-sync.yml
+      - ./${APP_ROOT}:/var/www:cached
+    # In case of several env files later declared variable
+    # values override earlier ones
+    env_file:
+      - .env
+      - .env.local
+    depends_on: # This key affects the order of which containers get started.
+      - php
+    restart: on-failure
+    working_dir: /var/www/web
+
+  php:
+    # Available builds: https://hub.docker.com/r/xoxoxo/php-container/tags
+    # Custom build contains sendmail_path -fix for Mailhog and OPTION to add
+    # overrides (per project) to other PHP config.
+    build: ./docker/build/php/${PROJECT_PHP_VERSION:-7.3}
+    container_name: "${PROJECT_NAME}_php"
+    volumes:
+      # :cached must be used with docker-sync
+      # See bottom of this file, and ./docker-sync.yml
+      - ./${APP_ROOT}:/var/www:cached
+    # In case of several env files later declared variable
+    # values override earlier ones
+    env_file:
+      - .env
+      - .env.local
+    restart: on-failure
+    working_dir: /var/www
+
+  composer:
+    # Runs `composer install` during startup.
+    build: ./docker/build/php/${PROJECT_PHP_VERSION:-7.3}
+    container_name: "${PROJECT_NAME}_composer"
+    volumes:
+      # This share gets writes from within the container by Composer.
+      # :cached must be used with docker-sync
+      # See bottom of this file, and ./docker-sync.yml
+      - ./${APP_ROOT}:/var/www:cached
+    # In case of several env files later declared variable
+    # values override earlier ones
+    env_file:
+      - .env
+      - .env.local
+    restart: on-failure
+    working_dir: /var/www
+    command: sh -c '[[ "$CONTAINER_COMPOSER_START" -ne "1" ]] && echo "Container 'composer' disabled." && exit 0 ||  [[ ! -e "/var/www/composer.lock" ]] && echo "File /var/www/composer.lock not present, exiting." && exit 0 || /usr/local/bin/composer install'
+
+  db:
+    # mysql:8.0.11 keeps restarting.
+    image: mysql:5.7.26
+    container_name: "${PROJECT_NAME}_db"
+    ports:
+      - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_DB:-3306}:3306"
+    volumes:
+      # This folder contains database dumps (mostly written by container).
+      # :cached must be used with docker-sync
+      # See bottom of this file, and ./docker-sync.yml
+      - ./db_dumps:/var/db_dumps:cached
+      # Named volume for db table data. Docker keeps this volume around
+      # unless stack is down'ed with "--volumes":
+      # $ docker-compose down --volumes
+      - db_data:/var/lib/mysql
+    # In case of several env files later declared variable
+    # values override earlier ones
+    env_file:
+      - .env
+      - .env.local
+    restart: on-failure
+    working_dir: /var
+    # Set max_allowed_packet to 256M (or any other value)
+    command: --max_allowed_packet=268435456
+
+  # Maybe use this instead of the one set blow here: https://hub.docker.com/r/eeacms/varnish/
+  # varnish:
+  #   image: jonbaldie/varnish:8056b94
+  #   ports:
+  #     - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_VARNISH:-8017}:80"
+
+  solr:
+    image: solr:8.2.0
+    container_name: "${PROJECT_NAME}_solr"
+    labels:
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-solr.rule=Host(`solr.${LOCAL_DOMAIN}`)"
+    volumes:
+      - solr_data:/var/solr
+    # In case of several env files later declared variable
+    # values override earlier ones
+    env_file:
+      - .env
+      - .env.local
+    restart: on-failure
+    command:
+      - solr-precreate
+      - gettingstarted
+
+  adminer:
+    image: adminer:4.7.3
+    container_name: "${PROJECT_NAME}_adminer"
+    labels:
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-db-client.rule=Host(`adminer.${LOCAL_DOMAIN}`)"
+    restart: on-failure
+
+  # PHP container needs some Mailhog -configuration.
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
+    container_name: "${PROJECT_NAME}_mailhog"
+    labels:
+      - "traefik.http.routers.${PROJECT_NAME}--web-ui-mail.rule=Host(`mailhog.${LOCAL_DOMAIN}`)"
+      # https://docs.traefik.io/routing/providers/docker/#service-definition
+      - "traefik.http.services.${PROJECT_NAME}--mailhog.loadbalancer.server.port=8025"
+    restart: on-failure
+
+  # Replace MYTHEME with your theme name. If you have multiple the
+  # clone the noodejs -section and rename the containers to something like
+  # - nodejs_mytheme and
+  # - nodejs_my_other_theme.
+  nodejs:
+    image: wodby/drupal-node:1.0-1.0.0
+    container_name: "${PROJECT_NAME}_nodejs"
+    volumes:
+      - ./${APP_ROOT}:/var/www:cached
+    # In case of several env files later declared variable
+    # values override earlier ones
+    env_file:
+      - .env
+      - .env.local
+    restart: on-failure
+    working_dir: /var/www
+    command: sh -c '[[ "$CONTAINER_NODEJS_START" -ne "1" ]] && echo "Nodejs container disabled." && exit 0 || [[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
+
+volumes:
+  db_data: {}
+  solr_data: {}

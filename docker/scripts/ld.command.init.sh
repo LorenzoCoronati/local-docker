@@ -179,10 +179,12 @@ function ld_command_init_exec() {
     echo "Verify application root can be used to install codebase (must be empty)..."
 
     DELETION_ASKED=0
-    echo "Files (count) in ./$APP_ROOT: "$(ls -A $APP_ROOT | wc -l | tr -d ' ')
+    APP_FILES_COUNT=$([ -e ./$APP_ROOT ] && find ./$APP_ROOT -print -maxdepth 1 | wc -l | tr -d ' ' || echo 0)
+    echo "Files (count) in ./$APP_ROOT: $APP_FILES_COUNT"
 
-    if [ "$(ls -A $APP_ROOT | wc -l | tr -d ' ')" -ne "0" ]; then
-        echo "Application root folder $APP_ROOT is not empty. Installation requires an empty folder. Currently there is: "
+    if [ "$APP_FILES_COUNT" -ne "0" ]; then
+        echo "Application root folder ./$APP_ROOT is not empty. Installation requires an empty folder."
+        echo "Current folder contents:"
         ls -A $APP_ROOT
         echo -en "${Red}WARNING: If you continue all of these will be deleted. ${Color_Off}"
         read -p "Type 'PLEASE-DELETE' to continue: " CHOICE

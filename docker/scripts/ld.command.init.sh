@@ -23,7 +23,7 @@ function ld_command_init_exec() {
     # Project type, defaults to common.
     TYPE=${1:-'common'}
     # Read all template files available for whitelist.
-    WHITELIST_TYPES=$(find ./docker -maxdepth 1 -name 'docker-compose.*.yml' -print0 | xargs -0 basename | cut -d'.' -f2 | xargs)
+    WHITELIST_TYPES=$(find ./docker -maxdepth 1 -name 'docker-compose.*.yml' -print0 | xargs -0 basename -a | cut -d'.' -f2 | xargs)
     if [[ " ${WHITELIST_TYPES[@]} " != *" $TYPE "* ]]; then
         echo
         echo -e "${Red}The requested template ${BRed}\"$TYPE\"${Red} is not available.. ${Color_Off}"

@@ -1,4 +1,7 @@
 # Template: docker-compose.skeleton.yml
+#
+# This file sets up containers using docker-sync (intermediate sync containers)
+# for page load performance, but causes start up time delay up to a few minutes.
 
 version: '3.3'
 
@@ -110,7 +113,7 @@ services:
       # This folder contains database dumps (mostly written by container).
       # :nocopy must be used with docker-sync
       # See bottom of this file, and ./docker-sync.yml
-      - webroot-nfs-dbdumps:/var/db_dumps
+      - ./db_dumps:/var/db_dumps:cached
       # Named volume for db table data. Docker keeps this volume around
       # unless stack is down'ed with "--volumes":
       # $ docker-compose down --volumes
@@ -194,11 +197,5 @@ volumes:
     external: true
   webroot-sync-src-themes:
     external: true
-  webroot-nfs-dbdumps:
-    driver: local
-    driver_opts:
-      type: nfs
-      o: addr=host.docker.internal,rw,nolock,nfsvers=3
-      device: ":${PWD}/${DATABASE_DUMP_STORAGE:-db_dumps}"
   db_data: {}
   solr_data: {}

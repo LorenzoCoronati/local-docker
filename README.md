@@ -60,7 +60,7 @@ and start the initialisation.
     $ git branch -D master
     $ git branch -m master-new master
     $ git push
-    $ ./ld init
+    $ ./ld init [TEMPLATE-NAME]
 
 #### Existing project
 
@@ -81,7 +81,7 @@ an error, ensure `ld.sh` has execute permission:
 
 Initial setup asks if you some generic information.
 
-    $ ./ld init
+    $ ./ld init [TEMPLATE-NAME]
 
 If you are applying `local-docker` on a Skeleton -based project, see
 "Skeleton" -section .
@@ -89,7 +89,7 @@ If you are applying `local-docker` on a Skeleton -based project, see
 ### Local domains
 
 `./ld init` sets up your local IP addresses and domains. You'll be asked
-for a local development domain among ohter things, and `local-docker`
+for a local development domain among other things, and `local-docker`
 will write a `/etc/hosts` -record for you and maintain localhost IP
 address aliases.
 
@@ -193,9 +193,12 @@ keeping most recent as the restorable dump.
 
 It is recommended to start the project first time with:
 
-    $ ./ld init
+    $ ./ld init [TEMPLATE-NAME]
 
 and answer some question to set up things properly.
+
+The template name must match the
+`docker/docker-compose.TEMPLATE-NAME.yml` template file names.
 
 #### Start local
 

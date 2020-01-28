@@ -49,18 +49,20 @@ else
     SCRIPT_NAME_SHORT=./$( basename "$0" .sh)
 fi
 
-IGNORE_INIT_STATE=
-WHITELIST_COMMANDS=("help" "self-update")
+IGNORE_INIT_STATE=0
+WHITELIST_COMMANDS=("help" "self-update" "init")
 element_in "$ACTION" "${WHITELIST_COMMANDS[@]}"
 if [ "$?" -eq "0" ]; then
     IGNORE_INIT_STATE=1
 fi
 
 # Read (and create if necessary) the .env.local file, allowing overrides to any of our config values.
-if [ -z "$IGNORE_INIT_STATE" ] || [  "$IGNORE_INIT_STATE" -eq "0" ]; then
-    check_if_project_needs_initialization
-    NEEDS_INITIALIZATION=$?
-    if [ "${NEEDS_INITIALIZATION}" -eq "1" ] && [ "$ACTION" != "init" ]; then
+if [ "$ACTION" == "init" ]; then
+    import_config
+fi
+
+if [  "$IGNORE_INIT_STATE" -eq "0" ]; then
+    if project_config_file_check; then
         echo -e "${BYellow}This project is not yet initialized. ${Color_Off}"
         echo -e "${Yellow}Initialize the project with: ${Color_Off}"
         echo -e "\$ ${SCRIPT_NAME_SHORT} init"

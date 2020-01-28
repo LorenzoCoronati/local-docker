@@ -151,14 +151,11 @@ function create_project_config_file() {
   fi
 
   if [ ! -f "$FILE" ]; then
-    echo -e "${Green}Creating default ${BGreen}${FILE}${Green} file from the template. ${Color_Off}"
     cp -f ${TEMPLATE} ${FILE}
   else
     echo -e "${Yellow}Adding default values from ${TEMPLATE} file to your ${BYellow}EXISTING${Yellow} ${BYellow}${FILE}${Yellow} file. ${Color_Off}"
     cat ${TEMPLATE} >> ${FILE}
   fi
-
-  echo -e "${Yellow}Your ${FILE} file ${BYellow}should be committed to Git repository${Yellow}.${Color_Off}"
 }
 
 function function_exists() {
@@ -242,19 +239,14 @@ element_in () {
 
 
 # Checks if project is initialized.
-# Prints 1 for is-initialized, 0 for not-yet-initialized.
-# return values: 0 initialized, 1 non-initialized
-check_if_project_needs_initialization () {
-    FILES_MISSING=0
-    if [ ! -f ".env" ] ; then
-        FILES_MISSING=1
-    fi
-    if [ ! -f "$DOCKERSYNC_FILE" ] ; then
-        FILES_MISSING=1
-    fi
-    if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
-        FILES_MISSING=1
+# @return
+# - 1 when config files are present
+# - 0 when only .env file is present (for cases where init is done with prepared .env file).
+project_config_file_check () {
+    # Both .env AND docker-compose.yml file must be present to define project as initialized.
+    if [ -f ".env" ] && ( [ -f "$DOCKERSYNC_FILE" ] || [ -f "$DOCKER_COMPOSE_FILE" ] ); then
+        return 1
     fi
 
-    return $FILES_MISSING
+    return 0
  }

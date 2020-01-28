@@ -4,10 +4,8 @@
 # This file contains init -command for local-docker script ld.sh.
 
 function ld_command_init_exec() {
-    check_if_project_needs_initialization
-    NEEDS_INITIALIZATION=$?
 
-    if [ "${NEEDS_INITIALIZATION}" -eq "0" ]; then
+    if ! project_config_file_check; then
         echo -e "${BRed}This project is already initialized. ${Color_Off}"
         echo -e "${Yellow}Are you really sure you want to re-initialize the project? ${Color_Off}"
         read -p "[yes/NO] " ANSWER
@@ -21,6 +19,19 @@ function ld_command_init_exec() {
               ;;
         esac
     fi
+
+    # Project type, defaults to common.
+    TYPE=${1:-'common'}
+    # Read all template files available for whitelist.
+    WHITELIST_TYPES=$(find ./docker -maxdepth 1 -name 'docker-compose.*.yml' -print0 | xargs -0 basename -a | cut -d'.' -f2 | xargs)
+    if [[ " ${WHITELIST_TYPES[@]} " != *" $TYPE "* ]]; then
+        echo
+        echo -e "${Red}The requested template ${BRed}\"$TYPE\"${Red} is not available.. ${Color_Off}"
+        echo -e "${Yellow}Available templates include: ${WHITELIST_TYPES[@]}. ${Color_Off}"
+        echo
+        exit 1
+    fi
+
 
     VALID=0
     while [ "$VALID" -eq "0" ]; do
@@ -105,8 +116,6 @@ function ld_command_init_exec() {
     define_configuration_value PROJECT_PHP_VERSION $PROJECT_PHP_VERSION
     echo -e "${BYellow}Using PHP version: $PROJECT_PHP_VERSION.${Color_Off}"
 
-    # 2nd param, project type.
-    TYPE=${1-'common'}
     # Suggest Skeleton cleanup only when it is relevant.
     if [ -e "$DOCKERSYNC_FILE" ] || [ -e "$DOCKER_COMPOSE_FILE" ]; then
         echo -e "${BYellow}WARNING: There is docker-compose and/or docker-sync recipies in project root.${Color_Off}"
@@ -123,7 +132,7 @@ function ld_command_init_exec() {
 
     # Skeleton uses different folder as the main location for app code.
     [[ "$TYPE" == "skeleton" ]] &&  APP_ROOT='drupal'
-    [[ "$TYPE" == "ddev" ]] &&  APP_ROOT='.' && TYPE="common"
+    [[ "$TYPE" == "ddev" ]] &&  APP_ROOT='.'
 
     yml_move $TYPE
     if [ "$?" -eq "1" ]; then
@@ -170,10 +179,12 @@ function ld_command_init_exec() {
     echo "Verify application root can be used to install codebase (must be empty)..."
 
     DELETION_ASKED=0
-    echo "Files (count) in ./$APP_ROOT: "$(ls -A $APP_ROOT | wc -l | tr -d ' ')
+    APP_FILES_COUNT=$([ -e ./$APP_ROOT ] && find ./$APP_ROOT -print -maxdepth 1 | wc -l | tr -d ' ' || echo 0)
+    echo "Files (count) in ./$APP_ROOT: $APP_FILES_COUNT"
 
-    if [ "$(ls -A $APP_ROOT | wc -l | tr -d ' ')" -ne "0" ]; then
-        echo "Application root folder $APP_ROOT is not empty. Installation requires an empty folder. Currently there is: "
+    if [ "$APP_FILES_COUNT" -ne "0" ]; then
+        echo "Application root folder ./$APP_ROOT is not empty. Installation requires an empty folder."
+        echo "Current folder contents:"
         ls -A $APP_ROOT
         echo -en "${Red}WARNING: If you continue all of these will be deleted. ${Color_Off}"
         read -p "Type 'PLEASE-DELETE' to continue: " CHOICE

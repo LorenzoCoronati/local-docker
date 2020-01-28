@@ -168,7 +168,7 @@ services:
   # - nodejs_othertheme.
   # - nodejs_thirdtheme etc.
   nodejs_MYTHEME:
-    image: "node:11"
+    image: node:11
     container_name: "${PROJECT_NAME}_nodejs_MYTHEME"
     volumes:
       - webroot-nfs-app:/var/www:nocopy

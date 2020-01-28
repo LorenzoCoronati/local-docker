@@ -40,7 +40,10 @@ function ld_command_configure-network_exec() {
                 echo -e "${Yellow}Configuring networking may require your password. Your password is not stored anywhere by local-docker.${Color_Off}"
                 echo
             fi
-            sudo bash -c "echo && echo '############  Project (local-docker): $PROJECT_NAME   ##############' >> /etc/hosts"
+            sudo bash -c "echo >> /etc/hosts"
+            sudo bash -c "echo '##############################################################' >> /etc/hosts"
+            sudo bash -c "echo '###  Project (local-docker): $PROJECT_NAME' >> /etc/hosts"
+            sudo bash -c "echo '###  Project folder: $CWD' >> /etc/hosts"
             sudo bash -c "echo '$LOCAL_IP      $LOCAL_DOMAIN $SUBDOMAINS' >> /etc/hosts"
         else
             echo -e "${Green}Domain $LOCAL_DOMAIN is already configured.${Color_Off}"

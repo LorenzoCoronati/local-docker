@@ -197,3 +197,4 @@ volumes:
       device: ":${PWD}/${DATABASE_DUMP_STORAGE:-db_dumps}"
   db_data: {}
   solr_data: {}
+  nodemodules: {}

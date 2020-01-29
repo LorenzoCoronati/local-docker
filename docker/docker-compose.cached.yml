@@ -183,3 +183,4 @@ services:
 volumes:
   db_data: {}
   solr_data: {}
+  nodemodules: {}

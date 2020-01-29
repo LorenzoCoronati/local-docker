@@ -186,3 +186,4 @@ volumes:
     external: true
   db_data: {}
   solr_data: {}
+  nodemodules: {}

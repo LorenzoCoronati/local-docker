@@ -169,21 +169,22 @@ services:
     restart: on-failure
 
   # Replace MYTHEME with your theme name. If you have multiple the
-  # clone the noodejs -section and rename the containers to something like
-  # - nodejs_mytheme and
-  # - nodejs_my_other_theme.
-  nodejs:
-    image: wodby/drupal-node:1.0-1.0.0
-    container_name: "${PROJECT_NAME}_nodejs"
+  # clone this section and rename the containers to something like
+  # - nodejs_othertheme.
+  # - nodejs_thirdtheme etc.
+  nodejs_MYTHEME:
+    image: node:11
+    container_name: "${PROJECT_NAME}_nodejs_MYTHEME"
     volumes:
       - webroot-sync-core:/var/www:nocopy
+      - nodemodules:/var/www/web/themes/custom/MYTHEME/node_modules
     # In case of several env files later declared variable
     # values override earlier ones
     env_file:
       - .env
       - .env.local
     restart: on-failure
-    working_dir: /var/www
+    working_dir: /var/www/web/themes/custom/MYTHEME/
     command: sh -c '[[ "$CONTAINER_NODEJS_START" -ne "1" ]] && echo "Nodejs container disabled." && exit 0 || [[ ! -e "/var/www/web/themes/custom/MYTHEME/gulpfile.js" ]] && exit 0 || npm install --global gulp-cli && npm install && npm install bootstrap-sass && gulp watch'
 
 volumes:
@@ -199,3 +200,4 @@ volumes:
     external: true
   db_data: {}
   solr_data: {}
+  nodemodules: {}

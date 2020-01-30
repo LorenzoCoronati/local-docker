@@ -50,6 +50,7 @@ services:
       # :cached must be used with docker-sync
       # See bottom of this file, and ./docker-sync.yml
       - ./${APP_ROOT}:/var/www:cached
+      - ./${APP_ROOT}/web/sites/default/files:/var/www/web/sites/default/files:delegated
     # In case of several env files later declared variable
     # values override earlier ones
     env_file:
@@ -70,6 +71,7 @@ services:
       # :cached must be used with docker-sync
       # See bottom of this file, and ./docker-sync.yml
       - ./${APP_ROOT}:/var/www:cached
+      - ./${APP_ROOT}/web/sites/default/files:/var/www/web/sites/default/files:delegated
     # In case of several env files later declared variable
     # values override earlier ones
     env_file:
@@ -152,6 +154,7 @@ services:
     container_name: "${PROJECT_NAME}_nodejs_MYTHEME"
     volumes:
       - ./${APP_ROOT}:/var/www:cached
+      - ./${APP_ROOT}/web/sites/default/files:/var/www/web/sites/default/files:delegated
       - nodemodules:/var/www/web/themes/custom/MYTHEME/node_modules
     # In case of several env files later declared variable
     # values override earlier ones

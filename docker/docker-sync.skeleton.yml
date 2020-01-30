@@ -18,12 +18,13 @@ syncs:
     # NOTE: run `docker-sync[-stack] clean` after any change in src
     src: './${APP_ROOT}/'
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
-    sync_args:
-      - "-ignore='Path .editorconfig'"  # no need to send PHPStorm config to container
-      - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
-      - "-ignore='BelowPath node_modules'" # remove this if you need code completion
-      - "-ignore='Path node_modules/*'" # remove this if you need code completion
-      # - "-ignore='Path vendor/*'"     # we could ignore the composer vendor folder, but then you won't have code completion in your IDE
+    sync_excludes_type: 'BelowPath'
+    # sync_excludes seem to be relative to src-location inside container.
+    sync_excludes: [
+      '.git',
+      'web/themes/*/node_modules',
+      'web/themes/*/*/node_modules',
+      'web/sites/*/files']
     # enable terminal_notifier. On every sync sends a Terminal Notification regarding files being synced. ( Mac Only ).
     # good thing in case you are developing and want to know exactly when your changes took effect.
     # be aware in case of unison this only gives you a notification on the initial sync, not the syncs after changes.
@@ -39,9 +40,6 @@ syncs:
     sync_strategy: 'native_osx'
     src: './src/modules/'
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
-    sync_args:
-      - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
-      - "-ignore='BelowPath node_modules'" # remove this if you need code completion
     notify_terminal: true
 
   webroot-sync-src-patches:
@@ -54,8 +52,10 @@ syncs:
     sync_strategy: 'native_osx'
     src: './src/themes/'
     host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
-    sync_args:
-      - "-ignore='BelowPath .git'"      # also ignore .git repos in subfolders such as in composer vendor dirs
-      - "-ignore='BelowPath node_modules'" # remove this if you need code completion
-      - "-ignore='Path node_modules/*'" # remove this if you need code completion
+    sync_excludes_type: 'BelowPath'
+    sync_excludes: [
+      '.git',
+      'web/themes/*/node_modules',
+      'web/themes/*/*/node_modules',
+      'web/sites/*/files']
     notify_terminal: true

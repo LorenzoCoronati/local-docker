@@ -12,7 +12,6 @@ function ld_command_rename-volumes_exec() {
         if [[ -z "$VOL_BASE_NAME" ]] || [ ! -z "$VOL_BASE_NAME_DEFAULT_FAILED" ]; then
             read -p "Container volume base name ['$VOL_BASE_NAME']: " ANSWER
         else
-            echo -e "Using default value: ${VOL_BASE_NAME}"
             ANSWER=${VOL_BASE_NAME}
         fi
         if [ -z "$ANSWER" ]; then
@@ -33,10 +32,11 @@ function ld_command_rename-volumes_exec() {
         [ "$LD_VERBOSE" -ge "1" ] && echo 'Turning off docker-sync (clean), please wait...'
         docker-sync clean
     fi
+
     define_configuration_value VOL_BASE_NAME $VOL_BASE_NAME
     import_config
 
-    echo "Renaming volumes to '$VOL_BASE_NAME' for docker-sync, please wait..."
+    [ "$LD_VERBOSE" -ge "2" ] && echo && echo -e "${BYellow}INFO: ${Yellow}Docker-sync volume's base name: ${BYellow}${VOL_BASE_NAME}${Yellow}.${Color_Off}"
     replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKERSYNC_FILE
     replace_in_file "s/webroot-sync/${VOL_BASE_NAME}-sync/g" $DOCKER_COMPOSE_FILE
     replace_in_file "s/webroot-nfs/${VOL_BASE_NAME}-nfs/g" $DOCKER_COMPOSE_FILE

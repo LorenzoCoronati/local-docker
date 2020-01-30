@@ -1,4 +1,4 @@
-# File: docker--compose-only.yml
+# File: docker--composer-only.yml
 #
 # This file is used only for temporary purposes, mainly - if not only - during
 # project init phase.
@@ -24,4 +24,3 @@ services:
       - ../.env.local
     restart: on-failure
     working_dir: /var/www
-

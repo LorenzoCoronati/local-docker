@@ -1,0 +1,27 @@
+# File: docker--compose-only.yml
+#
+# This file is used only for temporary purposes, mainly - if not only - during
+# project init phase.
+
+version: '3.3'
+
+services:
+  composer:
+    # Runs `composer install` during startup.
+    build: ../docker/build/php/${PROJECT_PHP_VERSION:-7.3}
+    container_name: "${PROJECT_NAME}_composer"
+    volumes:
+      # Declaring only one volume with on volumes within allows building
+      # the codebase into a folder with nothing inside (where as overlapping
+      # volumes do appear as files and can't be removed).
+      # Locations are calculated from where this file is in filesystem.
+      - ../${APP_ROOT}:/var/www:delegated
+    env_file:
+      # In case of several env files later declared variable
+      # values override earlier ones
+      # Locations are calculated from where this file is in filesystem.
+      - ../.env
+      - ../.env.local
+    restart: on-failure
+    working_dir: /var/www
+

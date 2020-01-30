@@ -84,21 +84,6 @@ services:
     restart: on-failure
     working_dir: /var/www
 
-  composer:
-    # Runs `composer install` during startup.
-    build: ./docker/build/php/${PROJECT_PHP_VERSION:-7.3}
-    container_name: "${PROJECT_NAME}_composer"
-    volumes:
-      - webroot-nfs-app:/var/www
-    # In case of several env files later declared variable
-    # values override earlier ones
-    env_file:
-      - .env
-      - .env.local
-    restart: on-failure
-    working_dir: /var/www
-    command: sh -c '[[ "$CONTAINER_COMPOSER_START" -ne "1" ]] && echo "Container 'composer' disabled." && exit 0 ||  [[ ! -e "/var/www/composer.lock" ]] && echo "File /var/www/composer.lock not present, exiting." && exit 0 || /usr/local/bin/composer install'
-
   db:
     # mysql:8.0.11 keeps restarting.
     image: mysql:5.7.26

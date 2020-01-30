@@ -37,12 +37,12 @@ function ld_command_init_exec() {
     while [ "$VALID" -eq "0" ]; do
         echo
         echo  -e "${BBlack}== Project name == ${Color_Off}"
-        echo  "Provide a string without spaces and use chars a-z, 0-9, - and _ (no dots)."
+        echo  "Provide a string using characters a-z, 0-9, - and _ (no dots, must start and end with a character a-z)."
         PROJECT_NAME=${PROJECT_NAME:-$(basename $PROJECT_ROOT)}
         read -p "Project name ['$PROJECT_NAME']: " ANSWER
         if [ -z "$ANSWER" ]; then
             VALID=1
-        elif [[ "$ANSWER" =~  ^(([a-zA-Z0-9])([a-zA-Z0-9]*))?([a-zA-Z0-9])$ ]]; then
+        elif [[ "$ANSWER" =~  ^(([a-z])([a-z0-9\_\-]*))?([a-z])$ ]]; then
             PROJECT_NAME=$ANSWER
             VALID=1
         else

@@ -51,6 +51,7 @@ services:
       # :nocopy must be used with docker-sync
       # See bottom of this file, and ./docker-sync.yml
       - webroot-sync-core:/var/www:nocopy
+      - ./${APP_ROOT}/web/sites/default/files:/var/www/web/sites/default/files:delegated
     # In case of several env files later declared variable
     # values override earlier ones
     env_file:
@@ -71,6 +72,7 @@ services:
       # :nocopy must be used with docker-sync
       # See bottom of this file, and ./docker-sync.yml
       - webroot-sync-core:/var/www:nocopy
+      - ./${APP_ROOT}/web/sites/default/files:/var/www/web/sites/default/files:delegated
     # In case of several env files later declared variable
     # values override earlier ones
     env_file:
@@ -78,24 +80,6 @@ services:
       - .env.local
     restart: on-failure
     working_dir: /var/www
-
-  composer:
-    # Runs `composer install` during startup.
-    build: ./docker/build/php/${PROJECT_PHP_VERSION:-7.3}
-    container_name: "${PROJECT_NAME}_composer"
-    volumes:
-      # This share gets writes from within the container by Composer.
-      # :nocopy must be used with docker-sync
-      # See bottom of this file, and ./docker-sync.yml
-      - webroot-sync-core:/var/www:nocopy
-    # In case of several env files later declared variable
-    # values override earlier ones
-    env_file:
-      - .env
-      - .env.local
-    restart: on-failure
-    working_dir: /var/www
-    command: sh -c '[[ "$CONTAINER_COMPOSER_START" -ne "1" ]] && echo "Container 'composer' disabled." && exit 0 ||  [[ ! -e "/var/www/composer.lock" ]] && echo "File /var/www/composer.lock not present, exiting." && exit 0 || /usr/local/bin/composer install'
 
   db:
     # mysql:8.0.11 keeps restarting.
@@ -171,6 +155,7 @@ services:
     container_name: "${PROJECT_NAME}_nodejs_MYTHEME"
     volumes:
       - webroot-sync-core:/var/www:nocopy
+      - ./${APP_ROOT}/web/sites/default/files:/var/www/web/sites/default/files:delegated
       - nodemodules:/var/www/web/themes/custom/MYTHEME/node_modules
     # In case of several env files later declared variable
     # values override earlier ones

@@ -5,6 +5,8 @@
 
 function ld_command_init_exec() {
 
+    DOCKER_COMPOSER_ONLY_FILE=./docker/docker--composer-only.yml
+
     if ! project_config_file_check; then
         echo -e "${BRed}This project is already initialized. ${Color_Off}"
         echo -e "${Yellow}Are you really sure you want to re-initialize the project? ${Color_Off}"
@@ -56,7 +58,7 @@ function ld_command_init_exec() {
     PROJECT_NAME=$(echo "$PROJECT_NAME" | sed 's/[[:space:]]/-/g')
 
     define_configuration_value PROJECT_NAME $PROJECT_NAME
-    echo -e "${BYellow}Project name is: $PROJECT_NAME.${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}Project name is: ${BYellow}${PROJECT_NAME}${Yellow}.${Color_Off}"
 
     VALID=0
     while [ "$VALID" -eq "0" ]; do
@@ -82,9 +84,10 @@ function ld_command_init_exec() {
     # Remove spaces.
     LOCAL_DOMAIN=$(echo "$LOCAL_DOMAIN" | sed 's/[[:space:]]/./g')
     define_configuration_value LOCAL_DOMAIN $LOCAL_DOMAIN
-    echo -e "${BYellow}Local develoment domain is: $LOCAL_DOMAIN.${Color_Off}"
-    define_configuration_value DRUSH_OPTIONS_URI "http://www."$LOCAL_DOMAIN
-    echo -e "${BYellow}Default URL for drush is: $DRUSH_OPTIONS_URI.${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}Local develoment domain is:  ${BYellow}${LOCAL_DOMAIN}${Yellow}.${Color_Off}"
+
+    define_configuration_value DRUSH_OPTIONS_URI "http://www.${LOCAL_DOMAIN}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}Default URL for Drush is: ${BYellow}${DRUSH_OPTIONS_URI}${Yellow}.${Color_Off}"
 
     echo
     echo -e "${BBlack}== Local development IP address ==${Color_Off}"
@@ -95,7 +98,7 @@ function ld_command_init_exec() {
         *) LAST=$((RANDOM % 240 + 3 )) && LOCAL_IP=$( printf "127.0.%d.%d\n" "$((RANDOM % 256))" "$LAST");;
     esac
     define_configuration_value LOCAL_IP $LOCAL_IP
-    echo -e "${BYellow}IP address is: $LOCAL_IP.${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}IP address is: ${BYellow}${LOCAL_IP}${Yellow}.${Color_Off}"
 
     echo
     echo -e "${BBlack}== PHP version ==${Color_Off}"
@@ -105,7 +108,7 @@ function ld_command_init_exec() {
         echo " [1] - PHP 7.1"
         echo " [2] - PHP 7.2"
         echo " [3] - PHP 7.3 (default)"
-        read -p "Selected version: " VERSION
+        read -p "Select version: " VERSION
         case "$VERSION" in
             ''|'3'|3) PROJECT_PHP_VERSION='7.3';;
             '2'|2) PROJECT_PHP_VERSION='7.2';;
@@ -114,75 +117,92 @@ function ld_command_init_exec() {
         esac
     done
     define_configuration_value PROJECT_PHP_VERSION $PROJECT_PHP_VERSION
-    echo -e "${BYellow}Using PHP version: $PROJECT_PHP_VERSION.${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}Using PHP version: ${BYellow}$PROJECT_PHP_VERSION${Yellow}.${Color_Off}"
 
     # Suggest Skeleton cleanup only when it is relevant.
     if [ -e "$DOCKERSYNC_FILE" ] || [ -e "$DOCKER_COMPOSE_FILE" ]; then
-        echo -e "${BYellow}WARNING: There is docker-compose and/or docker-sync recipies in project root.${Color_Off}"
-        echo -e "${BYellow}If you continue your containers with their volumes ${BRed}will be destroyed.${Color_Off}"
-        echo -e "This does not delete your application root directory, but ${BYellow}database volumes will be destroyed.${Color_Off}"
+        echo -e "${BYellow}WARNING: ${Yellow}There is docker-compose and/or docker-sync configuration (.yml) files in project root.${Color_Off}"
+        echo -e "${Yellow}If you continue your containers with their volumes ${BYellow}will be wiped out${Yellow}.${Color_Off}"
+        echo -e "This does not delete your application root directory, but ${BYellow}database volumes may well will be destroyed.${Color_Off}"
         read -p "Continue? [y/N]" CHOICE
         case "$CHOICE" in
-            n|N|'no'|'NO' ) echo "Cancelled." && return 1;;
+            y|Y|'yes'|'YES' ) ;;
+            * ) echo "Cancelled." && return 1;;
         esac
     fi
 
     echo
-    [ "$LD_VERBOSE" -ge "2" ] && echo "Setting up docker-compose and docker-sync files for project type '$TYPE'."
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}Setting up docker-compose and docker-sync files for project type '${BYellow}$TYPE${Yellow}'."
 
-    # Skeleton uses different folder as the main location for app code.
+    # Skeleton and DDEV tend to use different folder as the main location for app code.
     [[ "$TYPE" == "skeleton" ]] &&  APP_ROOT='drupal'
     [[ "$TYPE" == "ddev" ]] &&  APP_ROOT='.'
 
     yml_move $TYPE
     if [ "$?" -eq "1" ]; then
-      echo -e "${Red}Trying to use yml files without project type.${Color_Off}"
+      echo -e "${Red}ERROR: Moving YML files for Docker Compose and Docker Sync failed.${Color_Off}"
       return 1
     fi
 
     echo
-
     APP_ROOT=${APP_ROOT:-app}
     define_configuration_value APP_ROOT $APP_ROOT
     ensure_folders_present $APP_ROOT
-    echo -e "${BYellow}Application root is in $APP_ROOT.${Color_Off}"
+    echo -e "${BYellow}INFO: ${Yellow}Application root is in ${BYellow}$APP_ROOT${Yellow}.${Color_Off}"
 
     DATABASE_DUMP_STORAGE=${DATABASE_DUMP_STORAGE:-db_dumps}
     define_configuration_value DATABASE_DUMP_STORAGE $DATABASE_DUMP_STORAGE
     ensure_folders_present $DATABASE_DUMP_STORAGE
-    echo -e "${BYellow}Database dumps will be placed in $DATABASE_DUMP_STORAGE.${Color_Off}"
+    echo -e "${BYellow}INFO: ${Yellow}Database dumps will be placed in ${BYellow}$DATABASE_DUMP_STORAGE${Yellow}.${Color_Off}"
+
     if [[ "$(docker-compose -f $DOCKER_COMPOSE_FILE ps -q)" ]]; then
-        echo "Turning off current container stack."
+        echo -n "Turning off current container stack, please wait..."
         docker-compose -f $DOCKER_COMPOSE_FILE down 2> /dev/null
+        echo  -e "${Green}DONE${Color_Off}"
     fi
 
+    # Docker-sync shouldn't be running to avoid it getting stuck with too
+    # may files being changed in a short period of time. Temporary Composer
+    # container does not use these volumes.
+    # "rename-volumes" will also turn off & clean docker-sync.
     $SCRIPT_NAME rename-volumes $PROJECT_NAME
 
-    if is_dockersync; then
-        [ "$LD_VERBOSE" -ge "1" ] && echo "Starting docker-sync, please wait..."
-        docker-sync start
-    fi
-
-    echo -e "${BYellow}Starting PHP container only, to use it to build the codebase.${Color_Off}"
-    docker-compose -f $DOCKER_COMPOSE_FILE up -d php
-    echo -e "${Green}PHP container: started.${Color_Off}"
-
     if [ -e "${APP_ROOT}/composer.json" ]; then
-        echo -e "${Yellow}Looks like project is already created? File "$APP_ROOT"/composer.json exists.${Color_Off}"
+        echo -e "${Yellow}Looks like project is already created? File ${APP_ROOT}/composer.json exists.${Color_Off}"
         echo -e "${Yellow}Maybe you should install codebase using composer:${Color_Off}"
         echo -e "${Yellow}$SCRIPT_NAME_SHORT up && $SCRIPT_NAME_SHORT composer install${Color_Off}"
         cd $CWD
         return 1
-    elif [ ! -d "$APP_ROOT" ]; then
-        mkdir $APP_ROOT;
     fi
+
+    echo
+    echo -e "${Yellow}Starting a temporary ${BYellow}Composer${Yellow} container only for the codebase building, please wait...${Color_Off}"
+    docker-compose -f $DOCKER_COMPOSER_ONLY_FILE up -d
+    echo -e "${BGreen}Composer${Green} container started.${Color_Off}"
+
+    echo
     echo "Verify application root can be used to install codebase (must be empty)..."
 
-    DELETION_ASKED=0
-    APP_FILES_COUNT=$([ -e ./$APP_ROOT ] && find ./$APP_ROOT -print -maxdepth 1 | wc -l | tr -d ' ' || echo 0)
-    echo "Files (count) in ./$APP_ROOT: $APP_FILES_COUNT"
+    FILE_COUNTER='find /var/www -maxdepth 1 | egrep -v "^\/var\/www$" | wc -l'
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c \"$FILE_COUNTER\"${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -n "Files (count) in ./${APP_ROOT}: "
+    APP_FILES_COUNT=$(docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c "$FILE_COUNTER")
+    # Clean up response from newlines and stuff to make it integer~ish.
+    APP_FILES_COUNT=$(echo $APP_FILES_COUNT |tr -d '\r' |tr -d '\n' |tr -d ' ')
 
-    if [ "$APP_FILES_COUNT" -ne "0" ]; then
+    if [ "$LD_VERBOSE" -ge "2" ]; then
+        [ ! -z "$APP_FILES_COUNT" ] && [ "$APP_FILES_COUNT" -eq "0" ] && echo -e "${APP_FILES_COUNT} - ${BGreen}CLEAN${Color_Off}" || echo -e " - ${Red}ERROR${Color_Off}"
+        sleep 1
+    fi
+
+    COMPOSER_INIT=
+    POST_COMPOSER_INIT=
+
+    if [ -z "$APP_FILES_COUNT" ]; then
+        echo -e "${Red}ERROR: Could not check files count in application root ./${APP_ROOT}.${Color_Off}"
+        docker-compose -f $DOCKER_COMPOSER_ONLY_FILE down
+        return 1
+    elif [ "$APP_FILES_COUNT" -ne "0" ]; then
         echo "Application root folder ./$APP_ROOT is not empty. Installation requires an empty folder."
         echo "Current folder contents:"
         ls -A $APP_ROOT
@@ -190,92 +210,102 @@ function ld_command_init_exec() {
         read -p "Type 'PLEASE-DELETE' to continue: " CHOICE
         case "$CHOICE" in
             'PLEASE-DELETE' )
-              echo "Clearing old things from the app root."
-              CLEAN_ROOT="rm -rf /var/www/{,.[!.],..?}*"
-              [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$CLEAN_ROOT\"${Color_Off}"
-              docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$CLEAN_ROOT"
-              ;;
-
+                echo "Clearing old things from the app root."
+                CLEAN_ROOT="rm -rf /var/www/{,.[!.],..?}*"
+                [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec composer bash -c \"$CLEAN_ROOT\"${Color_Off}"
+                docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c "$CLEAN_ROOT"
+                ;;
+            *)
+                echo -e "${Red}ERROR: Application can't be installed to a non-empty folder ./${APP_ROOT}.${Color_Off}"
+                docker-compose -f $DOCKER_COMPOSER_ONLY_FILE down
+                return 1
+                ;;
         esac
     fi
 
-    COMPOSER_INIT=''
-    POST_COMPOSER_INIT=
-    if [ "$(ls -A $APP_ROOT | wc -l | tr -d ' ')" -eq "0" ]; then
+    echo
+    echo -e "${BBlack}== Installing Drupal project ==${Color_Off}"
+    echo "Please select which version of drupal you wish to have."
+    echo "Alternatively you can install your codebase manually into $APP_ROOT."
+    echo "Options:"
+    echo " [8.8] - Drupal 8.8 recommended (drupal/recommended-project:~8.8.0)"
+    echo " [8.8-legacy] - Drupal 8.8 legacy (drupal/legacy-project:~8.8.0)"
+    echo " [8.7] - Drupal 8.7 using contrib template (drupal-composer/drupal-project:8.x-dev)"
+    echo " [N] - Thanks for the offer, but I'll handle codebase build manually."
+    read -p "Select version [default: 1]? " VERSION
+    case "$VERSION" in
+      ''|'8.8')
+        COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.8.0 /var/www --no-interaction --stability=dev'
+        POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^9.7'
+        echo -e "${Green}Creating project using ${BGreen}Drupal 8.8+${Green}, recommended structure (${BGreen}drupal/recommended-project:~8.8.0${Green}).${Color_Off}"
+        ;;
+      '8.8-legacy')
+        COMPOSER_INIT='composer -vv create-project drupal/legacy-project:~8.8.0 /var/www --no-interaction --stability=dev'
+        POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^9.7'
+        echo -e "${Green}Creating project using ${BGreen}Drupal 8.8+${Green}, legacy structure (${BGreen}drupal/legacy-project:~8.8.0${Green}).${Color_Off}"
+        ;;
+      '8.7')
+        COMPOSER_INIT='composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev'
+        echo -e "${Green}Creating project using ${BGreen}Drupal 8.7${Green}, contrib template (drupal-composer/drupal-project:8.x-dev).${Color_Off}"
+        ;;
+      *)
+        echo -e "${BYellow}Build phase skipped, no codebase built!${Color_Off}"
+        ;;
+    esac
 
-        echo
-        echo -e "${BBlack}== Installing Drupal project ==${Color_Off}"
-        echo "Please select which version of drupal you wish to have."
-        echo "Alternatively you can install your codebase manually into $APP_ROOT."
-        echo "Options:"
-        echo " [1] - Drupal 8.8 recommended (drupal/recommended-project:~8.8.0)"
-        echo " [2] - Drupal 8.8 legacy (drupal/legacy-project:~8.8.0)"
-        echo " [3] - Drupal 8.7 using contrib template (drupal-composer/drupal-project:8.x-dev)"
-        echo " [no] - Skip this, I'll build my codebase via other means"
-        read -p "select version [default: 1]? " VERSION
-        case "$VERSION" in
-          ''|'1'|1)
-            COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.8.0 /var/www --no-interaction --stability=dev'
-            POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^9.7'
-            echo -e "${Green}Creating project using ${BGreen}Drupal 8.8+${Green}, recommended structure (${BGreen}drupal/recommended-project:~8.8.0${Green}).${Color_Off}"
-            ;;
-          '2'|2)
-            COMPOSER_INIT='composer -vv create-project drupal/legacy-project:~8.8.0 /var/www --no-interaction --stability=dev'
-            POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^9.7'
-            echo -e "${Green}Creating project using ${BGreen}Drupal 8.8+${Green}, legacy structure (${BGreen}drupal/legacy-project:~8.8.0${Green}).${Color_Off}"
-            ;;
-          '3'|3)
-            COMPOSER_INIT='composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev'
-            echo -e "${Green}Creating project using ${BGreen}Drupal 8.7${Green}, contrib template (drupal-composer/drupal-project:8.x-dev).${Color_Off}"
-            ;;
-          *)
-            PROJECT=''
-            echo -e "${BYellow}Build phase skipped, no codebase built!${Color_Off}"
-            ;;
-        esac
-
-        if [ ! -z "$COMPOSER_INIT" ]; then
+    if [ ! -z "$COMPOSER_INIT" ]; then
+      # Use verbose output on this composer command.
+      [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec php bash -c \"COMPOSER_MEMORY_LIMIT=-1 $COMPOSER_INIT\"${Color_Off}"
+      # Turn off PHP memory limit for the create project -phase (only).
+      docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c "COMPOSER_MEMORY_LIMIT=-1  $COMPOSER_INIT"
+      OK=$?
+      if [ "$OK" -ne "0" ]; then
+          echo -e "${BRed}ERROR${Red}: Something went wrong when initializing the codebase.${Color_Off}"
+          echo -e "${Red}Check that required ports are not allocated (by other containers or programs) and re-configure them if needed.${Color_Off}"
+          docker-compose -f $DOCKER_COMPOSER_ONLY_FILE down
+          cd $CWD
+          return 1
+      fi
+      if [ -n "$POST_COMPOSER_INIT" ]; then
           # Use verbose output on this composer command.
-          [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$COMPOSER_INIT\"${Color_Off}"
-          docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$COMPOSER_INIT"
-          OK=$?
-          if [ "$OK" -ne "0" ]; then
-              echo -e "${Red}ERROR: Something went wrong when initializing the codebase.${Color_Off}"
-              echo -e "${Red}Check that required ports are not allocated (by other containers or programs) and re-configure them if needed.${Color_Off}"
-              cd $CWD
-              return 1
-          fi
-          if [ -n "$POST_COMPOSER_INIT" ]; then
-              # Use verbose output on this composer command.
-              [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"$POST_COMPOSER_INIT\"${Color_Off}"
-              docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c "$POST_COMPOSER_INIT"
-          fi
-          # This must be run after composer install.
-          $SCRIPT_NAME drupal-structure-fix
-          $SCRIPT_NAME drupal-files-folder-perms
-          echo
-          echo -e "${Green}Project created to ./$APP_ROOT folder (/var/www in containers).${Color_Off}"
-        else
-          echo -e "${Green}Projec root is set to ./$APP_ROOT folder (/var/www in containers).${Color_Off}"
-        fi
+          [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"COMPOSER_MEMORY_LIMIT=-1 $POST_COMPOSER_INIT\"${Color_Off}"
+          # Turn off PHP memory limit for these commands.
+          docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c "COMPOSER_MEMORY_LIMIT=-1 $POST_COMPOSER_INIT"
+      fi
 
-        echo
-    else
-      echo -en "${Red}Application root ./$APP_ROOT is not empty.${Color_Off}"
-    fi
-    echo
-    echo 'Bringing the containers up now... Please wait.'
-    $SCRIPT_NAME up
-    echo
-    echo -e "${BGreen}Codebase ready!!${Color_Off}"
-    echo
-    if [ -z "$COMPOSER_INIT" ]; then
-      echo -e "${Yellow}NOTE: Once Drupal is installed, you should remove write perms in sites/default -folder:${Color_Off}"
-      echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0755 web/sites/default'"
-      echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
-      echo "With these changes you can edit settings.php from host, but keep Drupal happy and allow it to write these files."
       echo
+      echo -e "${Green}Project created to ./$APP_ROOT folder (/var/www in containers).${Color_Off}"
+    else
+      echo -e "${Green}Project root is set to ./$APP_ROOT folder (/var/www in containers).${Color_Off}"
     fi
+
+    docker-compose -f $DOCKER_COMPOSER_ONLY_FILE down
+
+    if [ "$LD_VERBOSE" -ge "1" ] ; then
+        echo
+        echo -e "${BGreen}*******************************${Color_Off}"
+        echo -e "${BGreen}***** Project initialized *****${Color_Off}"
+        echo -e "${BGreen}*******************************${Color_Off}"
+        echo
+    fi
+    if [ -z "$COMPOSER_INIT" ]; then
+        echo
+        echo -e "${Yellow}NOTE: Once Drupal is installed, you should remove write perms in sites/default -folder:${Color_Off}"
+        echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0755 web/sites/default'"
+        echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
+        echo "With these changes you can edit settings.php from host, but keep Drupal happy and allow it to write these files."
+    fi
+
+    if [ "$LD_VERBOSE" -ge "1" ] ; then
+        echo
+        echo -e "${BGreen}Booting up the project now, please wait...${Color_Off}"
+        echo
+    fi
+    $SCRIPT_NAME up
+    # This must be run after composer install.
+    $SCRIPT_NAME drupal-structure-fix
+    $SCRIPT_NAME drupal-files-folder-perms
+
     $SCRIPT_NAME info
 }
 

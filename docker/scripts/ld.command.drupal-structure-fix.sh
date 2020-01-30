@@ -13,7 +13,7 @@ function ld_command_drupal-structure-fix_exec() {
       echo -e "${Red}ERROR: PHP container ('${CONTAINER_PHP:-php}')is not up.${Color_Off}"
       return 2
     fi
-    echo "Creating some folders to project below /var/www"
+    [ "$LD_VERBOSE" -ge "1" ] && echo -e "${Yellow}Creating some folders and setting file perms to project below ${BYellow}${APP_ROOT}${Yellow}.${Color_Off}"
     docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_PHP:-php} bash -c '[[ ! -d "config/sync" ]] &&  mkdir -vp config/sync'
     docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_PHP:-php} bash -c '[[ ! -d "web/sites/default/files" ]] &&  mkdir -vp web/sites/default/files'
     docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_PHP:-php} bash -c '[[ ! -w "web/sites/default/files" ]] &&  chmod -r 0777 web/sites/default/files'

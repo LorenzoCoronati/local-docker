@@ -11,8 +11,8 @@ function ld_command_configure-network-down_exec() {
     if [ "$LOCAL_IP" != "127.0.0.1" ]; then
         IP_ALIAS_SET=$(ifconfig lo0 | grep -c $LOCAL_IP)
         if ((  "$IP_ALIAS_SET" > "0" )); then
-            echo -e "${Yellow}Removing an IP alias may require your password. Your password is not stored anywhere by local-docker.${Color_Off}"
-            echo -e "${Yellow}Removing an IP alias from your loopback network interface.${Color_Off}"
+            [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}Removing an IP alias from your loopback network interface.${Color_Off}"
+            [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Yellow}Removing an IP alias may require your password. Your password is not stored anywhere by local-docker.${Color_Off}"
             sudo ifconfig lo0 delete $LOCAL_IP
         fi
     fi

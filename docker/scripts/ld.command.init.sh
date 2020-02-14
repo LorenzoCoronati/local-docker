@@ -91,13 +91,20 @@ function ld_command_init_exec() {
 
     echo
     echo -e "${BBlack}== Local development IP address ==${Color_Off}"
-    echo "Random 127.0.0.0./16 will be generated for you if you so wish?"
-    read -p "Use the random IP address 127.0.0.0./16 [Y/n]? " LOCAL_IP
-    case "$LOCAL_IP" in
-        'n'|'N'|'no'|'NO') LOCAL_IP='127.0.0.1';;
-        *) LAST=$((RANDOM % 240 + 3 )) && LOCAL_IP=$( printf "127.0.%d.%d\n" "$((RANDOM % 256))" "$LAST");;
-    esac
-    define_configuration_value LOCAL_IP $LOCAL_IP
+    # Do not re-generate IP if one is set!
+    if [ ! -z "$LOCAL_IP" ] && [ "$LOCAL_IP" != "127.0.0.1" ]; then
+        [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BGreen}INFO: ${Green}Local development IP is pre-configured in .env file.${Color_Off}"
+    else
+        echo "Random IP address is recommended for local development. Once can be generated for you now."
+        read -p "Generate random IP address [Y/n]? " GENERATE_LOCAL_IP
+        case "$GENERATE_LOCAL_IP" in
+            'n'|'N'|'no'|'NO') LOCAL_IP='127.0.0.1';;
+            *) LAST=$((RANDOM % 240 + 3 )) && LOCAL_IP=$( printf "127.0.%d.%d\n" "$((RANDOM % 256))" "$LAST");;
+        esac
+        # Remove spaces.
+        LOCAL_IP=$(echo "$LOCAL_IP" | sed 's/[[:space:]]/./g')
+        define_configuration_value LOCAL_IP $LOCAL_IP
+    fi
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}IP address is: ${BYellow}${LOCAL_IP}${Yellow}.${Color_Off}"
 
     echo

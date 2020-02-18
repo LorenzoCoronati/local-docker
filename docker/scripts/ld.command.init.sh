@@ -93,7 +93,7 @@ function ld_command_init_exec() {
     echo -e "${BBlack}== Local development IP address ==${Color_Off}"
     # Do not re-generate IP if one is set!
     if [ -n "$LOCAL_IP" ] && [ "$LOCAL_IP" != "127.0.0.1" ]; then
-        [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BGreen}INFO: ${Green}Local development IP is pre-configured in .env file.${Color_Off}"
+        [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BGreen}INFO: ${Green}Local development IP is pre-configured to ${LOCAL_IP} in .env file.${Color_Off}"
     else
         echo "Random IP address is recommended for local development. Once can be generated for you now."
         read -p "Generate random IP address [Y/n]? " GENERATE_LOCAL_IP

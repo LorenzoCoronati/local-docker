@@ -8,14 +8,14 @@ function ld_command_containers_exec() {
     COMM="docker ps -a --filter=name=${PROJECT_NAME}_".
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: $COMM${Color_Off}"
     PROJ=$($COMM)
-    if [ ! -z "$PROJ" ]; then
+    if [ -n "$PROJ" ]; then
         echo -e "${BYellow} === Project containers ===${Color_Off}"
         $COMM
     fi
     COMM="docker ps --filter=name=${PROJECT_NAME}-".
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: $COMM${Color_Off}"
     PROJ=$($COMM)
-    if [ ! -z "$PROJ" ]; then
+    if [ -n "$PROJ" ]; then
         echo -e "${BYellow} === Docker-sync containers ===${Color_Off}"
         $COMM
     fi

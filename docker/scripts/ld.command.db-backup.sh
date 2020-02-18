@@ -43,7 +43,7 @@ function ld_command_db-backup_exec() {
     cd $PROJECT_ROOT/${DATABASE_DUMP_STORAGE:-db_dumps}
     ln -sf ${FILENAME} db-backup--${DBNAME}--LATEST.sql.gz
 
-    if [ ! -z "$STARTED" ]; then
+    if [ -n "$STARTED" ]; then
        [ "$LD_VERBOSE" -ge "1" ] && echo -e "${Yellow}Stopping DB container.${Color_Off}"
        COMM="docker-compose -f $DOCKER_COMPOSE_FILE stop $CONTAINER_DB"
         [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: $COMM${Color_Off}"

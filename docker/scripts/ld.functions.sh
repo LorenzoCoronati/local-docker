@@ -9,13 +9,13 @@ function find_container() {
     fi
     TMP_NAME=$PROJECT_NAME"_"$1
     FOUND_NAME=$(docker ps  | grep "$TMP_NAME" | sed 's/.*\ //' )
-    if [ ! -z "$FOUND_NAME" ]; then
+    if [ -n "$FOUND_NAME" ]; then
         echo $FOUND_NAME;
     fi
 }
 
 function is_dockersync() {
-    [ ! -z "$(which docker-sync)" ] && [ -f "$PROJECT_ROOT/$DOCKERSYNC_FILE" ]
+    [ -n "$(which docker-sync)" ] && [ -f "$PROJECT_ROOT/$DOCKERSYNC_FILE" ]
 }
 
 # Copy conf of your choosing to project root, destroy leftovers.
@@ -195,7 +195,7 @@ function define_configuration_value() {
 function osx_version() {
   VERSION_LONG=$(defaults read loginwindow SystemVersionStampAsString)
   VERSION_SHORT=$(echo $VERSION_LONG | cut -d'.' -f1 -f2)
-  if [ ! -z "$VERSION_SHORT" ]; then
+  if [ -n "$VERSION_SHORT" ]; then
     echo $VERSION_SHORT;
     return;
   fi
@@ -208,17 +208,17 @@ function osx_version() {
 # and they behave differently. Trying to catch all the flavors and behaviours here.
 function required_binaries_check() {
 
-  if [ ! -z "$(which docker | grep 'not found')" ] ||
+  if [ -n "$(which docker | grep 'not found')" ] ||
       [ "$(which docker >/dev/null 2>&1 ; echo $?)" -ne "0" ] ; then
     return 1
   fi
 
-  if [ ! -z "$(which docker-compose | grep 'not found')" ] ||
+  if [ -n "$(which docker-compose | grep 'not found')" ] ||
       [ "$(which docker-compose >/dev/null 2>&1 ; echo $?)" -ne "0" ] ; then
     return 2
   fi
 
-  if [ ! -z "$(which git | grep 'not found')" ] ||
+  if [ -n "$(which git | grep 'not found')" ] ||
       [ "$(which git >/dev/null 2>&1 ; echo $?)" -ne "0" ] ; then
     return 3
   fi

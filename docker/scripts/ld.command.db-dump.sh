@@ -38,13 +38,13 @@ function ld_command_db-dump_exec() {
     cd $PROJECT_ROOT/${DATABASE_DUMP_STORAGE:-db_dumps}
     ln -sf ${FILENAME} db-container--FULL--LATEST.sql.gz
 
-    if [ ! -z "$STARTED" ]; then
+    if [ -n "$STARTED" ]; then
        [ "$LD_VERBOSE" -ge "1" ] && echo -e "${Yellow}Stopping DB container.${Color_Off}"
        COMM="docker-compose -f $DOCKER_COMPOSE_FILE stop $CONTAINER_DB"
         [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: $COMM${Color_Off}"
        $COMM
     fi
-    if [ ! -z "$DOCKER_SYNC_STARTED" ]; then
+    if [ -n "$DOCKER_SYNC_STARTED" ]; then
         [ "$LD_VERBOSE" -ge "1" ] && echo 'Turning off docker-sync (stop), please wait...'
         docker-sync stop
     fi

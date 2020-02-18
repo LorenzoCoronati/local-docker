@@ -92,7 +92,7 @@ function ld_command_init_exec() {
     echo
     echo -e "${BBlack}== Local development IP address ==${Color_Off}"
     # Do not re-generate IP if one is set!
-    if [ ! -z "$LOCAL_IP" ] && [ "$LOCAL_IP" != "127.0.0.1" ]; then
+    if [ -n "$LOCAL_IP" ] && [ "$LOCAL_IP" != "127.0.0.1" ]; then
         [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BGreen}INFO: ${Green}Local development IP is pre-configured in .env file.${Color_Off}"
     else
         echo "Random IP address is recommended for local development. Once can be generated for you now."
@@ -198,7 +198,7 @@ function ld_command_init_exec() {
     APP_FILES_COUNT=$(echo $APP_FILES_COUNT |tr -d '\r' |tr -d '\n' |tr -d ' ')
 
     if [ "$LD_VERBOSE" -ge "2" ]; then
-        [ ! -z "$APP_FILES_COUNT" ] && [ "$APP_FILES_COUNT" -eq "0" ] && echo -e "${APP_FILES_COUNT} - ${BGreen}CLEAN${Color_Off}" || echo -e " - ${Red}ERROR${Color_Off}"
+        [ -n "$APP_FILES_COUNT" ] && [ "$APP_FILES_COUNT" -eq "0" ] && echo -e "${APP_FILES_COUNT} - ${BGreen}CLEAN${Color_Off}" || echo -e " - ${Red}ERROR${Color_Off}"
         sleep 1
     fi
 
@@ -260,7 +260,7 @@ function ld_command_init_exec() {
         ;;
     esac
 
-    if [ ! -z "$COMPOSER_INIT" ]; then
+    if [ -n "$COMPOSER_INIT" ]; then
       # Use verbose output on this composer command.
       [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec php bash -c \"COMPOSER_MEMORY_LIMIT=-1 $COMPOSER_INIT\"${Color_Off}"
       # Turn off PHP memory limit for the create project -phase (only).

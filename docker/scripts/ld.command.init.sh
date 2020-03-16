@@ -11,6 +11,8 @@ function ld_command_init_exec() {
         echo -e "${BRed}This project is already initialized. ${Color_Off}"
         echo -e "${Yellow}Are you really sure you want to re-initialize the project? ${Color_Off}"
         read -p "[yes/NO] " ANSWER
+        # Lowercase.
+        ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
         case "$ANSWER" in
             'y'|'yes')
                 if [ -e "$DOCKERSYNC_FILE" ] || [ -e "$DOCKER_COMPOSE_FILE" ]; then
@@ -53,6 +55,8 @@ function ld_command_init_exec() {
         echo  "Provide a string using characters a-z, 0-9, - and _ (no dots, must start and end with a character a-z)."
         PROJECT_NAME=${PROJECT_NAME:-$(basename $PROJECT_ROOT)}
         read -p "Project name ['$PROJECT_NAME']: " ANSWER
+        # Lowercase.
+        ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
         if [ -z "$ANSWER" ]; then
             VALID=1
         elif [[ "$ANSWER" =~  ^(([a-z])([a-z0-9\_\-]*))?([a-z])$ ]]; then
@@ -107,9 +111,11 @@ function ld_command_init_exec() {
         [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BGreen}INFO: ${Green}Local development IP is pre-configured to ${LOCAL_IP} in .env file.${Color_Off}"
     else
         echo "Random IP address is recommended for local development. Once can be generated for you now."
-        read -p "Generate random IP address [Y/n]? " GENERATE_LOCAL_IP
-        case "$GENERATE_LOCAL_IP" in
-            'n'|'N'|'no'|'NO') LOCAL_IP='127.0.0.1';;
+        read -p "Generate random IP address [Y/n]? " ANSWER
+        # Lowercase.
+        ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
+        case "$ANSWER" in
+            'n'|'no') LOCAL_IP='127.0.0.1';;
             *) LAST=$((RANDOM % 240 + 3 )) && LOCAL_IP=$( printf "127.0.%d.%d\n" "$((RANDOM % 256))" "$LAST");;
         esac
         # Remove spaces.
@@ -225,8 +231,10 @@ function ld_command_init_exec() {
         echo "Current folder contents:"
         ls -A $APP_ROOT
         echo -en "${Red}WARNING: If you continue all of these will be deleted. ${Color_Off}"
-        read -p "Type 'PLEASE-DELETE' to continue: " CHOICE
-        case "$CHOICE" in
+        read -p "Type 'PLEASE-DELETE' to continue: " ANSWER
+        # Lowercase.
+        ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
+        case "$ANSWER" in
             'PLEASE-DELETE' )
                 echo "Clearing old things from the app root."
                 CLEAN_ROOT="rm -rf /var/www/{,.[!.],..?}*"
@@ -250,8 +258,10 @@ function ld_command_init_exec() {
     echo " [8.8-legacy] - Drupal 8.8 legacy (drupal/legacy-project:~8.8.0)"
     echo " [8.7] - Drupal 8.7 using contrib template (drupal-composer/drupal-project:8.x-dev)"
     echo " [N] - Thanks for the offer, but I'll handle codebase build manually."
-    read -p "Select version [default: 1]? " VERSION
-    case "$VERSION" in
+    read -p "Select version [default: 1]? " ANSWER
+    # Lowercase.
+    ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
+    case "$ANSWER" in
       ''|'8.8')
         COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.8.0 /var/www --no-interaction --stability=dev'
         POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^9.7'

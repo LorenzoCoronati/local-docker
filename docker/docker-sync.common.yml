@@ -25,6 +25,18 @@ syncs:
       'web/themes/*/node_modules',
       'web/themes/*/*/node_modules',
       'web/sites/*/files']
+
+    sync_userid: '${DOCKER_SYNC_UID}'
+    sync_groupid: '${DOCKER_SYNC_GID}'
+
+    # monit can be used to monitor the health of unison in the native_osx strategy and can restart unison if it detects a problem
+    # optional: use this to switch monit monitoring on
+    monit_enable: true
+    # optional: use this to change how many seconds between each monit check (cycle)
+    monit_interval: 5
+    # optional: use this to change how many consecutive times high cpu usage must be observed before unison is restarted
+    monit_high_cpu_cycles: 2
+
     # enable terminal_notifier. On every sync sends a Terminal Notification regarding files being synced. ( Mac Only ).
     # good thing in case you are developing and want to know exactly when your changes took effect.
     # be aware in case of unison this only gives you a notification on the initial sync, not the syncs after changes.

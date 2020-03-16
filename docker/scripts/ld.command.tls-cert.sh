@@ -51,15 +51,22 @@ function ld_command_tls-cert_exec() {
 
     # Heavily borrowed from https://github.com/abmruman/traefik-docker-compose/
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} Generating random key...${Color_Off}"
-    openssl genrsa -out ${CERTFILEBASE_FULL}.key >/dev/null
+
+    COMM="openssl genrsa -out ${CERTFILEBASE_FULL}.key"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: ${COMM} >/dev/null${Color_Off}"
+    $COMM >/dev/null
 
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} Generating CSR file...${Color_Off}"
-    openssl req -new -key ${CERTFILEBASE_FULL}.key -out ${CERTFILEBASE_FULL}.csr -config ${CONF_FILE}
+    COMM="openssl req -new -key ${CERTFILEBASE_FULL}.key -out ${CERTFILEBASE_FULL}.csr -config ${CONF_FILE}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: ${COMM}${Color_Off}"
+    $COMM
 
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} Generating TLS file (the HTTPS certificate) ...${Color_Off}"
-    openssl x509 -req -days 365 -in ${CERTFILEBASE_FULL}.csr -signkey ${CERTFILEBASE_FULL}.key -out ${CERTFILEBASE_FULL}.crt -extensions req_ext -extfile ${CERTFILEBASE_FULL}.conf
+    COMM="openssl x509 -req -days 365 -in ${CERTFILEBASE_FULL}.csr -signkey ${CERTFILEBASE_FULL}.key -out ${CERTFILEBASE_FULL}.crt -extensions req_ext -extfile ${CERTFILEBASE_FULL}.conf"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: ${COMM}${Color_Off}"
+    $COMM
 
-    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} Writing instructions for Traefik how to use our certs..${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} Writing instructions for Traefik how to use our certs.${Color_Off}"
     echo "tls:"                                             > ${CERTS_FILE}
     echo "  stores:"                                        >> ${CERTS_FILE}
     echo "    default:"                                     >> ${CERTS_FILE}
@@ -68,7 +75,7 @@ function ld_command_tls-cert_exec() {
     echo "          keyFile: ${CERTFILENAME}.key"          >> ${CERTS_FILE}
     echo "#        - certFile: /path/to/other-domain.cert"  >> ${CERTS_FILE}
     echo "#          keyFile: /path/to/other-domain.key"    >> ${CERTS_FILE}
-    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} You may generate more certs manually, and then add the files to ./docker/certs/certs.yml file..${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} You may generate more certs manually, and then add the files to ./docker/certs/certs.yml file.${Color_Off}"
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} Traefik uses them if the domain matches, and generates a temporary cert if no matching cert file is found${Color_Off}"
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} More info in local-docker README file.${Color_Off}"
 

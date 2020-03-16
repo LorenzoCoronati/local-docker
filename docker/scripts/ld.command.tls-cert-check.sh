@@ -11,8 +11,10 @@ function ld_command_tls-cert-check_exec() {
     CERTFILEBASE_FULL="${CERT_FOLDER}/${CERTFILENAME}"
 
 
-    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} Checking certificate in: ${CERTFILEBASE_FULL}.crt${Color_Off}"
-    openssl x509 -in ${CERTFILEBASE_FULL}.crt -noout -text
+    [ "$LD_VERBOSE" -ge "1" ] && echo -e "${BYellow}INFO:${Yellow} Checking certificate in: ${CERTFILEBASE_FULL}.crt${Color_Off}"
+    COMM="openssl x509 -in ${CERTFILEBASE_FULL}.crt -noout -text"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: ${COMM}${Color_Off}"
+    $COMM
 
 }
 

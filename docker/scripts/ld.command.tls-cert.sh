@@ -67,14 +67,19 @@ function ld_command_tls-cert_exec() {
     $COMM
 
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} Writing instructions for Traefik how to use our certs.${Color_Off}"
-    echo "tls:"                                             > ${CERTS_FILE}
-    echo "  stores:"                                        >> ${CERTS_FILE}
-    echo "    default:"                                     >> ${CERTS_FILE}
-    echo "        defaultCertificate:"                      >> ${CERTS_FILE}
-    echo "        - certFile: ${CERTFILENAME}.crt"         >> ${CERTS_FILE}
-    echo "          keyFile: ${CERTFILENAME}.key"          >> ${CERTS_FILE}
-    echo "#        - certFile: /path/to/other-domain.cert"  >> ${CERTS_FILE}
-    echo "#          keyFile: /path/to/other-domain.key"    >> ${CERTS_FILE}
+    echo "# https://docs.traefik.io/v2.0/https/tls/"            > ${CERTS_FILE}
+    echo "tls:"                                                 >> ${CERTS_FILE}
+    echo "  stores:"                                            >> ${CERTS_FILE}
+    echo "    default:"                                         >> ${CERTS_FILE}
+    echo "        defaultCertificate:"                          >> ${CERTS_FILE}
+    echo "          certFile: /certs/${CERTFILENAME}.crt"       >> ${CERTS_FILE}
+    echo "          keyFile: /certs/${CERTFILENAME}.key"        >> ${CERTS_FILE}
+    echo "#  certificates:"                                     >> ${CERTS_FILE}
+    echo "#  # tls.certificates is array"                       >> ${CERTS_FILE}
+    echo "#    - certFile: /path/to/other-domain.cert"          >> ${CERTS_FILE}
+    echo "#      keyFile: /path/to/other-domain.key"            >> ${CERTS_FILE}
+    echo "#    - certFile: /path/to/more-domain.cert"           >> ${CERTS_FILE}
+    echo "#      keyFile: /path/to/more-domain.key"             >> ${CERTS_FILE}
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} You may generate more certs manually, and then add the files to ./docker/certs/certs.yml file.${Color_Off}"
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} Traefik uses them if the domain matches, and generates a temporary cert if no matching cert file is found${Color_Off}"
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO:${Yellow} More info in local-docker README file.${Color_Off}"

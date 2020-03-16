@@ -145,18 +145,6 @@ function ld_command_init_exec() {
     define_configuration_value PROJECT_PHP_VERSION $PROJECT_PHP_VERSION
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}Using PHP version: ${BYellow}$PROJECT_PHP_VERSION${Yellow}.${Color_Off}"
 
-    # Suggest Skeleton cleanup only when it is relevant.
-    if [ -e "$DOCKERSYNC_FILE" ] || [ -e "$DOCKER_COMPOSE_FILE" ]; then
-        echo -e "${BYellow}WARNING: ${Yellow}There is docker-compose and/or docker-sync configuration (.yml) files in project root.${Color_Off}"
-        echo -e "${Yellow}If you continue your containers with their volumes ${BYellow}will be wiped out${Yellow}.${Color_Off}"
-        echo -e "This does not delete your application root directory, but ${BYellow}database volumes may well will be destroyed.${Color_Off}"
-        read -p "Continue? [y/N]" CHOICE
-        case "$CHOICE" in
-            y|Y|'yes'|'YES' ) ;;
-            * ) echo "Cancelled." && return 1;;
-        esac
-    fi
-
     echo
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}Setting up docker-compose and docker-sync files for project type '${BYellow}$TYPE${Yellow}'."
 

@@ -77,24 +77,26 @@ function ld_command_init_exec() {
 
     VALID=0
     while [ "$VALID" -eq "0" ]; do
-      echo
-      echo  -e "${BBlack}== Local development base domain == ${Color_Off}"
-      echo -e "Do not add protocol nor www -part but just the domain name. It is recommended to use domain ending with ${BBlack}.ld${Black}.${Color_Off}"
-      DEFAULT=${PROJECT_NAME}.ld
-      LOCAL_DOMAIN=${LOCAL_DOMAIN:-${DEFAULT}}
-      read -p "Domain [$LOCAL_DOMAIN] " ANSWER
-      TEST=$(echo $ANSWER | egrep -e '^(([a-zA-Z0-9])([a-zA-Z0-9\.]*))?([a-zA-Z0-9])$')
-      if [ -z "$ANSWER" ]; then
-          VALID=1
-      elif [ "${#TEST}" -gt 0 ]; then
-          LOCAL_DOMAIN=$ANSWER
-          VALID=1
-      else
-          echo -e "${Red}ERROR: Domain name can contain only alphabetic characters (a-z), numbers (0-9), hyphens (-), underscoreds (_) and dots (.).${Color_Off}"
-          echo -e "${Red}ERROR: Also the domain name must not start or end with underscore, hyphen or dot.${Color_Off}"
-          sleep 2
-          echo
-      fi
+        echo
+        echo  -e "${BBlack}== Local development base domain == ${Color_Off}"
+        echo -e "Do not add protocol nor www -part but just the domain name. It is recommended to use domain ending with ${BBlack}.local${Black}.${Color_Off}"
+        DEFAULT=${PROJECT_NAME}.local
+        LOCAL_DOMAIN=${LOCAL_DOMAIN:-${DEFAULT}}
+        read -p "Domain [$LOCAL_DOMAIN] " ANSWER
+        # Lowercase.
+        ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
+        TEST=$(echo $ANSWER | egrep -e '^(([a-zA-Z0-9])([a-zA-Z0-9\.]*))?([a-zA-Z0-9])$')
+        if [ -z "$ANSWER" ]; then
+            VALID=1
+        elif [ "${#TEST}" -gt 0 ]; then
+            LOCAL_DOMAIN=$ANSWER
+            VALID=1
+        else
+            echo -e "${Red}ERROR: Domain name can contain only alphabetic characters (a-z), numbers (0-9), hyphens (-), underscoreds (_) and dots (.).${Color_Off}"
+            echo -e "${Red}ERROR: Also the domain name must not start or end with underscore, hyphen or dot.${Color_Off}"
+            sleep 2
+            echo
+        fi
     done
     # Remove spaces.
     LOCAL_DOMAIN=$(echo "$LOCAL_DOMAIN" | sed 's/[[:space:]]/./g')

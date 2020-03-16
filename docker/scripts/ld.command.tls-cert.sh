@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # File
 #
-# This file contains run-tests -command for local-docker script ld.sh.
+# This file contains tls-cert -command for local-docker script ld.sh.
 
 function ld_command_tls-cert_exec() {
     CERT_FOLDER="./docker/certs"

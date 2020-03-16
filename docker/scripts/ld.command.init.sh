@@ -13,7 +13,18 @@ function ld_command_init_exec() {
         read -p "[yes/NO] " ANSWER
         case "$ANSWER" in
             'y'|'yes')
-                echo -e "${Green}Sure, thanks for the confirmation.${Color_Off}"
+                if [ -e "$DOCKERSYNC_FILE" ] || [ -e "$DOCKER_COMPOSE_FILE" ]; then
+                    echo -e "${BYellow}WARNING: ${Yellow}There is docker-compose and/or docker-sync configuration (.yml) files in project root.${Color_Off}"
+                    echo -e "${Yellow}If you continue and rename your volumes ${BYellow}you may loose data (database).${Yellow}.${Color_Off}"
+                    echo -e "${Yellow}It is highly recommended to backup your database before continuing:${Color_Off}"
+                    echo -e "${Yellow}./ld db-dump${Color_Off}"
+                    read -p "Remove these files? [Y/n/cancel] " CHOICE
+                    CHOICE="$(echo ${CHOICE} | tr [A-Z] [a-z])"
+                    case "$CHOICE" in
+                        y|'yes'|'') rm -f $DOCKERSYNC_FILE $DOCKER_COMPOSE_FILE 6& echo "Removed." ;;
+                        c|'cancel') echo "Cancelled." && exit 1;;
+                    esac
+                fi
                 ;;
             *)
               echo -e "${BRed}Initialization cancelled.${Color_Off}"

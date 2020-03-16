@@ -110,6 +110,19 @@ subdomains:
 - Whoami (**only** request headers ) -
   [http://**whoami**.example.com](http://whoami.example.com)
 
+#### SSL/TLS certificates, ie. HTTPS for local
+
+During the initial project initialisation local-docker generates self-signed SSL/TLS cerificates for your local development needs. Certificate is created for `*.example.local` -domain, which means it covers all auto-generated subdomains you have.
+
+If you wish to have automatic HTTP -> HTTPS redirection for you local check your `docker-compose.yml` file and comment out some lines below `label` -key (under `nginx` or any other service).
+
+You can also have several certificates for multiple domains. Place generated certificates inside `docker/certs` folder and adjust `docker/certs/certs.yml` file.
+
+Traefik will terminate encrypted requests and pass forward unencrypted queries.
+
+Check also section "Drupal and local HTTPS".
+
+
 #### Install Drupal
 
 Once the local is up and running you can install Drupal.
@@ -179,6 +192,47 @@ and by default credentials `drupal`/`drupal` with database named
 However, editing `settings.php` manually for database connection is
 usually necessary only if you are applying `local-docker` on top of an
 existing Skeleton -project.
+
+### Drupal and local HTTPS
+
+Since Traefik acts as proxy and terminates encrypted connections, `nginx` won't see the requests coming in as encrypted, and therefore Drupal needs some help recognizing them, too.
+
+Place this inside your `sites/XXX/settings.php` file to fix the issue:
+
+	/**
+	 * Tell all Drupal sites that we're running behind an HTTPS proxy.
+	 *
+	 * @see https://www.drupal.org/node/425990
+	 */
+	
+	// Drupal 7 configuration.
+	if (explode('.', VERSION)[0] == 7) {
+	  $conf['reverse_proxy'] = TRUE;
+	  // Do NOT do this in publicly accessbile site.	  $conf['reverse_proxy_addresses'] = [@$_SERVER['REMOTE_ADDR']];
+	
+	  // Force the protocol provided by the proxy. This isn't always done
+	  // automatically in Drupal 7. Otherwise, you'll get mixed content warnings
+	  // and/or some assets will be blocked by the browser.
+	  if (php_sapi_name() != 'cli') {
+	
+	    if (isset($_SERVER['SITE_SUBDIR']) && isset($_SERVER['RAW_HOST'])) {
+	      // Handle subdirectory mode (e.g. example.com/site1).
+	      $base_url = $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['RAW_HOST'] . '/' . $_SERVER['SITE_SUBDIR'];
+	    }
+	    else {
+	      $base_url = $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_X_FORWARDED_HOST'];
+	    }
+	  }
+	}
+	// Drupal 8 configuration.
+	else {
+	  $settings['reverse_proxy'] = TRUE;
+	  // Do NOT do this in publicly accessbile site.
+	  $settings['reverse_proxy_addresses'] = [@$_SERVER['REMOTE_ADDR']];
+	  // See https://symfony.com/doc/current/deployment/proxies.html.
+	  $settings['reverse_proxy_trusted_headers'] = \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_ALL
+	}
+
 
 ### Daily usage
 

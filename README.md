@@ -230,7 +230,7 @@ Place this inside your `sites/XXX/settings.php` file to fix the issue:
 	  // Do NOT do this in publicly accessbile site.
 	  $settings['reverse_proxy_addresses'] = [@$_SERVER['REMOTE_ADDR']];
 	  // See https://symfony.com/doc/current/deployment/proxies.html.
-	  $settings['reverse_proxy_trusted_headers'] = \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_ALL
+	  $settings['reverse_proxy_trusted_headers'] = \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_ALL;
 	}
 
 

@@ -177,8 +177,7 @@ done via your site's `settings.php` file. Where Skeleton may use
 and by default credentials `drupal`/`drupal` with database named
 `drupal` (simple!). Example for Drupal 8:
 
-    <?php
-      $databases['default']['default'] = [
+    $databases['default']['default'] = [
         'database' => 'drupal',
         'username' => 'drupal',
         'password' => 'drupal',
@@ -199,39 +198,39 @@ Since Traefik acts as proxy and terminates encrypted connections, `nginx` won't 
 
 Place this inside your `sites/XXX/settings.php` file to fix the issue:
 
-	/**
-	 * Tell all Drupal sites that we're running behind an HTTPS proxy.
-	 *
-	 * @see https://www.drupal.org/node/425990
-	 */
-	
-	// Drupal 7 configuration.
-	if (explode('.', VERSION)[0] == 7) {
-	  $conf['reverse_proxy'] = TRUE;
-	  // Do NOT do this in publicly accessbile site.	  $conf['reverse_proxy_addresses'] = [@$_SERVER['REMOTE_ADDR']];
-	
-	  // Force the protocol provided by the proxy. This isn't always done
-	  // automatically in Drupal 7. Otherwise, you'll get mixed content warnings
-	  // and/or some assets will be blocked by the browser.
-	  if (php_sapi_name() != 'cli') {
-	
-	    if (isset($_SERVER['SITE_SUBDIR']) && isset($_SERVER['RAW_HOST'])) {
-	      // Handle subdirectory mode (e.g. example.com/site1).
-	      $base_url = $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['RAW_HOST'] . '/' . $_SERVER['SITE_SUBDIR'];
-	    }
-	    else {
-	      $base_url = $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_X_FORWARDED_HOST'];
-	    }
-	  }
-	}
-	// Drupal 8 configuration.
-	else {
-	  $settings['reverse_proxy'] = TRUE;
-	  // Do NOT do this in publicly accessbile site.
-	  $settings['reverse_proxy_addresses'] = [@$_SERVER['REMOTE_ADDR']];
-	  // See https://symfony.com/doc/current/deployment/proxies.html.
-	  $settings['reverse_proxy_trusted_headers'] = \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_ALL;
-	}
+    /**
+     * Tell all Drupal sites that we're running behind an HTTPS proxy.
+     *
+     * @see https://www.drupal.org/node/425990
+     */
+
+    // Drupal 7 configuration.
+    if (explode('.', VERSION)[0] == 7) {
+      $conf['reverse_proxy'] = TRUE;
+      // Do NOT do this in publicly accessbile site.      $conf['reverse_proxy_addresses'] = [@$_SERVER['REMOTE_ADDR']];
+
+      // Force the protocol provided by the proxy. This isn't always done
+      // automatically in Drupal 7. Otherwise, you'll get mixed content warnings
+      // and/or some assets will be blocked by the browser.
+      if (php_sapi_name() != 'cli') {
+
+        if (isset($_SERVER['SITE_SUBDIR']) && isset($_SERVER['RAW_HOST'])) {
+          // Handle subdirectory mode (e.g. example.com/site1).
+          $base_url = $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['RAW_HOST'] . '/' . $_SERVER['SITE_SUBDIR'];
+        }
+        else {
+          $base_url = $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_X_FORWARDED_HOST'];
+        }
+      }
+    }
+    // Drupal 8 configuration.
+    else {
+      $settings['reverse_proxy'] = TRUE;
+      // Do NOT do this in publicly accessbile site.
+      $settings['reverse_proxy_addresses'] = [@$_SERVER['REMOTE_ADDR']];
+      // See https://symfony.com/doc/current/deployment/proxies.html.
+      $settings['reverse_proxy_trusted_headers'] = \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_ALL;
+    }
 
 
 ### Daily usage

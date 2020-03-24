@@ -59,12 +59,12 @@ function ld_command_init_exec() {
         ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
         if [ -z "$ANSWER" ]; then
             VALID=1
-        elif [[ "$ANSWER" =~  ^(([a-z])([a-z0-9\_\-]*))?([a-z])$ ]]; then
+        elif [[ "$ANSWER" =~  ^(([a-z])([a-z0-9\-]*))?([a-z])$ ]]; then
             PROJECT_NAME=$ANSWER
             VALID=1
         else
-            echo -e "${Red}ERROR: Project name can contain only alphabetic characters (a-z), numbers (0-9), underscore (_) and hyphen (-).${Color_Off}"
-            echo -e "${Red}ERROR: Also the project name must not start or end with underscore or hyphen.${Color_Off}"
+            echo -e "${Red}ERROR: Project name can contain only alphabetic characters (a-z), numbers (0-9) and hyphen (-).${Color_Off}"
+            echo -e "${Red}ERROR: Also the project name must not start or end with hyphen or number.${Color_Off}"
             sleep 2
             echo
         fi
@@ -92,8 +92,8 @@ function ld_command_init_exec() {
             LOCAL_DOMAIN=$ANSWER
             VALID=1
         else
-            echo -e "${Red}ERROR: Domain name can contain only alphabetic characters (a-z), numbers (0-9), hyphens (-), underscores (_) and dots (.).${Color_Off}"
-            echo -e "${Red}ERROR: Also the domain name must not start or end with underscore, hyphen or dot.${Color_Off}"
+            echo -e "${Red}ERROR: Domain name can contain only alphabetic characters (a-z), numbers (0-9), hyphens (-) and dots (.).${Color_Off}"
+            echo -e "${Red}ERROR: Also the domain name must not start or end with hyphen or dot.${Color_Off}"
             sleep 2
             echo
         fi

@@ -11,9 +11,22 @@ function ld_command_init_exec() {
         echo -e "${BRed}This project is already initialized. ${Color_Off}"
         echo -e "${Yellow}Are you really sure you want to re-initialize the project? ${Color_Off}"
         read -p "[yes/NO] " ANSWER
+        # Lowercase.
+        ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
         case "$ANSWER" in
             'y'|'yes')
-                echo -e "${Green}Sure, thanks for the confirmation.${Color_Off}"
+                if [ -e "$DOCKERSYNC_FILE" ] || [ -e "$DOCKER_COMPOSE_FILE" ]; then
+                    echo -e "${BYellow}WARNING: ${Yellow}There is docker-compose and/or docker-sync configuration (.yml) files in project root.${Color_Off}"
+                    echo -e "${Yellow}If you continue and rename your volumes ${BYellow}you may lose data (database).${Color_Off}"
+                    echo -e "${Yellow}It is highly recommended to backup your database before continuing:${Color_Off}"
+                    echo -e "${Yellow}./ld db-dump${Color_Off}"
+                    read -p "Remove these files? [Y/n/cancel] " CHOICE
+                    CHOICE="$(echo ${CHOICE} | tr [A-Z] [a-z])"
+                    case "$CHOICE" in
+                        y|'yes'|'') rm -f $DOCKERSYNC_FILE $DOCKER_COMPOSE_FILE 6& echo "Removed." ;;
+                        n|'no'|c|'cancel') echo "Cancelled reinitialization of docker-compose/docker-sync config." && exit 1;;
+                    esac
+                fi
                 ;;
             *)
               echo -e "${BRed}Initialization cancelled.${Color_Off}"
@@ -42,14 +55,16 @@ function ld_command_init_exec() {
         echo  "Provide a string using characters a-z, 0-9, - and _ (no dots, must start and end with a character a-z)."
         PROJECT_NAME=${PROJECT_NAME:-$(basename $PROJECT_ROOT)}
         read -p "Project name ['$PROJECT_NAME']: " ANSWER
+        # Lowercase.
+        ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
         if [ -z "$ANSWER" ]; then
             VALID=1
-        elif [[ "$ANSWER" =~  ^(([a-z])([a-z0-9\_\-]*))?([a-z])$ ]]; then
+        elif [[ "$ANSWER" =~  ^(([a-z])([a-z0-9\-]*))?([a-z])$ ]]; then
             PROJECT_NAME=$ANSWER
             VALID=1
         else
-            echo -e "${Red}ERROR: Project name can contain only alphabetic characters (a-z), numbers (0-9), underscore (_) and hyphen (-).${Color_Off}"
-            echo -e "${Red}ERROR: Also the project name must not start or end with underscore or hyphen.${Color_Off}"
+            echo -e "${Red}ERROR: Project name can contain only alphabetic characters (a-z), numbers (0-9) and hyphen (-).${Color_Off}"
+            echo -e "${Red}ERROR: Also the project name must not start or end with hyphen or number.${Color_Off}"
             sleep 2
             echo
         fi
@@ -62,24 +77,26 @@ function ld_command_init_exec() {
 
     VALID=0
     while [ "$VALID" -eq "0" ]; do
-      echo
-      echo  -e "${BBlack}== Local development base domain == ${Color_Off}"
-      echo -e "Do not add protocol nor www -part but just the domain name. It is recommended to use domain ending with ${BBlack}.ld${Black}.${Color_Off}"
-      DEFAULT=${PROJECT_NAME}.ld
-      LOCAL_DOMAIN=${LOCAL_DOMAIN:-${DEFAULT}}
-      read -p "Domain [$LOCAL_DOMAIN] " ANSWER
-      TEST=$(echo $ANSWER | egrep -e '^(([a-zA-Z0-9])([a-zA-Z0-9\.]*))?([a-zA-Z0-9])$')
-      if [ -z "$ANSWER" ]; then
-          VALID=1
-      elif [ "${#TEST}" -gt 0 ]; then
-          LOCAL_DOMAIN=$ANSWER
-          VALID=1
-      else
-          echo -e "${Red}ERROR: Domain name can contain only alphabetic characters (a-z), numbers (0-9), hyphens (-), underscoreds (_) and dots (.).${Color_Off}"
-          echo -e "${Red}ERROR: Also the domain name must not start or end with underscore, hyphen or dot.${Color_Off}"
-          sleep 2
-          echo
-      fi
+        echo
+        echo  -e "${BBlack}== Local development base domain == ${Color_Off}"
+        echo -e "Do not add protocol nor www part but just the domain name. It is recommended to use domain ending with ${BBlack}.local${Black}.${Color_Off}"
+        DEFAULT=${PROJECT_NAME}.local
+        LOCAL_DOMAIN=${LOCAL_DOMAIN:-${DEFAULT}}
+        read -p "Domain [$LOCAL_DOMAIN] " ANSWER
+        # Lowercase.
+        ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
+        TEST=$(echo $ANSWER | egrep -e '^(([a-zA-Z0-9])([a-zA-Z0-9\.]*))?([a-zA-Z0-9])$')
+        if [ -z "$ANSWER" ]; then
+            VALID=1
+        elif [ "${#TEST}" -gt 0 ]; then
+            LOCAL_DOMAIN=$ANSWER
+            VALID=1
+        else
+            echo -e "${Red}ERROR: Domain name can contain only alphabetic characters (a-z), numbers (0-9), hyphens (-) and dots (.).${Color_Off}"
+            echo -e "${Red}ERROR: Also the domain name must not start or end with hyphen or dot.${Color_Off}"
+            sleep 2
+            echo
+        fi
     done
     # Remove spaces.
     LOCAL_DOMAIN=$(echo "$LOCAL_DOMAIN" | sed 's/[[:space:]]/./g')
@@ -96,9 +113,11 @@ function ld_command_init_exec() {
         [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BGreen}INFO: ${Green}Local development IP is pre-configured to ${LOCAL_IP} in .env file.${Color_Off}"
     else
         echo "Random IP address is recommended for local development. Once can be generated for you now."
-        read -p "Generate random IP address [Y/n]? " GENERATE_LOCAL_IP
-        case "$GENERATE_LOCAL_IP" in
-            'n'|'N'|'no'|'NO') LOCAL_IP='127.0.0.1';;
+        read -p "Generate random IP address [Y/n]? " ANSWER
+        # Lowercase.
+        ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
+        case "$ANSWER" in
+            'n'|'no') LOCAL_IP='127.0.0.1';;
             *) LAST=$((RANDOM % 240 + 3 )) && LOCAL_IP=$( printf "127.0.%d.%d\n" "$((RANDOM % 256))" "$LAST");;
         esac
         # Remove spaces.
@@ -125,18 +144,6 @@ function ld_command_init_exec() {
     done
     define_configuration_value PROJECT_PHP_VERSION $PROJECT_PHP_VERSION
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}Using PHP version: ${BYellow}$PROJECT_PHP_VERSION${Yellow}.${Color_Off}"
-
-    # Suggest Skeleton cleanup only when it is relevant.
-    if [ -e "$DOCKERSYNC_FILE" ] || [ -e "$DOCKER_COMPOSE_FILE" ]; then
-        echo -e "${BYellow}WARNING: ${Yellow}There is docker-compose and/or docker-sync configuration (.yml) files in project root.${Color_Off}"
-        echo -e "${Yellow}If you continue your containers with their volumes ${BYellow}will be wiped out${Yellow}.${Color_Off}"
-        echo -e "This does not delete your application root directory, but ${BYellow}database volumes may well will be destroyed.${Color_Off}"
-        read -p "Continue? [y/N]" CHOICE
-        case "$CHOICE" in
-            y|Y|'yes'|'YES' ) ;;
-            * ) echo "Cancelled." && return 1;;
-        esac
-    fi
 
     echo
     [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}Setting up docker-compose and docker-sync files for project type '${BYellow}$TYPE${Yellow}'."
@@ -214,8 +221,10 @@ function ld_command_init_exec() {
         echo "Current folder contents:"
         ls -A $APP_ROOT
         echo -en "${Red}WARNING: If you continue all of these will be deleted. ${Color_Off}"
-        read -p "Type 'PLEASE-DELETE' to continue: " CHOICE
-        case "$CHOICE" in
+        read -p "Type 'PLEASE-DELETE' to continue: " ANSWER
+        # Lowercase.
+        ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
+        case "$ANSWER" in
             'PLEASE-DELETE' )
                 echo "Clearing old things from the app root."
                 CLEAN_ROOT="rm -rf /var/www/{,.[!.],..?}*"
@@ -243,8 +252,10 @@ function ld_command_init_exec() {
     echo " [8.8-legacy] - Drupal 8.8 legacy (drupal/legacy-project:~8.8.0)"
     echo " [8.7] - Drupal 8.7 using contrib template (drupal-composer/drupal-project:8.x-dev)"
     echo " [N] - Thanks for the offer, but I'll handle codebase build manually."
-    read -p "Select version [default: 1]? " VERSION
-    case "$VERSION" in
+    read -p "Select version [default: 1]? " ANSWER
+    # Lowercase.
+    ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
+    case "$ANSWER" in
       ''|'8.8')
         COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.8.0 /var/www --no-interaction --stability=dev'
         POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^9.7'

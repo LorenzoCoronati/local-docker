@@ -230,7 +230,7 @@ function required_binaries_check() {
 #   haystack=("item 1" "item 2")
 #   element_in "needle" "${haystack[@]}"
 #   [ "$?" -eq "0" ] &&  CONTAINS=1 || CONTAINS=0
-element_in () {
+function element_in () {
   local e match="$1"
   shift
   for e; do [[ "$e" == "$match" ]] && return 0; done
@@ -242,11 +242,11 @@ element_in () {
 # @return
 # - 1 when config files are present
 # - 0 when only .env file is present (for cases where init is done with prepared .env file).
-project_config_file_check () {
+function project_config_file_check () {
     # Both .env AND docker-compose.yml file must be present to define project as initialized.
     if [ -f ".env" ] && ( [ -f "$DOCKERSYNC_FILE" ] || [ -f "$DOCKER_COMPOSE_FILE" ] ); then
         return 1
     fi
 
     return 0
- }
+}

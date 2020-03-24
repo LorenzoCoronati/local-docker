@@ -92,7 +92,7 @@ function ld_command_init_exec() {
             LOCAL_DOMAIN=$ANSWER
             VALID=1
         else
-            echo -e "${Red}ERROR: Domain name can contain only alphabetic characters (a-z), numbers (0-9), hyphens (-), underscoreds (_) and dots (.).${Color_Off}"
+            echo -e "${Red}ERROR: Domain name can contain only alphabetic characters (a-z), numbers (0-9), hyphens (-), underscores (_) and dots (.).${Color_Off}"
             echo -e "${Red}ERROR: Also the domain name must not start or end with underscore, hyphen or dot.${Color_Off}"
             sleep 2
             echo

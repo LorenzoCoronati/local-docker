@@ -24,7 +24,7 @@ function ld_command_init_exec() {
                     CHOICE="$(echo ${CHOICE} | tr [A-Z] [a-z])"
                     case "$CHOICE" in
                         y|'yes'|'') rm -f $DOCKERSYNC_FILE $DOCKER_COMPOSE_FILE 6& echo "Removed." ;;
-                        n|'no'| c|'cancel') echo "Cancelled." && exit 1;;
+                        n|'no'|c|'cancel') echo "Cancelled reinitialization of docker-compose/docker-sync config." && exit 1;;
                     esac
                 fi
                 ;;

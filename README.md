@@ -43,7 +43,7 @@ You may have the Docker already installed, in which case
     1 gem installed
 
     # Update the PATH variable in your favourite shell config. Note that the
-    # exact path to configure will vary (see above). $HOME is your home folder path.
+    # exact path to configure will vary (see above).
     # $HOME is your home folder path.
     $ GEMPATH=$HOME/.gem/ruby/2.6.0/bin
     # Zshell:

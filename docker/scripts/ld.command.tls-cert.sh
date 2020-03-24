@@ -110,6 +110,6 @@ function ld_command_tls-cert_extended_help() {
     echo "your project needs."
     echo " "
     echo "NOTE: By default Traefik configuration is set to handle also HTTPS requests, but "
-    echo "rediretion HTTP -> HTTPS (nginx, mailhog, solr, etc.) need docker-compose.yml file "
+    echo "redirection HTTP -> HTTPS (nginx, mailhog, solr, etc.) need docker-compose.yml file "
     echo "edits to work properly".
 }

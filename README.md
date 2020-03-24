@@ -205,7 +205,7 @@ Place this inside your `sites/XXX/settings.php` file to fix the issue:
      */
 
     // Drupal 7 configuration.
-    if (explode('.', VERSION)[0] == 7) {
+    if (defined('VERSION') && explode('.', VERSION)[0] == 7) {
       $conf['reverse_proxy'] = TRUE;
       // Do NOT do this in publicly accessbile site.      $conf['reverse_proxy_addresses'] = [@$_SERVER['REMOTE_ADDR']];
 

@@ -174,7 +174,7 @@ function ensure_folders_present() {
 function define_configuration_value() {
     NAME=$1
     VAL=$2
-    FILE="./.env"
+    FILE=${3:-./.env}
 
     if [ ! -e "$FILE" ]; then
         echo -e "${Red}ERROR: File $FILE not present while trying to store a value into it.${Color_Off}";

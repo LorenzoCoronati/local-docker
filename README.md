@@ -178,15 +178,15 @@ and by default credentials `drupal`/`drupal` with database named
 `drupal` (simple!). Example for Drupal 8:
 
     $databases['default']['default'] = [
-        'database' => 'drupal',
-        'username' => 'drupal',
-        'password' => 'drupal',
-        'prefix' => '',
-        'host' => 'db',   // <== IMPORTANT!
-        'port' => '3306',
-        'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
-        'driver' => 'mysql',
-      ];
+      'database' => 'drupal',
+      'username' => 'drupal',
+      'password' => 'drupal',
+      'prefix' => '',
+      'host' => 'db',   // <== IMPORTANT!
+      'port' => '3306',
+      'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
+      'driver' => 'mysql',
+     ];
 
 However, editing `settings.php` manually for database connection is
 usually necessary only if you are applying `local-docker` on top of an

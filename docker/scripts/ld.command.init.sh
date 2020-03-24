@@ -79,7 +79,7 @@ function ld_command_init_exec() {
     while [ "$VALID" -eq "0" ]; do
         echo
         echo  -e "${BBlack}== Local development base domain == ${Color_Off}"
-        echo -e "Do not add protocol nor www -part but just the domain name. It is recommended to use domain ending with ${BBlack}.local${Black}.${Color_Off}"
+        echo -e "Do not add protocol nor www part but just the domain name. It is recommended to use domain ending with ${BBlack}.local${Black}.${Color_Off}"
         DEFAULT=${PROJECT_NAME}.local
         LOCAL_DOMAIN=${LOCAL_DOMAIN:-${DEFAULT}}
         read -p "Domain [$LOCAL_DOMAIN] " ANSWER

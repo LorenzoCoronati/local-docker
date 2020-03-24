@@ -17,16 +17,42 @@ for configuring local, booting it up and so on.
 Your laptop should have
 [Docker and Docker compose](https://docs.docker.com/compose/) as well
 as [Docker-sync](https://docker-sync.readthedocs.io). Install
-[Homebrew](https://brew.sh/) if you have not done it already, and run
-this on you host (in any directory):
+[Homebrew](https://brew.sh/) if you have not done it already.
+
+### Install Docker
+
 
     $ brew install cask
     $ brew cask install docker-edge # edge channel OR
     $ brew cask install docker # stable channel
-    $ sudo gem install docker-sync
+
 
 You may have the Docker already installed, in which case
 [Homebrew](https://brew.sh/) will tell you.
+
+### Install `docker-sync`
+
+`docker-sync` is a Ruby Gem and it shold not be installed using `sudo`.
+
+    $ gem install docker-sync --user-install
+    WARNING:  You don't have /Users/USERNAME/.gem/ruby/2.6.0/bin in your PATH,
+        gem executables will not run.
+    Successfully installed docker-sync-0.5.14
+    Parsing documentation for docker-sync-0.5.14
+    Done installing documentation for docker-sync after 1 seconds
+    1 gem installed
+
+    # Update the PATH variable in your favourite shell config. Note that the
+    # exact path to configure will vary (see above).
+    # $HOME is your home folder path.
+    $ GEMPATH=$HOME/.gem/ruby/2.6.0/bin
+    # Zshell:
+    $ echo "export PATH=\"\$PATH:$GEMPATH\"" >> ~/.zshrc
+    $ source ~/.zshrc
+    # Bash
+    $ echo "export PATH=\"\$PATH:$GEMPATH\"" >> ~/.bashrc # Bash
+    $ source ~/.bashrc
+
 
 ## Usage
 
@@ -566,13 +592,15 @@ Privacy.
 
 ## Issues with installing gems / Unable to download data from https://rubygems.org/ [For Mac users]
 
-     $ sudo gem install docker-sync # docker-sync is just an example
+`docker-sync` is a Ruby Gem and it shold not be installed using `sudo`. If you do, you should also understand the risks when doing so.
+
+     $ gem install docker-sync --user-install # docker-sync is just an example
      ERROR:  Could not find a valid gem 'docker-sync' (>= 0), here is why:
      Unable to download data from https://rubygems.org/ - SSL_connect returned=1 errno=0 state=SSLv2/v3 read server hello A: tlsv1 alert protocol version (https://api.rubygems.org/specs.4.8.gz)
 
-If you are encountering the error above when trying to install a gem, simple workaround is to explicitly set the installation path and source (with http protocol):
+If you are encountering the error above when trying to install a gem, simple workaround is to explicitly set source (with http protocol)
 
-     $ sudo gem install -n /usr/local/bin docker-sync --source http://rubygems.org
+     $ gem install docker-sync --user-install --source http://rubygems.org
 
 ## Why my favourite feature is not there?
 

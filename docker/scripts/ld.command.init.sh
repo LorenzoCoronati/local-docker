@@ -231,6 +231,10 @@ function ld_command_init_exec() {
     fi
 
     echo
+    echo -e "${BBlack}== Generating SSL/TLS certificates ==${Color_Off}"
+    $SCRIPT_NAME tls-cert
+
+    echo
     echo -e "${BBlack}== Installing Drupal project ==${Color_Off}"
     echo "Please select which version of drupal you wish to have."
     echo "Alternatively you can install your codebase manually into $APP_ROOT."

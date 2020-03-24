@@ -18,14 +18,34 @@ services:
     image: "traefik:v2.0.0"
     container_name: "${PROJECT_NAME}_traefik"
     ports:
-      - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_WEB}:80"
+      - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_WEB:-80}:80"
+      - "${LOCAL_IP:-127.0.0.1}:${CONTAINER_PORT_WEB_SSL:-443}:443"
     labels:
-      # Dashboard
-      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.rule=Host(`traefik.${LOCAL_DOMAIN}`)"
-      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.service=api@internal"
-      - "traefik.http.routers.${PROJECT_NAME}--web-ui-traefik.entrypoints=web"
+      - "traefik.enable=true"
+      # DASHBOARD
+      # Comment out routers with entrypoint "web" to add http -> https redirect.
+      - "traefik.http.routers.${PROJECT_NAME}--traefik-plain.rule=Host(`traefik.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--traefik-plain.entrypoints=web"
+      - "traefik.http.routers.${PROJECT_NAME}--traefik-plain.service=api@internal"
+
+      - "traefik.http.routers.${PROJECT_NAME}--traefik-https.rule=Host(`traefik.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--traefik-https.entrypoints=websecure"
+      - "traefik.http.routers.${PROJECT_NAME}--traefik-https.service=api@internal"
+      - "traefik.http.routers.${PROJECT_NAME}--traefik-https.tls=true"
+
+      #  !!!! redirection HTTP to HTTPS - BEGIN !!!!
+      # This catches http request ONLY if there is no router which has a matching
+      # host -rule and attached to entrypoint "web".
+      - "traefik.http.routers.${PROJECT_NAME}--http_catchall.rule=HostRegexp(`{any:.*}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--http_catchall.entrypoints=web"
+      - "traefik.http.routers.${PROJECT_NAME}--http_catchall.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      #  !!!! redirection HTTP to HTTPS - END !!!!
+
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/certs:/certs:delegated
+      - ./docker/certs/certs.yml:/etc/traefik/certs.yml:delegated
     # In case of several env files later declared variable
     # values override earlier ones
     env_file:
@@ -34,24 +54,47 @@ services:
     restart: on-failure
     command:
       # NOTE: entrypoints.XX.address MUST NOT contain IP, but only port.
-      - "--entrypoints.web.address=:${CONTAINER_PORT_WEB}"
+      - "--entrypoints.web.address=:${CONTAINER_PORT_WEB:-80}"
+      - "--entryPoints.web.forwardedHeaders.insecure"
+      - "--entrypoints.websecure.address=:${CONTAINER_PORT_WEB_SSL:-443}"
+      - "--entryPoints.websecure.forwardedHeaders.insecure"
       - --providers.docker
+      - --ping
       - --api
-      - --api.insecure=true
-      - --api.debug=true
+      - --api.dashboard
+      - --providers.file.filename=/etc/traefik/certs.yml
+      #- --log.level=DEBUG
 
     whoami:
       image: containous/whoami:v1.3.0
       container_name: "${PROJECT_NAME}_whoami"
       labels:
-        - "traefik.http.routers.${PROJECT_NAME}--web-ui-whoami.rule=Host(`whoami.${LOCAL_DOMAIN}`)"
-    restart: on-failure
+        # Comment out routers with entrypoint "web" to add http -> https redirect.
+        - "traefik.http.routers.${PROJECT_NAME}--whoami-plain.rule=Host(`whoami.${LOCAL_DOMAIN}`)"
+        - "traefik.http.routers.${PROJECT_NAME}--whoami-plain.entrypoints=web"
+
+        - "traefik.http.routers.${PROJECT_NAME}--whoami-https.rule=Host(`whoami.${LOCAL_DOMAIN}`)"
+        - "traefik.http.routers.${PROJECT_NAME}--whoami-https.entrypoints=websecure"
+        # This tells Traefik to terminate the SSL connection,
+        # @see https://docs.traefik.io/routing/routers/#tls
+        - "traefik.http.routers.${PROJECT_NAME}--whoami-https.tls=true"
+
+      restart: on-failure
 
     nginx:
       build: ./docker/build/nginx
       container_name: "${PROJECT_NAME}_nginx"
       labels:
-        - "traefik.http.routers.${PROJECT_NAME}--web-ui.rule=Host(`${LOCAL_DOMAIN}`, `www.${LOCAL_DOMAIN}`)"
+        # Comment out routers with entrypoint "web" to add http -> https redirect.
+        - "traefik.http.routers.${PROJECT_NAME}--www-plain.rule=Host(`${LOCAL_DOMAIN}`, `www.${LOCAL_DOMAIN}`)"
+        - "traefik.http.routers.${PROJECT_NAME}--www-plain.entrypoints=web"
+
+        - "traefik.http.routers.${PROJECT_NAME}--www-https.rule=Host(`${LOCAL_DOMAIN}`, `www.${LOCAL_DOMAIN}`)"
+        - "traefik.http.routers.${PROJECT_NAME}--www-https.entrypoints=websecure"
+        # This tells Traefik to terminate the SSL connection,
+        # @see https://docs.traefik.io/routing/routers/#tls
+        - "traefik.http.routers.${PROJECT_NAME}--www-https.tls=true"
+
       volumes:
         # :nocopy must be used with docker-sync
         # See bottom of this file, and ./docker-sync.yml
@@ -118,7 +161,16 @@ services:
     image: solr:8.2.0
     container_name: "${PROJECT_NAME}_solr"
     labels:
-      - "traefik.http.routers.${PROJECT_NAME}--web-ui-solr.rule=Host(`solr.${LOCAL_DOMAIN}`)"
+      # Comment out routers with entrypoint "web" to add http -> https redirect.
+      - "traefik.http.routers.${PROJECT_NAME}--solr-plain.rule=Host(`solr.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--solr-plain.entrypoints=web"
+
+      - "traefik.http.routers.${PROJECT_NAME}--solr-https.rule=Host(`solr.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--solr-https.entrypoints=websecure"
+      # This tells Traefik to terminate the SSL connection,
+      # @see https://docs.traefik.io/routing/routers/#tls
+      - "traefik.http.routers.${PROJECT_NAME}--solr-https.tls=true"
+
     volumes:
       - solr_data:/var/solr
     # In case of several env files later declared variable
@@ -135,7 +187,16 @@ services:
     image: adminer:4.7.3
     container_name: "${PROJECT_NAME}_adminer"
     labels:
-      - "traefik.http.routers.${PROJECT_NAME}--web-ui-db-client.rule=Host(`adminer.${LOCAL_DOMAIN}`)"
+      # Comment out routers with entrypoint "web" to add http -> https redirect.
+      - "traefik.http.routers.${PROJECT_NAME}--adminer-plain.rule=Host(`adminer.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--adminer-plain.entrypoints=web"
+
+      - "traefik.http.routers.${PROJECT_NAME}--adminer-https.rule=Host(`adminer.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--adminer-https.entrypoints=websecure"
+      # This tells Traefik to terminate the SSL connection,
+      # @see https://docs.traefik.io/routing/routers/#tls
+      - "traefik.http.routers.${PROJECT_NAME}--adminer-https.tls=true"
+
     restart: on-failure
 
   # PHP container needs some Mailhog -configuration.
@@ -143,9 +204,18 @@ services:
     image: mailhog/mailhog:v1.0.0
     container_name: "${PROJECT_NAME}_mailhog"
     labels:
-      - "traefik.http.routers.${PROJECT_NAME}--web-ui-mail.rule=Host(`mailhog.${LOCAL_DOMAIN}`)"
+      # Comment out routers with entrypoint "web" to add http -> https redirect.
+      - "traefik.http.routers.${PROJECT_NAME}--mailhog-plain.rule=Host(`mailhog.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--mailhog-plain.entrypoints=web"
+
+      - "traefik.http.routers.${PROJECT_NAME}--mailhog-https.rule=Host(`mailhog.${LOCAL_DOMAIN}`)"
+      - "traefik.http.routers.${PROJECT_NAME}--mailhog-https.entrypoints=websecure"
+      # This tells Traefik to terminate the SSL connection,
+      # @see https://docs.traefik.io/routing/routers/#tls
+      - "traefik.http.routers.${PROJECT_NAME}--mailhog-https.tls=true"
       # https://docs.traefik.io/routing/providers/docker/#service-definition
       - "traefik.http.services.${PROJECT_NAME}--mailhog.loadbalancer.server.port=8025"
+
     restart: on-failure
 
   # Replace MYTHEME with your theme name. If you have multiple the

@@ -70,6 +70,9 @@ if [  "$IGNORE_INIT_STATE" -eq "0" ]; then
         exit 1;
     fi
     import_config
+# Some help instructions utilize config if it exists.
+elif [ -f ".env" ]; then
+    import_config
 fi
 
 FILE=./docker/scripts/ld.command.$ACTION.sh

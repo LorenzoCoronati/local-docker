@@ -114,7 +114,7 @@ subdomains:
 
 During the initial project initialisation local-docker generates self-signed SSL/TLS cerificates for your local development needs. Certificate is created for `*.example.local` -domain, which means it covers all auto-generated subdomains you have.
 
-If you wish to have automatic HTTP -> HTTPS redirection for you local check your `docker-compose.yml` file and comment out some lines below `label` -key (under `nginx` or any other service).
+If you wish to have automatic HTTP -> HTTPS redirection for you local check your `docker-compose.yml` file and comment out some lines below `label` key (under `nginx` or any other service).
 
 You can also have several certificates for multiple domains. Place generated certificates inside `docker/certs` folder and adjust `docker/certs/certs.yml` file.
 

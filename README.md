@@ -51,7 +51,7 @@ You may have the Docker already installed, in which case
     $ source ~/.zshrc
     # Bash
     $ echo "export PATH=\"\$PATH:$GEMPATH\"" >> ~/.bashrc # Bash
-    $ source ~/.zshrc
+    $ source ~/.bashrc
 
 
 ## Usage

@@ -100,7 +100,7 @@ function ld_command_tls-cert_extended_help() {
     echo "(mounted volume)."
     echo " "
     echo "Certificate is a multidomain certificate: "
-    echo "    *.example.com"
+    echo "    *.${LOCAL_DOMAIN:-example.com}"
     echo " "
     echo "You can re-generate the files any time. Should you need more than one certificate"
     echo "you can rename existing files and generate new ones using command "

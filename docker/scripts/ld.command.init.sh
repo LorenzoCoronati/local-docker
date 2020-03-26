@@ -259,7 +259,7 @@ function ld_command_init_exec() {
     VERSION=${VERSION:-${DEFAULT}}
     case "$VERSION" in
       '8.8')
-        COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.8.0 /var/www --no-interaction --stability=dev'
+        COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.8.0 /var/www --no-interaction'
         POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^9.7'
         echo -e "${Green}Creating project using ${BGreen}Drupal 8.8.x${Green}, recommended structure (${BGreen}drupal/recommended-project:~8.8.0${Green}).${Color_Off}"
         ;;

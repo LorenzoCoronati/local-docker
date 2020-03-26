@@ -24,6 +24,9 @@ syncs:
       '.git',
       'web/themes/*/node_modules',
       'web/themes/*/*/node_modules',
+      # When a Drupal theme uses Pattern Lab (like Emulsify does), it produces A LOT of traffic when the styles
+      # compilation is being done on the host. Excluding the directory from sync will reduce docker-sync related errors.
+      'web/themes/custom/*/pattern-lab',
       'web/sites/*/files']
 
     sync_userid: '${DOCKER_SYNC_UID}'

@@ -23,6 +23,7 @@ syncs:
     sync_excludes: [
       '.git',
       'web/themes/*/node_modules',
+      # You may want to remove the following line in case you use npm to download assets used in theme libraries.
       'web/themes/*/*/node_modules',
       # When a Drupal theme uses Pattern Lab (like Emulsify does), it produces A LOT of traffic when the styles
       # compilation is being done on the host. Excluding the directory from sync will reduce docker-sync related errors.

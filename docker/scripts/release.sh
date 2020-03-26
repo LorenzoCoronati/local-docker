@@ -33,8 +33,8 @@ if [ "$FOUND" -ne "0" ]; then
   exit 3
 fi
 
-if [[ ! "$RELEASE_TAG" =~ ^([0-9]*\.(([0-9]*\.)*[0-9]*))$ ]]; then
-  echo "ERROR: Invalid tag. Use pattern x.y[.z]"
+if [[ ! "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "ERROR: Invalid tag. Use pattern x.y.z (MAJOR.MINOR.PATCH)"
   exit 4
 fi
 

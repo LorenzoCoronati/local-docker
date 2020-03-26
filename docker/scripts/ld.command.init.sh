@@ -245,30 +245,37 @@ function ld_command_init_exec() {
 
     echo
     echo -e "${BBlack}== Installing Drupal project ==${Color_Off}"
+    DEFAULT=8.8
+
     echo "Please select which version of drupal you wish to have."
     echo "Alternatively you can install your codebase manually into $APP_ROOT."
     echo "Options:"
     echo " [8.8] - Drupal 8.8 recommended (drupal/recommended-project:~8.8.0)"
+    echo " [8.8-dev] - Drupal 8.8 recommended (drupal/recommended-project:~8.8.0) with dev-stability"
     echo " [8.8-legacy] - Drupal 8.8 legacy (drupal/legacy-project:~8.8.0)"
     echo " [8.7] - Drupal 8.7 using contrib template (drupal-composer/drupal-project:8.x-dev)"
     echo " [N] - Thanks for the offer, but I'll handle codebase build manually."
-    read -p "Select version [default: 1]? " ANSWER
-    # Lowercase.
-    ANSWER="$(echo ${ANSWER} | tr [A-Z] [a-z])"
-    case "$ANSWER" in
-      ''|'8.8')
+    read -p "Select version [default: ${DEFAULT}]? " VERSION
+    VERSION=${VERSION:-${DEFAULT}}
+    case "$VERSION" in
+      '8.8')
         COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.8.0 /var/www --no-interaction --stability=dev'
         POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^9.7'
-        echo -e "${Green}Creating project using ${BGreen}Drupal 8.8+${Green}, recommended structure (${BGreen}drupal/recommended-project:~8.8.0${Green}).${Color_Off}"
+        echo -e "${Green}Creating project using ${BGreen}Drupal 8.8.x${Green}, recommended structure (${BGreen}drupal/recommended-project:~8.8.0${Green}).${Color_Off}"
+        ;;
+      '8.8-dev')
+        COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.8.0 /var/www --no-interaction --stability=dev'
+        POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^9.7'
+        echo -e "${Green}Creating project using ${BGreen}Drupal 8.8.x (dev)${Green}, recommended structure (${BGreen}drupal/recommended-project:~8.8.0${Green}).${Color_Off}"
         ;;
       '8.8-legacy')
         COMPOSER_INIT='composer -vv create-project drupal/legacy-project:~8.8.0 /var/www --no-interaction --stability=dev'
         POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^9.7'
-        echo -e "${Green}Creating project using ${BGreen}Drupal 8.8+${Green}, legacy structure (${BGreen}drupal/legacy-project:~8.8.0${Green}).${Color_Off}"
+        echo -e "${Green}Creating project using ${BGreen}Drupal 8.8.x${Green}, legacy structure (${BGreen}drupal/legacy-project:~8.8.0${Green}).${Color_Off}"
         ;;
       '8.7')
         COMPOSER_INIT='composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev'
-        echo -e "${Green}Creating project using ${BGreen}Drupal 8.7${Green}, contrib template (drupal-composer/drupal-project:8.x-dev).${Color_Off}"
+        echo -e "${Green}Creating project using ${BGreen}Drupal 8.7.x${Green}, contrib template (drupal-composer/drupal-project:8.x-dev).${Color_Off}"
         ;;
       *)
         echo -e "${BYellow}Build phase skipped, no codebase built!${Color_Off}"

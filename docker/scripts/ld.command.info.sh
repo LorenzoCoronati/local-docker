@@ -20,6 +20,8 @@ function ld_command_info_exec() {
     echo -e "${Green}PHP version                       : ${BGreen}${PROJECT_PHP_VERSION:-MISSING}${Color_Off}"
     echo -e "${Green}PHP memory limit                  : ${BGreen}${PHP_MEMORY_LIMIT:-MISSING}${Color_Off}"
     echo -e "${Green}Xdebug port (for your editor)     : ${BGreen}${PHP_XDEBUG_REMOTE_PORT:-MISSING}${Color_Off}"
+    echo -e "${Green}Local-docker version              : ${BGreen}${LOCAL_DOCKER_VERSION:-MISSING}${Color_Off}"
+    echo -e "${Green}Initialized with local-docker     : ${BGreen}${LOCAL_DOCKER_VERSION_INIT:-MISSING}${Color_Off}"
 
     echo -e "${Green}Default URL for Drush             : ${BGreen}${DRUSH_OPTIONS_URI:-MISSING}${Color_Off}"
     echo -e "${Green}Created dB dumps location         : ${BGreen}${DATABASE_DUMP_STORAGE:-MISSING}${Color_Off}"

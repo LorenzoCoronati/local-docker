@@ -35,6 +35,12 @@ function ld_command_init_exec() {
         esac
     fi
 
+    echo
+    echo -e "${BBlack}== General setup ==${Color_Off}"
+
+    define_configuration_value LOCAL_DOCKER_VERSION_INIT $LOCAL_DOCKER_VERSION
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${BYellow}INFO: ${Yellow}Initializing with local-docker version: ${BYellow}${LOCAL_DOCKER_VERSION}${Yellow}.${Color_Off}"
+
     # Project type, defaults to common.
     TYPE=${1:-'common'}
     # Read all template files available for whitelist.

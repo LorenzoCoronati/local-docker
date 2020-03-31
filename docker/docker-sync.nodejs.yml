@@ -1,0 +1,41 @@
+version: "2"
+
+# docker-sync.yml
+options:
+  # optional, default: pwd, root directory to be used when transforming sync src into absolute path, accepted values: pwd (current working directory), config_path (the directory where docker-sync.yml is found)
+  project_root: 'pwd'
+  # optional, maximum number of attempts for unison waiting for the success exit status. The default is 5 attempts (1-second sleep for each attempt). Only used in unison.
+  max_attempt: 10
+  verbose: true
+  compose-dev-file-path: 'docker-compose.yml'
+  compose-file-path: 'docker-compose.dev-vm.yml'
+
+syncs:
+  webroot-sync-core:
+    sync_strategy: 'native_osx'
+    # which folder to watch / sync from - you can use tilde, it will get expanded.
+    # the contents of this directory will be synchronized to the Docker volume with the name of this sync entry ('default-sync' here)
+    # NOTE: run `docker-sync[-stack] clean` after any change in src
+    src: './${APP_ROOT}/'
+    host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
+    # sync_excludes seem to be relative to src-location inside container.
+    sync_excludes_type: 'BelowPath'
+    sync_excludes: [
+      '.git'
+    ]
+
+    sync_userid: '${DOCKER_SYNC_UID}'
+    sync_groupid: '${DOCKER_SYNC_GID}'
+
+    # monit can be used to monitor the health of unison in the native_osx strategy and can restart unison if it detects a problem
+    # optional: use this to switch monit monitoring on
+    monit_enable: true
+    # optional: use this to change how many seconds between each monit check (cycle)
+    monit_interval: 5
+    # optional: use this to change how many consecutive times high cpu usage must be observed before unison is restarted
+    monit_high_cpu_cycles: 2
+
+    # enable terminal_notifier. On every sync sends a Terminal Notification regarding files being synced. ( Mac Only ).
+    # good thing in case you are developing and want to know exactly when your changes took effect.
+    # be aware in case of unison this only gives you a notification on the initial sync, not the syncs after changes.
+    notify_terminal: true

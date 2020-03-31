@@ -50,14 +50,14 @@ else
 fi
 
 IGNORE_INIT_STATE=0
-WHITELIST_COMMANDS=("help" "self-update" "init")
+WHITELIST_COMMANDS=("help" "self-update" "init" "init-node")
 element_in "$ACTION" "${WHITELIST_COMMANDS[@]}"
 if [ "$?" -eq "0" ]; then
     IGNORE_INIT_STATE=1
 fi
 
 # Read (and create if necessary) the .env.local file, allowing overrides to any of our config values.
-if [ "$ACTION" == "init" ]; then
+if [ "$ACTION" == "init" || "$ACTION" == "init-node" ]; then
     import_config
 fi
 

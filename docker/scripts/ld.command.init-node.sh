@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # File
 #
-# This file contains init -command for local-docker script ld.sh.
+# This file contains init-node -command for local-docker script ld.sh.
 
-function ld_command_init_exec() {
+function ld_command_init-node_exec() {
 
     if ! project_config_file_check; then
         echo -e "${BRed}This project is already initialized. ${Color_Off}"
@@ -209,6 +209,6 @@ function ld_command_init_exec() {
     $SCRIPT_NAME info
 }
 
-function ld_command_init_help() {
+function ld_command_init-node_help() {
     echo "Builds the project (default: codebase in./app -folder."
 }

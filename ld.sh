@@ -57,7 +57,7 @@ if [ "$?" -eq "0" ]; then
 fi
 
 # Read (and create if necessary) the .env.local file, allowing overrides to any of our config values.
-if [ "$ACTION" == "init" || "$ACTION" == "init-node" ]; then
+if [[ "$ACTION" == "init"  ||  "$ACTION" == "init-node" ]]; then
     import_config
 fi
 

@@ -10,4 +10,4 @@ COPY ./conf.d/*.conf /etc/nginx/conf.d/
 # Copy entrypoint script
 COPY ./docker-entrypoint.sh /
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

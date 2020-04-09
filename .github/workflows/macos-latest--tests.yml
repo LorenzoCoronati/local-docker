@@ -25,7 +25,9 @@ jobs:
 
     - name: Restart docker-machine
       run: |
-        docker-machine env default
+        docker-machine ls
+        docker-machine create default
+        docker-machine ls
         docker-machine restart
 
 #    - name: Tell this workflow is on hold

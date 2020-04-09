@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - name: Run a one-line script
+    - name: Tell about the workflow
       if: github.event_name == 'pull_request'
       run: echo This event is a pull request. Test build ./ld init.
 
@@ -26,8 +26,12 @@ jobs:
     - name: Install Xhyve (hypervisor for docker)
       run: |
         brew install docker-machine-driver-xhyve
+        ls -lhA /usr/local/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
         sudo chown root:wheel /usr/local/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
-        sudo chown root:wheel /usr/local/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
+        ls -lhA /usr/local/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
+
+    - name: Create docker-machine with xhyve
+      run: |
         docker-machine create --driver xhyve manager
 
     - name: Restart docker-machine

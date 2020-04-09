@@ -13,6 +13,17 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: Install Docker.app and docker-compose using brew
+      run: |
+        echo 'docker installed in path: ' && which docker
+        echo 'docker-compose installed in path: ' && which docker-compose
+
+    - name: Install docker-sync
+      run: |
+        gem install docker-sync
+        echo 'docker-sync installed in path: ' && which docker-sync
+        docker-sync
+
     - name: Tell this workflow is on hold
       run: echo "Until GH issue has been resolved Docker.app can't be started in Mac OS" && echo "https://github.com/actions/virtual-environments/issues/115"
 #    - name: Run a one-line script

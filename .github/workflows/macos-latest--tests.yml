@@ -23,6 +23,13 @@ jobs:
         echo -n 'docker-compose installed in path: ' && which docker-compose
         echo -n 'docker-machine installed in path: ' && which docker-machine
 
+    - name: Install Xhyve (hypervisor for docker)
+      run: |
+        brew install docker-machine-driver-xhyve
+        sudo chown root:wheel /usr/local/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
+        sudo chown root:wheel /usr/local/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
+        docker-machine create --driver xhyve manager
+
     - name: Restart docker-machine
       run: |
         docker-machine ls

@@ -17,6 +17,10 @@ jobs:
       if: github.event_name == 'pull_request'
       run: echo This event is a pull request. Test build ./ld init.
 
+    - name: Verify virtualisation is supported
+      run: |
+        sysctl kern.hv_support
+
     - name: Check paths of docker-* binaries
       run: |
         echo -n 'docker installed in path: ' && which docker

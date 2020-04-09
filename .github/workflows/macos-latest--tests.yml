@@ -13,11 +13,15 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - name: Install Docker.app and docker-compose using brew
+    - name: Check paths of docker-* binaries
       run: |
         echo -n 'docker installed in path: ' && which docker
         echo -n 'docker-compose installed in path: ' && which docker-compose
         echo -n 'docker-machine installed in path: ' && which docker-machine
+
+    - name: Restart docker-machine
+      run: |
+        docker-machine restart
 
 #    - name: Tell this workflow is on hold
 #      run: echo "Until GH issue has been resolved Docker.app can't be started in Mac OS" && echo "https://github.com/actions/virtual-environments/issues/115"

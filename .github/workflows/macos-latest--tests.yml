@@ -13,6 +13,10 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: Run a one-line script
+      if: github.event_name == 'pull_request'
+      run: echo This event is a pull request. Test build ./ld init.
+
     - name: Check paths of docker-* binaries
       run: |
         echo -n 'docker installed in path: ' && which docker
@@ -25,10 +29,6 @@ jobs:
 
 #    - name: Tell this workflow is on hold
 #      run: echo "Until GH issue has been resolved Docker.app can't be started in Mac OS" && echo "https://github.com/actions/virtual-environments/issues/115"
-    - name: Run a one-line script
-      if: github.event_name == 'pull_request'
-      run: echo This event is a pull request. Test build ./ld init.
-
     - name: Check the current user's name and home folder path
       run: |
           whoami

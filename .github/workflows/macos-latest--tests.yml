@@ -25,8 +25,8 @@ jobs:
 
     - name: Restart docker-machine
       run: |
-        docker-machine restart
         docker-machine env default
+        docker-machine restart
 
 #    - name: Tell this workflow is on hold
 #      run: echo "Until GH issue has been resolved Docker.app can't be started in Mac OS" && echo "https://github.com/actions/virtual-environments/issues/115"

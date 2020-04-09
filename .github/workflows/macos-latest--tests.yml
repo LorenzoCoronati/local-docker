@@ -15,28 +15,25 @@ jobs:
 
     - name: Install Docker.app and docker-compose using brew
       run: |
-        echo 'docker installed in path: ' && which docker
-        echo 'docker-compose installed in path: ' && which docker-compose
+        echo -n 'docker installed in path: ' && which docker
+        echo -n 'docker-compose installed in path: ' && which docker-compose
 
-    - name: Install docker-sync
+#    - name: Tell this workflow is on hold
+#      run: echo "Until GH issue has been resolved Docker.app can't be started in Mac OS" && echo "https://github.com/actions/virtual-environments/issues/115"
+    - name: Run a one-line script
+      if: github.event_name == 'pull_request'
+      run: echo This event is a pull request. Test build ./ld init.
+
+    - name: Check the current user's name and home folder path
       run: |
-        gem install docker-sync
-        echo 'docker-sync installed in path: ' && which docker-sync
-        docker-sync
-
-    - name: Tell this workflow is on hold
-      run: echo "Until GH issue has been resolved Docker.app can't be started in Mac OS" && echo "https://github.com/actions/virtual-environments/issues/115"
-#    - name: Run a one-line script
-#      if: github.event_name == 'pull_request'
-#      run: echo This event is a pull request. Test build ./ld init.
-#
+          whoami
 #    - name: Reset the password of user 'runner' (FileVault2 is already disabled in Github CI  instance of MacOs-latest)
 #      run: |
 #          whoami
 #          sudo -i
 #          whoami
 #          dscl . -passwd /Users/runner SOME-PASSWORD-HERE
-#
+
 #    - name: Install Docker.app and docker-compose using brew
 #      run: |
 #        brew cask install docker && echo 'docker installed'
@@ -51,7 +48,7 @@ jobs:
 #        sudo su root
 #        dscl . -passwd /Users/runner SOME-PASSWORD-HERE
 #        exit
-#
+
 #    - name: Launch Docker.app
 #      run: |
 #        echo "NEXT: open -F -g -a /Applications/Docker.app"
@@ -93,33 +90,40 @@ jobs:
 #            end tell
 #          end tell
 #        '
-#
-#    - name: Get versions of Docker and docker-compose
-#      run: |
-#        echo "NEXT: Wait for docker to wake up"
-#        while ! docker system info > /dev/null 2>&1; do docker system info && ROUND=1 && echo "Waiting Docker.app to start, round ${ROUND}" && sleep 2 && (( ROUND + 1 )) ; done
-#        echo 'Docker.app should be now running...'
-#        echo "NEXT: wait for Docker to wake up..."
-#        #echo 'Starting Docker.app again (with nohup)...'
-#        #nohup /Applications/Docker.app/Contents/MacOS/Docker --unattended &
-#        #echo 'Docker.app should be now running (again, with nohup)...'
-#        which docker || echo 'no docker in path'
-#        ls -lh /usr/local/bin | grep docker || echo 'No docker in /usr/local/bin - exiting'
-#        [ -f /usr/local/bin/docker ] || exit 1
-#        docker system info
-#        docker ps
-#        docker-compose --version
-#
-#    - name: Install docker-sync
-#      run: |
-#        gem install docker-sync
-#        docker-sync
-#
-#    - name: List what is in the project folder.
-#      run: ls -lha
-#
-#    - name: Check the type of ld
-#      run: file ld
-#
-#    - name: Run init and see where it gets us
-#      run: ./ld init
+
+    - name: Get versions of Docker and docker-compose
+      run: |
+        echo "NEXT: Wait for docker to wake up"
+        while ! docker system info > /dev/null 2>&1; do docker system info && ROUND=1 && echo "Waiting Docker.app to start, round ${ROUND}" && sleep 2 && (( ROUND + 1 )) ; done
+        echo 'Docker.app should be now running...'
+        echo "NEXT: wait for Docker to wake up..."
+        #echo 'Starting Docker.app again (with nohup)...'
+        #nohup /Applications/Docker.app/Contents/MacOS/Docker --unattended &
+        #echo 'Docker.app should be now running (again, with nohup)...'
+        which docker || echo 'no docker in path'
+        ls -lh /usr/local/bin | grep docker || echo 'No docker in /usr/local/bin - exiting'
+        [ -f /usr/local/bin/docker ] || exit 1
+        docker system info
+        docker ps
+        docker-compose --version
+
+    - name: Install docker-sync
+      run: |
+        gem install docker-sync --user-install
+        echo -n 'docker-sync installed in path: ' && which docker-sync
+        docker-sync
+        echo "export PATH=\"\$PATH:$GEMPATH\"" >> ~/.bashrc # Bash
+        source ~/.bashrc
+        echo $PATH
+
+    - name: List what is in the project folder.
+      run: ls -lha
+
+    - name: Check the type of ld
+      run: file ld
+
+    - name: Run help and see where it gets us
+      run: ./ld
+
+    - name: Run init and see where it gets us
+      run: ./ld init

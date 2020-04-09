@@ -21,12 +21,17 @@ jobs:
       run: |
         sysctl kern.hv_support
 
+    - name: Check lo0
+      run: |
+        ifconfig lo0
+
     - name: Check paths of docker-* binaries
       run: |
         echo -n 'docker installed in path: ' && which docker
         echo -n 'docker-compose installed in path: ' && which docker-compose
         echo -n 'docker-machine installed in path: ' && which docker-machine
 
+      #https://github.com/machine-drivers/docker-machine-driver-xhyve#install
     - name: Install Xhyve (hypervisor for docker)
       run: |
         brew install docker-machine-driver-xhyve

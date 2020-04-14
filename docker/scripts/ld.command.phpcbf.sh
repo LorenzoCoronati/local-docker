@@ -27,5 +27,5 @@ function ld_command_phpcbf_extended_help() {
     echo "dealerdirect/phpcodesniffer-composer-installer package has been installed."
     echo "To target e.g. your custom modules, use /var/www/web/modules/custom as the argument."
     echo
-    echo "Example: $SCRIPT_NAME_SHORT phpcbf --standard=Drupal,DrupalPractice /var/www/web/modules/custom"
+    echo "Example: $SCRIPT_NAME_SHORT phpcbf --extensions=module,theme,php,inc --standard=Drupal,DrupalPractice /var/www/web/modules/custom"
 }

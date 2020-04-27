@@ -31,6 +31,12 @@ jobs:
       run: |
         ifconfig lo0
 
+    - name: Install docker et al tools
+      run: |
+        brew install docker
+        brew install docker-compose
+        brew install docker-machine
+
     - name: Check paths of docker-* binaries
       run: |
         echo -n 'docker installed in path: ' && which docker
@@ -38,17 +44,17 @@ jobs:
         echo -n 'docker-machine installed in path: ' && which docker-machine
 
       #https://github.com/machine-drivers/docker-machine-driver-xhyve#install
-    - name: Install Xhyve (hypervisor for docker)
-      run: |
-        brew install docker-machine-driver-xhyve
-        ls -lhA $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
-        sudo chown root:wheel $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
-        sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
-        ls -lhA $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
+#    - name: Install Xhyve (hypervisor for docker)
+#      run: |
+#        brew install docker-machine-driver-xhyve
+#        ls -lhA $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
+#        sudo chown root:wheel $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
+#        sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
+#        ls -lhA $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
 
-    - name: Create docker-machine with xhyve
-      run: |
-        docker-machine create --driver xhyve manager
+ #   - name: Create docker-machine with xhyve
+ #     run: |
+ #       docker-machine create --driver xhyve manager
 
     - name: Restart docker-machine
       run: |

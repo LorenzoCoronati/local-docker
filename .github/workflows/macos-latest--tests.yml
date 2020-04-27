@@ -21,6 +21,9 @@ jobs:
       run: |
         sysctl kern.hv_support
 
+    - name: Check and set Virtualbox default
+      run: eval $(docker-machine env default)
+      
     - name: Check lo0
       run: |
         ifconfig lo0

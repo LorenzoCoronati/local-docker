@@ -68,7 +68,7 @@ jobs:
     - name: Download Boot2Docker iso image
       run: | 
         cd /Users/runner/.docker/machine/cache/
-        wget https://api.github.com/repos/boot2docker/boot2docker/zipball/v19.03.5 boot2docker.iso.zip
+        wget https://api.github.com/repos/boot2docker/boot2docker/zipball/v19.03.5 -O boot2docker.iso.zip
         pwd
         ls -lha 
         file boot2docker.iso.zip

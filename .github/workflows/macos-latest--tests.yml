@@ -78,9 +78,14 @@ jobs:
     - name: Create machine with Virtualbox and start it
       run: |
         docker-machine ls
+        echo "----"
         docker-machine create --driver virtualbox default
+        echo "----"
         docker-machine ls
-        docker-machine start
+        echo "----"
+        docker-machine restart
+        echo "----"
+        docker-machine ls
 
 #    - name: Tell this workflow is on hold
 #      run: echo "Until GH issue has been resolved Docker.app can't be started in Mac OS" && echo "https://github.com/actions/virtual-environments/issues/115"

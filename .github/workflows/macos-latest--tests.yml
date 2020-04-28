@@ -95,9 +95,10 @@ jobs:
     #- name: Make Docker client talks to the Docker engine
     #  run: eval $(docker-machine env default)
 
-    - name: Check Docker machine env, 'default'
+    - name: Export docker machine environment ('default')
       run: |
         docker-machine env default >> ~/.bashrc 
+        cat ~/.bashrc 
         source ~/.bashrc
 
     - name: Check docker-machine env variables (2)

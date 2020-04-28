@@ -66,8 +66,9 @@ jobs:
     - name: Install docker-sync
       run: |
         gem install docker-sync --user-install
-        GEMPATH=$HOME/.gem/ruby/2.6.0/bin
-        echo "export PATH=\"\$PATH:$GEMPATH\"" >> ~/.bashrc # Bash
+        GEMPATH=$(gem env | grep  'USER INSTALLATION DIRECTORY' | cut -d: -f2 | tr -d ' ')/bin
+        echo GEMPATH=$GEMPATH
+        echo "export PATH=\"\$PATH:$GEMPATH\"" >> ~/.bashrc
         source ~/.bashrc
         echo $PATH
         echo -n 'docker-sync installed in path: ' && which docker-sync

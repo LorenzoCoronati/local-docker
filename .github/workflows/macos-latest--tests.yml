@@ -21,7 +21,9 @@ jobs:
       run: whoami
 
     - name: What shell is being used
-      run: echo $0
+      run: |
+        echo $0
+        ls -lha ~/.ba*
 
     - name: Verify virtualisation is supported
       run: sysctl kern.hv_support
@@ -70,12 +72,12 @@ jobs:
     - name: Install docker-sync
       run: |
         gem install docker-sync --user-install
-        echo -n 'docker-sync installed in path: ' && which docker-sync
-        docker-sync
         GEMPATH=$HOME/.gem/ruby/2.6.0/bin
         echo "export PATH=\"\$PATH:$GEMPATH\"" >> ~/.bashrc # Bash
         source ~/.bashrc
         echo $PATH
+        echo -n 'docker-sync installed in path: ' && which docker-sync
+        docker-sync
 
     - name: List what is in the project folder.
       run: |

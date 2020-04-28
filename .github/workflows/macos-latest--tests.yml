@@ -67,10 +67,12 @@ jobs:
     
     - name: Download Boot2Docker iso image
       run: | 
-        wget https://api.github.com/repos/boot2docker/boot2docker/tarball/v19.03.5 /Users/runner/.docker/machine/cache/boot2docker.iso.gz
-        ls -lha /Users/runner/.docker/machine/cache
-        file /Users/runner/.docker/machine/cache/boot2docker.iso.gz
-        gunzip /Users/runner/.docker/machine/cache/boot2docker.iso.gz
+        cd /Users/runner/.docker/machine/cache/
+        wget https://api.github.com/repos/boot2docker/boot2docker/zipball/v19.03.5 boot2docker.iso.zip
+        pwd
+        ls -lha 
+        file boot2docker.iso.zip
+        unzip boot2docker.iso.zip
         ls -lha /Users/runner/.docker/machine/cache
         
     - name: Create machine with Virtualbox and start it

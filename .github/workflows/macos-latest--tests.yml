@@ -57,15 +57,9 @@ jobs:
         ls -lha 
         file boot2docker.iso
         
-    - name: Create machine with Virtualbox and start it
+    - name: Create machine 'default' with Virtualbox
       run: |
-        docker-machine ls
-        echo "----"
         docker-machine create --driver virtualbox --virtualbox-boot2docker-url ~/.docker/machine/cache/boot2docker.iso default
-        echo "----"
-        docker-machine ls
-        echo "----"
-        docker-machine restart
         echo "----"
         docker-machine ls
 
@@ -86,6 +80,9 @@ jobs:
         file ld
         file ld.sh
  
+    - name: Check Docker machine env, 'default'
+      run: docker-machine env default
+
     - name: Make Docker client talks to the Docker engine
       run: eval $(docker-machine env default)
 

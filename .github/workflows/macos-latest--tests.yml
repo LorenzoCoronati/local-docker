@@ -76,7 +76,7 @@ jobs:
       run: |
         docker-machine ls
         echo "----"
-        docker-machine create --driver virtualbox default
+        docker-machine create --driver virtualbox --virtualbox-boot2docker-url ~/.docker/machine/cache/boot2docker.iso default
         echo "----"
         docker-machine ls
         echo "----"

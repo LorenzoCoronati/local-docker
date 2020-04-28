@@ -94,7 +94,7 @@ jobs:
       run: eval $(docker-machine env default)
 
     - name: (re)start docker-machine with default
-      run: test docker-machine restart default || docker-machine start default
+      run: docker-machine restart default
 
     - name: Check docker-machine env variables (2)
       run: |

@@ -108,6 +108,13 @@ jobs:
        echo "DOCKER_HOST="$DOCKER_HOST
        echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
        echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
+       echo "==== sourcing .bashrc ==="
+       source ~/.bashrc
+       echo "==== sourcing .bashrc OK ==="
+       echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
+       echo "DOCKER_HOST="$DOCKER_HOST
+       echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
+       echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
 
     - name: Print ./ld help
       run: ./ld

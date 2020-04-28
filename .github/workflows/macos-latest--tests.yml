@@ -87,7 +87,11 @@ jobs:
         file ld.sh
  
     - name: Run help and see where it gets us
-      run: ./ld
+      run: |
+        docker-machine start default
+        ./ld
 
     - name: Run init and see where it gets us
-      run: ./ld init
+      run: |
+        docker-machine start default
+        ./ld init

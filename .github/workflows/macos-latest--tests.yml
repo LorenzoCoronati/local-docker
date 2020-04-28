@@ -31,7 +31,7 @@ jobs:
       run: |
         ifconfig lo0
 
-    - name: Install docker et al tools
+    - name: Install docker, docker-compose, docker-machine, boot2docker{,-cli}
       run: |
         brew install docker
         brew install docker-compose
@@ -43,10 +43,11 @@ jobs:
         echo -n 'docker installed in path: ' && which docker
         echo -n 'docker-compose installed in path: ' && which docker-compose
         echo -n 'docker-machine installed in path: ' && which docker-machine
+        echo -n 'boot2docker installed in path: ' && which boot2docker
 
-    - name: Start docker-machine
-      run: |
-        docker-machine start
+#    - name: Start docker-machine
+#      run: |
+#        docker-machine start
 
       #https://github.com/machine-drivers/docker-machine-driver-xhyve#install
 #    - name: Install Xhyve (hypervisor for docker)
@@ -61,12 +62,12 @@ jobs:
  #     run: |
  #       docker-machine create --driver xhyve manager
 
-    - name: Restart docker-machine
+    - name: Create machine with Virtualbox and start it
       run: |
         docker-machine ls
-        docker-machine create default
+        docker-machine create --driver virtualbox default
         docker-machine ls
-        docker-machine restart
+        docker-machine start
 
 #    - name: Tell this workflow is on hold
 #      run: echo "Until GH issue has been resolved Docker.app can't be started in Mac OS" && echo "https://github.com/actions/virtual-environments/issues/115"

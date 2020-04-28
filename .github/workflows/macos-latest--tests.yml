@@ -43,7 +43,7 @@ jobs:
         echo -n 'docker installed in path: ' && which docker
         echo -n 'docker-compose installed in path: ' && which docker-compose
         echo -n 'docker-machine installed in path: ' && which docker-machine
-        echo -n 'boot2docker installed in path: ' && which boot2docker
+#        echo -n 'boot2docker installed in path: ' && which boot2docker
 
 #    - name: Start docker-machine
 #      run: |

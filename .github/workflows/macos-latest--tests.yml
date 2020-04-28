@@ -90,11 +90,11 @@ jobs:
     - name: Check Docker machine env, 'default'
       run: docker-machine env default
 
-    - name: Make Docker client talks to the Docker engine
-      run: eval $(docker-machine env default)
-
     - name: (re)start docker-machine with default
       run: docker-machine restart default
+
+    - name: Make Docker client talks to the Docker engine
+      run: eval $(docker-machine env default)
 
     - name: Check docker-machine env variables (2)
       run: |

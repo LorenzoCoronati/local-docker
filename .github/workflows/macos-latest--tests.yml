@@ -86,12 +86,11 @@ jobs:
         file ld
         file ld.sh
  
-    - name: Run help and see where it gets us
-      run: |
-        docker-machine start default
-        ./ld
+    - name: Make Docker client talks to the Docker engine
+      run: eval $(docker-machine env default)
 
-    - name: Run init and see where it gets us
-      run: |
-        docker-machine start default
-        ./ld init
+    - name: Print ./ld help
+      run: ./ld
+
+    - name: Run ./ld init 
+      run: ./ld init

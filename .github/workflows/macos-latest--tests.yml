@@ -80,11 +80,28 @@ jobs:
         file ld
         file ld.sh
  
+    - name: Check docker-machine env variables (1)
+      run: |
+       echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
+       echo "DOCKER_HOST="$DOCKER_HOST
+       echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
+       echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
+
     - name: Check Docker machine env, 'default'
       run: docker-machine env default
 
     - name: Make Docker client talks to the Docker engine
       run: eval $(docker-machine env default)
+
+    - name: (re)start docker-machine with default
+      run: test docker-machine restart default || docker-machine start default
+
+    - name: Check docker-machine env variables (2)
+      run: |
+       echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
+       echo "DOCKER_HOST="$DOCKER_HOST
+       echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
+       echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
 
     - name: Print ./ld help
       run: ./ld

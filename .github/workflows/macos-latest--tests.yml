@@ -84,7 +84,7 @@ jobs:
     - name: Export and source docker machine environment ('default', .bashrc)
       run: |
         docker-machine env default >> ~/.bashrc 
-        echo "COMPOSE_INTERACTIVE_NO_CLI=1" >> ~/.bashrc 
+        echo "COMPOSE_INTERACTIVE_NO_CLI=0" >> ~/.bashrc 
         echo "echo Sourced file ~/.bashrc "$(date) >> ~/.bashrc 
 
     - name: Source docker machine environment ('default', .bashrc)

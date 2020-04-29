@@ -158,7 +158,13 @@ jobs:
         
 
     - name: Print ./ld help
-      run: ./ld
+      run: |
+        source ~/.bashrc
+        ./ld
 
     - name: Run ./ld init 
-      run: ./ld init
+      run: |
+        source ~/.bashrc
+        ./ld init
+
+

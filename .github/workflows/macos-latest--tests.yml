@@ -95,14 +95,49 @@ jobs:
     #- name: Make Docker client talks to the Docker engine
     #  run: eval $(docker-machine env default)
 
-    - name: Export docker machine environment ('default')
+    - name: Eval docker machine environment ('default')
+      run: |
+       echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
+       echo "DOCKER_HOST="$DOCKER_HOST
+       echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
+       echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
+       echo "==== eval $() ==="
+       eval $(docker-machine env default)
+       echo "==== sourcing .bashrc OK ==="
+       echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
+       echo "DOCKER_HOST="$DOCKER_HOST
+       echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
+       echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
+
+    - name: Export and source docker machine environment ('default', .bashrc)
       run: |
         docker-machine env default >> ~/.bashrc 
         echo "echo Sourced file ~/.bashrc "$(date) >> ~/.bashrc 
         cat ~/.bashrc 
         source ~/.bashrc
 
-    - name: Check docker-machine env variables (2)
+    - name: Export and source docker machine environment ('default', .bash_profile)
+      run: |
+        docker-machine env default >> ~/.bash_profile 
+        echo "echo Sourced file ~/.bash_profile "$(date) >> ~/.bash_profile
+        cat ~/.bash_profile 
+        source ~/.bash_profile
+
+    - name: Source docker machine environment ('default', .bash_profile)
+      run: |
+       echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
+       echo "DOCKER_HOST="$DOCKER_HOST
+       echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
+       echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
+       echo "==== sourcing .bash_profile ==="
+       source ~/.bash_profile
+       echo "==== sourcing .bash_profile OK ==="
+       echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
+       echo "DOCKER_HOST="$DOCKER_HOST
+       echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
+       echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
+
+    - name: Source docker machine environment ('default', .bashrc)
       run: |
        echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
        echo "DOCKER_HOST="$DOCKER_HOST

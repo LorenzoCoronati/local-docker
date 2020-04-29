@@ -81,56 +81,11 @@ jobs:
         file ld
         file ld.sh
  
-    - name: Check docker-machine env variables, expect to be empty
-      run: |
-        echo "PATH="$PATH
-        echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
-        echo "DOCKER_HOST="$DOCKER_HOST
-        echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
-        echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
-
-    - name: Check Docker machine env, 'default', should not get values (no eval())
-      run: |
-        echo "PATH="$PATH
-        echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
-        echo "DOCKER_HOST="$DOCKER_HOST
-        echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
-        echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
-        echo "==== eval $(), vars should be present ==="
-        docker-machine env default
-        echo "PATH="$PATH
-        echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
-        echo "DOCKER_HOST="$DOCKER_HOST
-        echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
-        echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
-
-    - name: Check Docker machine env, 'default', should get values with eval()
-      run: |
-        echo "PATH="$PATH
-        echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
-        echo "DOCKER_HOST="$DOCKER_HOST
-        echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
-        echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
-        echo "==== eval $(), vars should be present ==="
-        eval $(docker-machine env default)
-        echo "PATH="$PATH
-        echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
-        echo "DOCKER_HOST="$DOCKER_HOST
-        echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
-        echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
-
     - name: Export and source docker machine environment ('default', .bashrc)
       run: |
-        echo "echo Sourced file ~/.profile "$(date) >> ~/.profile 
-        echo "==== eval $(), vars should be present ==="
         docker-machine env default >> ~/.bashrc 
+        echo "COMPOSE_INTERACTIVE_NO_CLI=1" >> ~/.bashrc 
         echo "echo Sourced file ~/.bashrc "$(date) >> ~/.bashrc 
-        echo "==== .bashrc contents \/ \/ ==="
-        cat ~/.bashrc
-        echo "==== .bashrc contents /\ /\ ==="
-        echo "==== sourcing .bashrc \/ \/ ==="
-        source ~/.bashrc 
-        echo "==== sourcing .bashrc /\ /\ ==="
 
     - name: Source docker machine environment ('default', .bashrc)
       run: |
@@ -139,6 +94,7 @@ jobs:
         echo "DOCKER_HOST="$DOCKER_HOST
         echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
         echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
+        echo "COMPOSE_INTERACTIVE_NO_CLI="$COMPOSE_INTERACTIVE_NO_CLI
         echo "==== sourcing .bashrc \/ \/ ==="
         source ~/.bashrc
         echo "==== sourcing .bashrc /\ /\ ==="
@@ -147,24 +103,20 @@ jobs:
         echo "DOCKER_HOST="$DOCKER_HOST
         echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
         echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
-
-    - name: new task no DOCKER_HOST defined unless sourced ~/.bashrc
-      run: |
-        echo "DOCKER_HOST="$DOCKER_HOST
-        echo "==== sourcing .bashrc \/ \/ ==="
-        source ~/.bashrc
-        echo "==== sourcing .bashrc /\ /\ ==="
-        echo "DOCKER_HOST="$DOCKER_HOST
-        
+        echo "COMPOSE_INTERACTIVE_NO_CLI="$COMPOSE_INTERACTIVE_NO_CLI
 
     - name: Print ./ld help
       run: |
         source ~/.bashrc
+        echo "DOCKER_HOST="$DOCKER_HOST
+        echo "COMPOSE_INTERACTIVE_NO_CLI="$COMPOSE_INTERACTIVE_NO_CLI
         ./ld
 
     - name: Run ./ld init 
       run: |
         source ~/.bashrc
+        echo "DOCKER_HOST="$DOCKER_HOST
+        echo "COMPOSE_INTERACTIVE_NO_CLI="$COMPOSE_INTERACTIVE_NO_CLI
         ./ld init
 
 

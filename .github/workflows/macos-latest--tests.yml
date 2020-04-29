@@ -132,32 +132,6 @@ jobs:
         source ~/.bashrc 
         echo "==== sourcing .bashrc /\ /\ ==="
 
-    - name: Export and source docker machine environment ('default', .bash_profile)
-      run: |
-        docker-machine env default >> ~/.bash_profile 
-        echo "echo Sourced file ~/.bash_profile "$(date) >> ~/.bash_profile
-        echo "==== .bash_profile contents \/ \/ ==="
-        cat ~/.bash_profile
-        echo "==== .bash_profile contents /\ /\ ==="
-        echo "==== sourcing .bash_profile \/ \/ ==="
-        source ~/.bash_profile 
-        echo "==== sourcing .bash_profile /\ /\ ==="
-
-    - name: Source docker machine environment ('default', .bash_profile)
-      run: |
-        echo "PATH="$PATH
-        echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
-        echo "DOCKER_HOST="$DOCKER_HOST
-        echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
-        echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
-        echo "==== sourcing .bash_profile \/ \/ ==="
-        source ~/.bash_profile
-        echo "==== sourcing .bash_profile /\ /\ ==="
-        echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
-        echo "DOCKER_HOST="$DOCKER_HOST
-        echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
-        echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
-
     - name: Source docker machine environment ('default', .bashrc)
       run: |
         echo "PATH="$PATH
@@ -173,6 +147,15 @@ jobs:
         echo "DOCKER_HOST="$DOCKER_HOST
         echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
         echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
+
+    - name: new task no DOCKER_HOST defined unless sourced ~/.bashrc
+      run: |
+        echo "DOCKER_HOST="$DOCKER_HOST
+        echo "==== sourcing .bashrc \/ \/ ==="
+        source ~/.bashrc
+        echo "==== sourcing .bashrc /\ /\ ==="
+        echo "DOCKER_HOST="$DOCKER_HOST
+        
 
     - name: Print ./ld help
       run: ./ld

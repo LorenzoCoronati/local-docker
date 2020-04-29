@@ -121,22 +121,27 @@ jobs:
 
     - name: Export and source docker machine environment ('default', .bashrc)
       run: |
+        echo "echo Sourced file ~/.profile "$(date) >> ~/.profile 
         echo "==== eval $(), vars should be present ==="
         docker-machine env default >> ~/.bashrc 
         echo "echo Sourced file ~/.bashrc "$(date) >> ~/.bashrc 
-        cat ~/.bashrc 
         echo "==== .bashrc contents \/ \/ ==="
-        source ~/.bashrc
+        cat ~/.bashrc
         echo "==== .bashrc contents /\ /\ ==="
+        echo "==== sourcing .bashrc \/ \/ ==="
+        source ~/.bashrc 
+        echo "==== sourcing .bashrc /\ /\ ==="
 
     - name: Export and source docker machine environment ('default', .bash_profile)
       run: |
         docker-machine env default >> ~/.bash_profile 
         echo "echo Sourced file ~/.bash_profile "$(date) >> ~/.bash_profile
-        cat ~/.bash_profile 
         echo "==== .bash_profile contents \/ \/ ==="
-        source ~/.bash_profile
+        cat ~/.bash_profile
         echo "==== .bash_profile contents /\ /\ ==="
+        echo "==== sourcing .bash_profile \/ \/ ==="
+        source ~/.bash_profile 
+        echo "==== sourcing .bash_profile /\ /\ ==="
 
     - name: Source docker machine environment ('default', .bash_profile)
       run: |
@@ -145,9 +150,9 @@ jobs:
         echo "DOCKER_HOST="$DOCKER_HOST
         echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
         echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
-        echo "==== sourcing .bash_profile ==="
+        echo "==== sourcing .bash_profile \/ \/ ==="
         source ~/.bash_profile
-        echo "==== sourcing .bash_profile OK ==="
+        echo "==== sourcing .bash_profile /\ /\ ==="
         echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
         echo "DOCKER_HOST="$DOCKER_HOST
         echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
@@ -160,9 +165,9 @@ jobs:
         echo "DOCKER_HOST="$DOCKER_HOST
         echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
         echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
-        echo "==== sourcing .bashrc ==="
+        echo "==== sourcing .bashrc \/ \/ ==="
         source ~/.bashrc
-        echo "==== sourcing .bashrc OK ==="
+        echo "==== sourcing .bashrc /\ /\ ==="
         echo "PATH="$PATH
         echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
         echo "DOCKER_HOST="$DOCKER_HOST

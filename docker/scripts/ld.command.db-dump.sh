@@ -32,9 +32,9 @@ function ld_command_db-dump_exec() {
     esac
 
     [ "$LD_VERBOSE" -ge "1" ] && echo -e "${Yellow}Using datestamp: $DATE${Color_Off}"
-    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}NEXT: docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c $COMMAND_SQL_DB_DUMPER${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}NEXT: docker-compose -f $DOCKER_COMPOSE_FILE exec -T ${CONTAINER_DB:-db} sh -c $COMMAND_SQL_DB_DUMPER${Color_Off}"
 
-    docker-compose -f $DOCKER_COMPOSE_FILE exec ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_DUMPER"
+    docker-compose -f $DOCKER_COMPOSE_FILE exec -T ${CONTAINER_DB:-db} sh -c "$COMMAND_SQL_DB_DUMPER"
     cd $PROJECT_ROOT/${DATABASE_DUMP_STORAGE:-db_dumps}
     ln -sf ${FILENAME} db-container--FULL--LATEST.sql.gz
 

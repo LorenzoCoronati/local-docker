@@ -118,9 +118,54 @@ If you are applying `local-docker` on a Skeleton -based project, see
 
 If your project already has local-docker initialized/configured, with all necessary configuration tracked in your project's own repository, there are fewer steps that you need to do.
 
+#### Build and start the containers
+
 You should skip the `init` step, and you can build and start the docker containers right away using [the `./ld up` command](#start-local).
 
-TODO: Describe next steps.
+#### Install composer dependencies
+
+Next, install composer dependencies:
+
+    $ ./ld composer install
+
+#### Settings file for a Drupal project and initial installation
+
+If you are dealing with a Drupal project, at this point when you visit [http://yourprojectname.local/](http://yourprojectname.local/) you should see the Drupal installation page.
+
+Next you should generate the `settings.php` file. First, make sure your `web/sites/default/default.settings.php` contains the following setting (you will likely need to uncomment and modify an existing line):
+
+    $settings['config_sync_directory'] = '../config/sync';
+
+Then do a minimal installation of Drupal, to prepare the `settings.php` file:
+
+    $ ./ld drush si minimal --db-url=mysql://drupal:drupal@db/drupal
+
+    You are about to:
+    * Create a sites/default/settings.php file
+    * CREATE the 'drupal' database.
+
+    Do you want to continue? (yes/no) [yes]:
+    > yes
+
+At this point visiting [http://yourprojectname.local/](http://yourprojectname.local/) should show to you a Drupal login page.
+
+#### Import an existing database
+
+Next, copy a database backup from an existing server to your local and place it under the `db_dumps/` folder.
+
+Let's say you have a file `db_dumps/myproject-db-dump.sql.gz`. In that case you can import it like *(Note: For Drupal sites `YOUR_DATABASE_NAME` would normally be `drupal`)*:
+
+    $ ./ld db-import YOUR_DATABASE_NAME db_dumps/myproject-db-dump.sql.gz
+
+#### Drupal site: clear cache and import configuration
+
+If you are dealing with a drupal site, you likely need to clear cache after importing the database.
+
+    $ ./ld drush cr
+
+You may also want to import the latest Drupal configuration:
+
+    $ ./ld drush cim
 
 ### Local domains
 

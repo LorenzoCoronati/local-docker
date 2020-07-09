@@ -61,6 +61,8 @@ without no arguments gives you command list.
 
 ### Start using local-docker
 
+This section describes how to take local-docker into use in a project where it has not yet been initialized. If your project already has local-docker initialized, with all necessary configuration tracked in your project's own repository, refer to the ["Setting up local environment for a project with configured local-docker" section](#setting-up-local-environment-for-a-project-with-configured-local-docker).
+
 This tool can be used both as a base for new Drupal 8 projects and as a
 local development tool for Skeleton based projects (known by Exove
 developers).
@@ -111,6 +113,14 @@ Initial setup asks if you some generic information.
 
 If you are applying `local-docker` on a Skeleton -based project, see
 "Skeleton" -section .
+
+### Setting up local environment for a project with configured local-docker
+
+If your project already has local-docker initialized/configured, with all necessary configuration tracked in your project's own repository, there are fewer steps that you need to do.
+
+You should skip the `init` step, and you can build and start the docker containers right away using [the `./ld up` command](#start-local).
+
+TODO: Describe next steps.
 
 ### Local domains
 
@@ -269,6 +279,8 @@ but executes (and restores) database backups in `db_dumps/` -folder,
 keeping most recent as the restorable dump.
 
 #### Initial start
+
+*Note: This step is only needed when you are first configuring local-docker in a project. If your project's local-docker has already been configured (e.g. by someone else), you do **not** need to run the `init` command.*
 
 It is recommended to start the project first time with:
 

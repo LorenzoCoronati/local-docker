@@ -27,5 +27,6 @@ function ld_command_sh_exec() {
 }
 
 function ld_command_sh_help() {
-    echo "Open the shell in a container (if up and running)"
+    echo "Open the shell in a container (if up and running)."
+    echo "If no container id specified, the php one will be used."
 }

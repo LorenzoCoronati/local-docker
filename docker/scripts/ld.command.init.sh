@@ -204,9 +204,9 @@ function ld_command_init_exec() {
     echo "Verify application root can be used to install codebase (must be empty)..."
 
     FILE_COUNTER='find /var/www -maxdepth 1 | egrep -v "^\/var\/www$" | wc -l'
-    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c \"$FILE_COUNTER\"${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T composer bash -c \"$FILE_COUNTER\"${Color_Off}"
     [ "$LD_VERBOSE" -ge "2" ] && echo -n "Files (count) in ./${APP_ROOT}: "
-    APP_FILES_COUNT=$(docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c "$FILE_COUNTER")
+    APP_FILES_COUNT=$(docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T composer bash -c "$FILE_COUNTER")
     # Clean up response from newlines and stuff to make it integer~ish.
     APP_FILES_COUNT=$(echo $APP_FILES_COUNT |tr -d '\r' |tr -d '\n' |tr -d ' ')
 
@@ -234,8 +234,8 @@ function ld_command_init_exec() {
             'PLEASE-DELETE' )
                 echo "Clearing old things from the app root."
                 CLEAN_ROOT="rm -rf /var/www/{,.[!.],..?}*"
-                [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec composer bash -c \"$CLEAN_ROOT\"${Color_Off}"
-                docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c "$CLEAN_ROOT"
+                [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T composer bash -c \"$CLEAN_ROOT\"${Color_Off}"
+                docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T composer bash -c "$CLEAN_ROOT"
                 ;;
             *)
                 echo -e "${Red}ERROR: Application can't be installed to a non-empty folder ./${APP_ROOT}.${Color_Off}"
@@ -309,9 +309,9 @@ function ld_command_init_exec() {
 
     if [ -n "$COMPOSER_INIT" ]; then
       # Use verbose output on this composer command.
-      [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec php bash -c \"COMPOSER_MEMORY_LIMIT=-1 $COMPOSER_INIT\"${Color_Off}"
+      [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T php bash -c \"COMPOSER_MEMORY_LIMIT=-1 $COMPOSER_INIT\"${Color_Off}"
       # Turn off PHP memory limit for the create project -phase (only).
-      docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c "COMPOSER_MEMORY_LIMIT=-1  $COMPOSER_INIT"
+      docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T composer bash -c "COMPOSER_MEMORY_LIMIT=-1  $COMPOSER_INIT"
       OK=$?
       if [ "$OK" -ne "0" ]; then
           echo -e "${BRed}ERROR${Red}: Something went wrong when initializing the codebase.${Color_Off}"
@@ -322,9 +322,9 @@ function ld_command_init_exec() {
       fi
       if [ -n "$POST_COMPOSER_INIT" ]; then
           # Use verbose output on this composer command.
-          [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"COMPOSER_MEMORY_LIMIT=-1 $POST_COMPOSER_INIT\"${Color_Off}"
+          [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T php bash -c \"COMPOSER_MEMORY_LIMIT=-1 $POST_COMPOSER_INIT\"${Color_Off}"
           # Turn off PHP memory limit for these commands.
-          docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c "COMPOSER_MEMORY_LIMIT=-1 $POST_COMPOSER_INIT"
+          docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T composer bash -c "COMPOSER_MEMORY_LIMIT=-1 $POST_COMPOSER_INIT"
       fi
 
       echo
@@ -345,8 +345,8 @@ function ld_command_init_exec() {
     if [ -z "$COMPOSER_INIT" ]; then
         echo
         echo -e "${Yellow}NOTE: Once Drupal is installed, you should remove write perms in sites/default -folder:${Color_Off}"
-        echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0755 web/sites/default'"
-        echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
+        echo "docker-compose -f $DOCKER_COMPOSE_FILE exec -T php bash -c 'chmod -v 0755 web/sites/default'"
+        echo "docker-compose -f $DOCKER_COMPOSE_FILE exec -T php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
         echo "With these changes you can edit settings.php from host, but keep Drupal happy and allow it to write these files."
     fi
 

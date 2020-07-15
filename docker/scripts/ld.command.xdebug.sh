@@ -9,7 +9,7 @@ function ld_command_xdebug_exec() {
     case "$1" in
         '1'|'on') define_configuration_value PHP_XDEBUG_REMOTE_ENABLE 1 .env.local; sleep 1; docker-compose -f $DOCKER_COMPOSE_FILE up -d php && $SCRIPT_NAME xdebug;;
         '0'|'off') define_configuration_value PHP_XDEBUG_REMOTE_ENABLE 0 .env.local; docker-compose -f $DOCKER_COMPOSE_FILE up -d php && $SCRIPT_NAME xdebug;;
-        *) docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'echo -n "Xdebug is: "; php -i | grep xdebug.remote_enable |tr -s " => " "|" | cut -d "|" -f2';;
+        *) docker-compose -f $DOCKER_COMPOSE_FILE exec -T php bash -c 'echo -n "Xdebug is: "; php -i | grep xdebug.remote_enable |tr -s " => " "|" | cut -d "|" -f2';;
     esac
 
 }

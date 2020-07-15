@@ -482,6 +482,37 @@ Docker exposes services to host using ports `:80` and `:3306`. Exposed
 ports are bind to `LOCAL_IP` to restrict outside access (from your
 current network) and to make parallel running of your projects possible.
 
+## Prevent local-docker asking sudo password
+
+You can add this content to your own sudoers file to allow local-docker to update
+your `/etc/hosts` file with local domains and allow it configuring networking
+(loopback interface, `lo0`) without asking password.
+
+Edit the file with command
+
+    # Edit using the default editor, usually vi:
+    sudo visudo
+    # Or edit using nano as the editor:
+    sudo EDITOR=nano visudo
+
+Add these lines at the end of the file:
+
+    # Allow local-docker to add hosts file records without asking password.
+    # @see https://github.com/agiledivider/vagrant-hostsupdater
+    Cmnd_Alias LOCALDOCKER_HOSTS_ADD_EMPTYLINE_CMD = /bin/bash -c echo >> /etc/hosts
+    Cmnd_Alias LOCALDOCKER_HOSTS_ADD_COMMENT_CMD = /bin/bash -c echo '#'* >> /etc/hosts
+    Cmnd_Alias LOCALDOCKER_HOSTS_ADD_RECORD_CMD = /bin/bash -c echo '127.0.'* >> /etc/hosts
+    Cmnd_Alias LOCALDOCKER_LOOPBACK_IF_ALIAS_ADD_CMD = /sbin/ifconfig lo0 alias 127.0*
+    Cmnd_Alias LOCALDOCKER_LOOPBACK_IF_ALIAS_DELETE_CMD = /sbin/ifconfig lo0 delete 127.0*
+
+    %admin ALL=(root) NOPASSWD: LOCALDOCKER_HOSTS_ADD_EMPTYLINE_CMD, LOCALDOCKER_HOSTS_ADD_COMMENT_CMD, LOCALDOCKER_HOSTS_ADD_RECORD_CMD
+    %admin ALL=(root) NOPASSWD: LOCALDOCKER_LOOPBACK_IF_ALIAS_ADD_CMD, LOCALDOCKER_LOOPBACK_IF_ALIAS_DELETE_CMD
+
+In case you need to adjust these commands you can see sudo'ed commands on MacOS
+using (executed past 1 hour):
+
+    log show --style syslog --predicate 'process == "sudo"' --last 1h | grep COMMAND
+
 ## Customize ld -script variables
 
 Local-docker configuration is defined in `./.env`  file, which is

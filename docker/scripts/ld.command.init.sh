@@ -256,6 +256,10 @@ function ld_command_init_exec() {
     echo "Please select which version of drupal you wish to have."
     echo "Alternatively you can install your codebase manually into $APP_ROOT."
     echo "Options:"
+    echo " [9.0] - Drupal 8.9 recommended (drupal/recommended-project:~9.0.0)"
+    echo " [9.0-dev] - Drupal 9.0 recommended (drupal/recommended-project:~9.0.0) with dev-stability"
+    echo " [8.9] - Drupal 8.9 recommended (drupal/recommended-project:~8.9.0)"
+    echo " [8.9-dev] - Drupal 8.9 recommended (drupal/recommended-project:~8.9.0) with dev-stability"
     echo " [8.8] - Drupal 8.8 recommended (drupal/recommended-project:~8.8.0)"
     echo " [8.8-dev] - Drupal 8.8 recommended (drupal/recommended-project:~8.8.0) with dev-stability"
     echo " [8.8-legacy] - Drupal 8.8 legacy (drupal/legacy-project:~8.8.0)"
@@ -263,6 +267,26 @@ function ld_command_init_exec() {
     read -p "Select version [default: ${DEFAULT}]? " VERSION
     VERSION=${VERSION:-${DEFAULT}}
     case "$VERSION" in
+      '9.0')
+        COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~9.0.0 /var/www --no-interaction'
+        POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^10.0 cweagans/composer-patches:~1.0'
+        echo -e "${Green}Creating project using ${BGreen}Drupal 9.0.x${Green}, recommended structure (${BGreen}drupal/recommended-project:~9.0.0${Green}), with the addition of Drupal Console, Drush and composer patches.${Color_Off}"
+        ;;
+      '9.0-dev')
+        COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~9.0.0 /var/www --no-interaction --stability=dev'
+        POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^10.0 cweagans/composer-patches:~1.0'
+        echo -e "${Green}Creating project using ${BGreen}Drupal 9.0.x (dev)${Green}, recommended structure (${BGreen}drupal/recommended-project:~9.0.0${Green}), with the addition of Drupal Console, Drush and composer patches.${Color_Off}"
+        ;;
+      '8.9')
+        COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.9.0 /var/www --no-interaction'
+        POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^10.0 cweagans/composer-patches:~1.0'
+        echo -e "${Green}Creating project using ${BGreen}Drupal 8.9.x${Green}, recommended structure (${BGreen}drupal/recommended-project:~8.9.0${Green}), with the addition of Drupal Console, Drush and composer patches.${Color_Off}"
+        ;;
+      '8.9-dev')
+        COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.9.0 /var/www --no-interaction --stability=dev'
+        POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^10.0 cweagans/composer-patches:~1.0'
+        echo -e "${Green}Creating project using ${BGreen}Drupal 8.9.x (dev)${Green}, recommended structure (${BGreen}drupal/recommended-project:~8.9.0${Green}), with the addition of Drupal Console, Drush and composer patches.${Color_Off}"
+        ;;
       '8.8')
         COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.8.0 /var/www --no-interaction'
         POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^10.0 cweagans/composer-patches:~1.0'

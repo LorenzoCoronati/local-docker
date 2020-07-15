@@ -251,7 +251,7 @@ function ld_command_init_exec() {
 
     echo
     echo -e "${BBlack}== Installing Drupal project ==${Color_Off}"
-    DEFAULT=8.8
+    DEFAULT=9.0
 
     echo "Please select which version of drupal you wish to have."
     echo "Alternatively you can install your codebase manually into $APP_ROOT."

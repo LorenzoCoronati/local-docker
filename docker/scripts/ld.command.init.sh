@@ -259,7 +259,6 @@ function ld_command_init_exec() {
     echo " [8.8] - Drupal 8.8 recommended (drupal/recommended-project:~8.8.0)"
     echo " [8.8-dev] - Drupal 8.8 recommended (drupal/recommended-project:~8.8.0) with dev-stability"
     echo " [8.8-legacy] - Drupal 8.8 legacy (drupal/legacy-project:~8.8.0)"
-    echo " [8.7] - Drupal 8.7 using contrib template (drupal-composer/drupal-project:8.x-dev)"
     echo " [N] - Thanks for the offer, but I'll handle codebase build manually."
     read -p "Select version [default: ${DEFAULT}]? " VERSION
     VERSION=${VERSION:-${DEFAULT}}
@@ -278,10 +277,6 @@ function ld_command_init_exec() {
         COMPOSER_INIT='composer -vv create-project drupal/legacy-project:~8.8.0 /var/www --no-interaction --stability=dev'
         POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^10.0 cweagans/composer-patches:~1.0'
         echo -e "${Green}Creating project using ${BGreen}Drupal 8.8.x${Green}, legacy structure (${BGreen}drupal/legacy-project:~8.8.0${Green}), with the addition of Drupal Console, Drush and composer patches.${Color_Off}"
-        ;;
-      '8.7')
-        COMPOSER_INIT='composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev'
-        echo -e "${Green}Creating project using ${BGreen}Drupal 8.7.x${Green}, contrib template (drupal-composer/drupal-project:8.x-dev).${Color_Off}"
         ;;
       *)
         echo -e "${BYellow}Build phase skipped, no codebase built!${Color_Off}"

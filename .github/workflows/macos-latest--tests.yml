@@ -1,0 +1,122 @@
+name: Test build and commands with macOS-latest
+
+on:
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+
+    runs-on: macOS-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Tell about the workflow
+      if: github.event_name == 'pull_request'
+      run: echo This event is a pull request. Test build ./ld init.
+
+    - name: Check the current user's name and home folder path
+      run: whoami
+
+    - name: What shell is being used
+      run: |
+        echo $0
+        ls -lha ~/.ba*
+
+    - name: Verify virtualisation is supported
+      run: sysctl kern.hv_support
+
+    - name: Check Virtualbox path
+      run: which virtualbox
+      
+    - name: Check lo0
+      run: ifconfig lo0
+
+    - name: Install docker, docker-compose, docker-machine, boot2docker{,-cli}
+      run: |
+        brew install docker
+        brew install docker-compose
+        brew install docker-machine
+        brew install boot2docker boot2docker-cli
+
+    - name: Check paths of docker-* binaries
+      run: |
+        echo -n 'docker installed in path: ' && which docker
+        echo -n 'docker-compose installed in path: ' && which docker-compose
+        echo -n 'docker-machine installed in path: ' && which docker-machine
+
+    - name: Create image cache for Docker
+      run: mkdir -p ~/.docker/machine/cache/
+    
+    - name: Download Boot2Docker iso image
+      run: | 
+        cd ~/.docker/machine/cache/
+        curl -Lo boot2docker.iso https://github.com/boot2docker/boot2docker/releases/download/v19.03.5/boot2docker.iso
+        ls -lha 
+        file boot2docker.iso
+        
+    - name: Create machine 'default' with Virtualbox
+      run: |
+        docker-machine create --driver virtualbox --virtualbox-boot2docker-url ~/.docker/machine/cache/boot2docker.iso default
+        echo "----"
+        docker-machine ls
+
+    - name: Install docker-sync
+      run: |
+        gem install docker-sync --user-install
+        GEMPATH=$(gem env | grep  'USER INSTALLATION DIRECTORY' | cut -d: -f2 | tr -d ' ')/bin
+        echo GEMPATH=$GEMPATH
+        echo "export PATH=\"\$PATH:$GEMPATH\"" >> ~/.bashrc
+        source ~/.bashrc
+        echo $PATH
+        echo -n 'docker-sync installed in path: ' && which docker-sync
+        docker-sync
+
+    - name: List what is in the project folder.
+      run: |
+        pwd
+        ls -lha
+        file ld
+        file ld.sh
+ 
+    - name: Export and source docker machine environment ('default', .bashrc)
+      run: |
+        docker-machine env default >> ~/.bashrc 
+        echo "COMPOSE_INTERACTIVE_NO_CLI=0" >> ~/.bashrc 
+        echo "echo Sourced file ~/.bashrc "$(date) >> ~/.bashrc 
+
+    - name: Source docker machine environment ('default', .bashrc)
+      run: |
+        echo "PATH="$PATH
+        echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
+        echo "DOCKER_HOST="$DOCKER_HOST
+        echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
+        echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
+        echo "COMPOSE_INTERACTIVE_NO_CLI="$COMPOSE_INTERACTIVE_NO_CLI
+        echo "==== sourcing .bashrc \/ \/ ==="
+        source ~/.bashrc
+        echo "==== sourcing .bashrc /\ /\ ==="
+        echo "PATH="$PATH
+        echo "DOCKER_TLS_VERIFY="$DOCKER_TLS_VERIFY
+        echo "DOCKER_HOST="$DOCKER_HOST
+        echo "DOCKER_CERT_PATH="$DOCKER_CERT_PATH
+        echo "DOCKER_MACHINE_NAME="$DOCKER_MACHINE_NAME
+        echo "COMPOSE_INTERACTIVE_NO_CLI="$COMPOSE_INTERACTIVE_NO_CLI
+
+    - name: Print ./ld help
+      run: |
+        source ~/.bashrc
+        echo "DOCKER_HOST="$DOCKER_HOST
+        echo "COMPOSE_INTERACTIVE_NO_CLI="$COMPOSE_INTERACTIVE_NO_CLI
+        ./ld
+
+    - name: Run ./ld init 
+      run: |
+        source ~/.bashrc
+        echo "DOCKER_HOST="$DOCKER_HOST
+        echo "COMPOSE_INTERACTIVE_NO_CLI="$COMPOSE_INTERACTIVE_NO_CLI
+        ./ld init
+
+

@@ -204,9 +204,9 @@ function ld_command_init_exec() {
     echo "Verify application root can be used to install codebase (must be empty)..."
 
     FILE_COUNTER='find /var/www -maxdepth 1 | egrep -v "^\/var\/www$" | wc -l'
-    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c \"$FILE_COUNTER\"${Color_Off}"
+    [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T composer bash -c \"$FILE_COUNTER\"${Color_Off}"
     [ "$LD_VERBOSE" -ge "2" ] && echo -n "Files (count) in ./${APP_ROOT}: "
-    APP_FILES_COUNT=$(docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c "$FILE_COUNTER")
+    APP_FILES_COUNT=$(docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T composer bash -c "$FILE_COUNTER")
     # Clean up response from newlines and stuff to make it integer~ish.
     APP_FILES_COUNT=$(echo $APP_FILES_COUNT |tr -d '\r' |tr -d '\n' |tr -d ' ')
 
@@ -234,8 +234,8 @@ function ld_command_init_exec() {
             'PLEASE-DELETE' )
                 echo "Clearing old things from the app root."
                 CLEAN_ROOT="rm -rf /var/www/{,.[!.],..?}*"
-                [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec composer bash -c \"$CLEAN_ROOT\"${Color_Off}"
-                docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c "$CLEAN_ROOT"
+                [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T composer bash -c \"$CLEAN_ROOT\"${Color_Off}"
+                docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T composer bash -c "$CLEAN_ROOT"
                 ;;
             *)
                 echo -e "${Red}ERROR: Application can't be installed to a non-empty folder ./${APP_ROOT}.${Color_Off}"
@@ -251,19 +251,42 @@ function ld_command_init_exec() {
 
     echo
     echo -e "${BBlack}== Installing Drupal project ==${Color_Off}"
-    DEFAULT=8.8
+    DEFAULT=9.0
 
     echo "Please select which version of drupal you wish to have."
     echo "Alternatively you can install your codebase manually into $APP_ROOT."
     echo "Options:"
+    echo " [9.0] - Drupal 8.9 recommended (drupal/recommended-project:~9.0.0)"
+    echo " [9.0-dev] - Drupal 9.0 recommended (drupal/recommended-project:~9.0.0) with dev-stability"
+    echo " [8.9] - Drupal 8.9 recommended (drupal/recommended-project:~8.9.0)"
+    echo " [8.9-dev] - Drupal 8.9 recommended (drupal/recommended-project:~8.9.0) with dev-stability"
     echo " [8.8] - Drupal 8.8 recommended (drupal/recommended-project:~8.8.0)"
     echo " [8.8-dev] - Drupal 8.8 recommended (drupal/recommended-project:~8.8.0) with dev-stability"
     echo " [8.8-legacy] - Drupal 8.8 legacy (drupal/legacy-project:~8.8.0)"
-    echo " [8.7] - Drupal 8.7 using contrib template (drupal-composer/drupal-project:8.x-dev)"
     echo " [N] - Thanks for the offer, but I'll handle codebase build manually."
     read -p "Select version [default: ${DEFAULT}]? " VERSION
     VERSION=${VERSION:-${DEFAULT}}
     case "$VERSION" in
+      '9.0')
+        COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~9.0.0 . --no-interaction'
+        POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^10.0 cweagans/composer-patches:~1.0'
+        echo -e "${Green}Creating project using ${BGreen}Drupal 9.0.x${Green}, recommended structure (${BGreen}drupal/recommended-project:~9.0.0${Green}), with the addition of Drupal Console, Drush and composer patches.${Color_Off}"
+        ;;
+      '9.0-dev')
+        COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~9.0.0 . --no-interaction --stability=dev'
+        POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^10.0 cweagans/composer-patches:~1.0'
+        echo -e "${Green}Creating project using ${BGreen}Drupal 9.0.x (dev)${Green}, recommended structure (${BGreen}drupal/recommended-project:~9.0.0${Green}), with the addition of Drupal Console, Drush and composer patches.${Color_Off}"
+        ;;
+      '8.9')
+        COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.9.0 . --no-interaction'
+        POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^10.0 cweagans/composer-patches:~1.0'
+        echo -e "${Green}Creating project using ${BGreen}Drupal 8.9.x${Green}, recommended structure (${BGreen}drupal/recommended-project:~8.9.0${Green}), with the addition of Drupal Console, Drush and composer patches.${Color_Off}"
+        ;;
+      '8.9-dev')
+        COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.9.0 . --no-interaction --stability=dev'
+        POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^10.0 cweagans/composer-patches:~1.0'
+        echo -e "${Green}Creating project using ${BGreen}Drupal 8.9.x (dev)${Green}, recommended structure (${BGreen}drupal/recommended-project:~8.9.0${Green}), with the addition of Drupal Console, Drush and composer patches.${Color_Off}"
+        ;;
       '8.8')
         COMPOSER_INIT='composer -vv create-project drupal/recommended-project:~8.8.0 /var/www --no-interaction'
         POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^10.0 cweagans/composer-patches:~1.0'
@@ -279,10 +302,6 @@ function ld_command_init_exec() {
         POST_COMPOSER_INIT='composer -vv require drupal/console:^1.9.4 drush/drush:^10.0 cweagans/composer-patches:~1.0'
         echo -e "${Green}Creating project using ${BGreen}Drupal 8.8.x${Green}, legacy structure (${BGreen}drupal/legacy-project:~8.8.0${Green}), with the addition of Drupal Console, Drush and composer patches.${Color_Off}"
         ;;
-      '8.7')
-        COMPOSER_INIT='composer -vv create-project drupal-composer/drupal-project:8.x-dev /var/www --no-interaction --stability=dev'
-        echo -e "${Green}Creating project using ${BGreen}Drupal 8.7.x${Green}, contrib template (drupal-composer/drupal-project:8.x-dev).${Color_Off}"
-        ;;
       *)
         echo -e "${BYellow}Build phase skipped, no codebase built!${Color_Off}"
         ;;
@@ -290,9 +309,9 @@ function ld_command_init_exec() {
 
     if [ -n "$COMPOSER_INIT" ]; then
       # Use verbose output on this composer command.
-      [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec php bash -c \"COMPOSER_MEMORY_LIMIT=-1 $COMPOSER_INIT\"${Color_Off}"
+      [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T php bash -c \"COMPOSER_MEMORY_LIMIT=-1 $COMPOSER_INIT\"${Color_Off}"
       # Turn off PHP memory limit for the create project -phase (only).
-      docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c "COMPOSER_MEMORY_LIMIT=-1  $COMPOSER_INIT"
+      docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T composer bash -c "COMPOSER_MEMORY_LIMIT=-1  $COMPOSER_INIT"
       OK=$?
       if [ "$OK" -ne "0" ]; then
           echo -e "${BRed}ERROR${Red}: Something went wrong when initializing the codebase.${Color_Off}"
@@ -303,9 +322,9 @@ function ld_command_init_exec() {
       fi
       if [ -n "$POST_COMPOSER_INIT" ]; then
           # Use verbose output on this composer command.
-          [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c \"COMPOSER_MEMORY_LIMIT=-1 $POST_COMPOSER_INIT\"${Color_Off}"
+          [ "$LD_VERBOSE" -ge "2" ] && echo -e "${Cyan}Next: docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T php bash -c \"COMPOSER_MEMORY_LIMIT=-1 $POST_COMPOSER_INIT\"${Color_Off}"
           # Turn off PHP memory limit for these commands.
-          docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec composer bash -c "COMPOSER_MEMORY_LIMIT=-1 $POST_COMPOSER_INIT"
+          docker-compose -f $DOCKER_COMPOSER_ONLY_FILE exec -T composer bash -c "COMPOSER_MEMORY_LIMIT=-1 $POST_COMPOSER_INIT"
       fi
 
       echo
@@ -326,8 +345,8 @@ function ld_command_init_exec() {
     if [ -z "$COMPOSER_INIT" ]; then
         echo
         echo -e "${Yellow}NOTE: Once Drupal is installed, you should remove write perms in sites/default -folder:${Color_Off}"
-        echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0755 web/sites/default'"
-        echo "docker-compose -f $DOCKER_COMPOSE_FILE exec php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
+        echo "docker-compose -f $DOCKER_COMPOSE_FILE exec -T php bash -c 'chmod -v 0755 web/sites/default'"
+        echo "docker-compose -f $DOCKER_COMPOSE_FILE exec -T php bash -c 'chmod -v 0644 web/sites/default/settings.php'"
         echo "With these changes you can edit settings.php from host, but keep Drupal happy and allow it to write these files."
     fi
 
